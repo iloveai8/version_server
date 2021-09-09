@@ -1,36 +1,28 @@
 package api
 
 import (
-	"fmt"
-	`game_slots_vsn/internal/consts`
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
+	`fmt`
+	`game_slots_vsn/internal/config`
+	`github.com/gin-gonic/gin`
+	`log`
 	`net/http`
-	`os`
 )
 
+//web start
 func ServerStart() {
-	gin.SetMode(gin.ReleaseMode)
-	addr := fmt.Sprintf("%s:%s", viper.GetString(consts.AppServerIp), viper.GetString(consts.AppServerPort))
-	fmt.Println("add:", addr)
-	router := setupRouter()
+	addr := fmt.Sprintf("%s:%d", config.C.Server.IP, config.C.Server.Port)
+	router := generateRouter()
 	if err := router.Run(addr); err != nil {
-		//logger.Logger.Error(consts.MessageServiceFail, err)
-		os.Exit(1)
+		log.Fatal("server start:", err)
 	}
 }
 
-//配置路由
-func setupRouter() *gin.Engine {
+func generateRouter() *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-	v1 := router.Group("/vsn")
-	{
-		v1.GET("/ping", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"message": "pong",
-			})
-		})
-	}
+	router.GET("/heartbeat", func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",

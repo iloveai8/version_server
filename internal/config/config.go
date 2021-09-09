@@ -1,10 +1,24 @@
 package config
 
-var config *Config
+import (
+	`fmt`
+	`github.com/spf13/viper`
+	`os`
+)
+
+var (
+	C = &Config{}
+)
 
 type Config struct {
-	MySQL MySQLConfig
-	REDIS RedisConfig
+	Mysql  MySQLConfig
+	Redis  RedisConfig
+	Server ServerConfig
+}
+
+type ServerConfig struct {
+	IP   string
+	Port int
 }
 
 type MySQLConfig struct {
@@ -16,39 +30,18 @@ type MySQLConfig struct {
 }
 
 type RedisConfig struct {
-	HOST     string
+	Host     string
 	DB       int
-	POOLSIZE int
+	PoolSize int
 }
 
-//init config eg:mysql redis.....
-func Init(cfg string) {
-	//config := &Config{}
-	//err := config.initConfig(cfg)
-	//if err != nil {
-	//	panic(fmt.Errorf("Fatal error config file: %s \n", err))
-	//	return
-	//}
+//init Config eg:mysql redis.....
+func Init() {
+	err := viper.Unmarshal(C)
+	if err != nil {
+		os.Exit(0)
+	}
+	fmt.Println("server:", C.Server)
+	fmt.Println("redis:", C.Redis)
+	fmt.Println("mysql:", C.Mysql)
 }
-
-func (c Config) initConfig(cfg string) error {
-	//viper.SetConfigFile(c.Name)
-	//viper.SetConfigType("yaml")
-	//config.watchConfig()
-	//if err := viper.ReadInConfig(); err != nil {
-	//	return err
-	//}
-	//return nil
-	return nil
-}
-
-//
-//func (c *Config) watchConfig() {
-//	viper.WatchConfig()
-//	viper.OnConfigChange(func(e fsnotify.Event) {
-//		if c.LevelKey == emptyString {
-//			return
-//		}
-//		logger.ChangeLevel(viper.GetString(c.LevelKey))
-//	})
-//}

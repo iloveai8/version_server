@@ -1,7 +1,6 @@
-app:
-  server:
-    ip: "127.0.0.1"
-    port: 8080
+server:
+  ip: "127.0.0.1"
+  port: 8080
 
 mysql:
   ip: "192.168.1.33"
@@ -13,4 +12,4 @@ mysql:
 redis:
   host: "192.168.1.33:6379"
   db: 15
-  poolSize: 10
+  poolsize: 10
