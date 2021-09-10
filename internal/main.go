@@ -3,6 +3,8 @@ package internal
 import (
 	`fmt`
 	`game_slots_vsn/internal/api`
+	`game_slots_vsn/internal/config`
+	`game_slots_vsn/internal/db/redis`
 	`os`
 	`os/signal`
 	`syscall`
@@ -11,8 +13,13 @@ import (
 
 //Run 程序入口
 func Run() {
-	go api.ServerStart()
+	go Start()
 	Signal()
+}
+
+func Start()  {
+	redis.Init(config.C)
+	api.Init(config.C)
 }
 
 //Signal 接受处理系统信号

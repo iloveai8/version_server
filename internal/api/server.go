@@ -1,32 +1,45 @@
 package api
 
 import (
+	`errors`
 	`fmt`
 	`game_slots_vsn/internal/config`
+	`game_slots_vsn/internal/handler`
 	`github.com/gin-gonic/gin`
-	`log`
 	`net/http`
 )
 
-//web start
-func ServerStart() {
-	addr := fmt.Sprintf("%s:%d", config.C.Server.IP, config.C.Server.Port)
+var (
+	ErrInitServer = errors.New("server start error")
+)
+
+func Init(sConfig *config.Config) {
+	addr := fmt.Sprintf("%s:%d", sConfig.Server.IP, sConfig.Server.Port)
 	router := generateRouter()
-	if err := router.Run(addr); err != nil {
-		log.Fatal("server start:", err)
+	err := router.Run(addr)
+	if err != nil {
+		panic(ErrInitServer)
 	}
 }
 
 func generateRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
+
 	router := gin.Default()
-	router.GET("/heartbeat", func(c *gin.Context) {
-		c.Status(http.StatusOK)
+
+	router.NoRoute(func(c *gin.Context) {
+		c.String(http.StatusNotFound, "Not router")
 	})
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
+	router.GET("/favicon.ico", func(c *gin.Context) {
+		c.String(http.StatusOK, "ok")
 	})
+	vsnHandler := handler.NewVersionHandler()
+	vsn := router.Group("/vsn")
+	{
+		vsn.GET("/all", vsnHandler.Get)
+		vsn.GET("/get", vsnHandler.Get)
+		vsn.DELETE("/del", vsnHandler.Get)
+		vsn.POST("/update", vsnHandler.Get)
+	}
 	return router
 }

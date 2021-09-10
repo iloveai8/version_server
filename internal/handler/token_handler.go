@@ -8,24 +8,24 @@ package handler
 //	"github.com/gin-gonic/gin"
 //)
 //
-////TokenHandler 操作Token的Handler
-//type TokenHandler struct {
+////VersionHandler 操作Token的Handler
+//type VersionHandler struct {
 //	BaseHandler
 //	service *service.TokenService
 //}
 //
-////NewTokenHandler 创建Handler
-//func NewTokenHandler(service *service.TokenService) *TokenHandler {
-//	return &TokenHandler{service: service}
+////NewVersionHandler 创建Handler
+//func NewVersionHandler(service *service.TokenService) *VersionHandler {
+//	return &VersionHandler{service: service}
 //}
 //
-////GetToken 获取Token
-//func (h *TokenHandler) GetToken(c *gin.Context) {
-//	log := logger.FromCtxTracer(c.Request.Context()).WithField("func", "TokenHandler.GetToken")
+////Get 获取Token
+//func (h *VersionHandler) Get(c *gin.Context) {
+//	log := logger.FromCtxTracer(c.Request.Context()).WithField("func", "VersionHandler.Get")
 //	userName := c.Param("userName")
 //	passWord := c.Param("passWord")
 //	log.Infof("get token param userName:[%s]，passWord:[%s]", userName, passWord)
-//	if accessToken, err := h.service.GetToken(c.Request.Context(), userName, passWord); err != nil {
+//	if accessToken, err := h.service.Get(c.Request.Context(), userName, passWord); err != nil {
 //		log.Warn("get token error", err.Error())
 //		c.JSON(http.StatusOK, map[string]string{"message": err.Error()})
 //	} else {
@@ -35,9 +35,9 @@ package handler
 //}
 //
 ////VerifyToken 验证Token
-//func (h *TokenHandler) VerifyToken(c *gin.Context) {
+//func (h *VersionHandler) VerifyToken(c *gin.Context) {
 //	//fmt.Println(ftutils.Object2JSONNoError(c.Request.URL))
-//	log := logger.FromCtxTracer(c.Request.Context()).WithField("func", "TokenHandler.VerifyToken")
+//	log := logger.FromCtxTracer(c.Request.Context()).WithField("func", "VersionHandler.VerifyToken")
 //	accessToken := c.Param("access_token")
 //	log.Infof("verify token param access_token:[%s]", accessToken)
 //	if claims, err := h.service.VerifyToken(c.Request.Context(), accessToken); err != nil {
