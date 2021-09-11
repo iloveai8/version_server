@@ -4,6 +4,7 @@ import (
 	`errors`
 	`fmt`
 	`game_slots_vsn/internal/config`
+	`game_slots_vsn/internal/db/redis`
 	`game_slots_vsn/internal/handler`
 	`github.com/gin-gonic/gin`
 	`net/http`
@@ -26,20 +27,28 @@ func generateRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
+	defaultRouter(router)
+	vsnRouter(router)
+	return router
+}
 
+func defaultRouter(router *gin.Engine) {
 	router.NoRoute(func(c *gin.Context) {
 		c.String(http.StatusNotFound, "Not router")
 	})
 	router.GET("/favicon.ico", func(c *gin.Context) {
 		c.String(http.StatusOK, "ok")
 	})
-	vsnHandler := handler.NewVersionHandler()
-	vsn := router.Group("/vsn")
+}
+
+func vsnRouter(router *gin.Engine) {
+	vsnHandler := handler.NewVsnHandler(redis.GetClient())
+	vsn := router.Group("v1")
 	{
-		vsn.GET("/all", vsnHandler.Get)
-		vsn.GET("/get", vsnHandler.Get)
-		vsn.DELETE("/del", vsnHandler.Get)
-		vsn.POST("/update", vsnHandler.Get)
+		vsn.GET("/vsn/list", vsnHandler.GetAll) //获取所有用户
+		vsn.GET("/vsn", vsnHandler.Get)         //根据id获取用户
+		vsn.POST("/vsn", vsnHandler.Insert)     //保存新用户
+		vsn.PUT("/vsn", vsnHandler.Update)      //根据id更新用户
+		vsn.DELETE("/vsn", vsnHandler.Delete)   //根据id删除用户
 	}
-	return router
 }

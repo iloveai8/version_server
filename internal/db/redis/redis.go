@@ -12,7 +12,7 @@ var (
 	ErrInitRedis = errors.New("connection not available")
 )
 
-func Init(rConfig *config.Config){
+func Init(rConfig *config.Config) {
 	o := redisOptions(rConfig.Redis.Host, rConfig.Redis.DB, rConfig.Redis.PoolSize)
 	_client = redis.NewClient(o)
 	if _, err := _client.Ping().Result(); err != nil {
@@ -34,16 +34,6 @@ func redisOptions(redisAddr string, db, poolSize int) *redis.Options {
 	}
 }
 
-func GetClient() *redis.Client{
-	if !ping() {
-		panic(ErrInitRedis)
-	}
+func GetClient() *redis.Client {
 	return _client
-}
-
-func ping() bool {
-	if _, err := _client.Ping().Result(); err != nil {
-		return false
-	}
-	return true
 }
