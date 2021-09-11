@@ -24,21 +24,21 @@ func (vh VsnHandler) GetAll(c *gin.Context) {
 	result, _ := vh.Client.HVals(CacheVsnKey).Result()
 
 	//eg1
-	//var vsnList []*mod.Vsn
+	//var vsnInfoList []*mod.Vsn
 	//for _, vsnStr := range result {
 	//	vsn := mod.NewVsn()
 	//	_ = json.Unmarshal([]byte(vsnStr), vsn)
-	//	vsnList = append(vsnList, vsn)
+	//	vsnInfoList = append(vsnInfoList, vsn)
 	//}
 	//eg2
-	vsnList1 := make([]*mod.Vsn, len(result), cap(result))
+	vsnInfoList := make([]*mod.Vsn, len(result), cap(result))
 	for i, vsnStr := range result {
 		vsn := mod.NewVsn()
 		_ = json.Unmarshal([]byte(vsnStr), vsn)
-		vsnList1[i] = vsn
+		vsnInfoList[i] = vsn
 	}
 
-	c.JSON(http.StatusOK, respone.Success(vsnList))
+	c.JSON(http.StatusOK, respone.Success(vsnInfoList))
 }
 
 //Get 根据vsn获取信息
