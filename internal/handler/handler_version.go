@@ -9,7 +9,7 @@ import (
 	`net/http`
 )
 
-const vsn_key string = "vsn."
+const CacheVsnKey string = "vsn."
 
 type VsnHandler struct {
 	Client *redis.Client
@@ -21,7 +21,7 @@ func NewVsnHandler(redis *redis.Client) *VsnHandler {
 
 //GetAll 获取所有vsn 信息
 func (vh VsnHandler) GetAll(c *gin.Context) {
-	result, _ := vh.Client.HVals(vsn_key).Result()
+	result, _ := vh.Client.HVals(CacheVsnKey).Result()
 
 	//eg1
 	//var vsnList []*mod.Vsn
@@ -50,7 +50,7 @@ func (vh VsnHandler) Get(c *gin.Context) {
 		}))
 		return
 	}
-	result, _ := vh.Client.HGet(vsn_key, vsn).Result()
+	result, _ := vh.Client.HGet(CacheVsnKey, vsn).Result()
 	vsnInfo := mod.NewVsn()
 	_ = json.Unmarshal([]byte(result), vsnInfo)
 	c.JSON(http.StatusOK, respone.Success(vsnInfo))
@@ -76,7 +76,7 @@ func (vh VsnHandler) Insert(c *gin.Context) {
 	newVsn.SrvUrl = srvUrl
 	newVsn.ResUrl = resUrl
 	marshal, _ := json.Marshal(newVsn)
-	vh.Client.HSet(vsn_key, vsn, marshal)
+	vh.Client.HSet(CacheVsnKey, vsn, marshal)
 	c.JSON(http.StatusOK, respone.Success(newVsn))
 }
 
@@ -89,7 +89,7 @@ func (vh VsnHandler) Update(c *gin.Context) {
 		}))
 		return
 	}
-	result, _ := vh.Client.HGet(vsn_key, vsn).Result()
+	result, _ := vh.Client.HGet(CacheVsnKey, vsn).Result()
 	vsnInfo := mod.NewVsn()
 	_ = json.Unmarshal([]byte(result), vsnInfo)
 
@@ -99,7 +99,7 @@ func (vh VsnHandler) Update(c *gin.Context) {
 	vsnInfo.SrvUrl = srvUrl
 	vsnInfo.ResUrl = resUrl
 	marshal, _ := json.Marshal(vsnInfo)
-	vh.Client.HSet(vsn_key, vsn, marshal)
+	vh.Client.HSet(CacheVsnKey, vsn, marshal)
 	c.JSON(http.StatusOK, respone.Success(vsnInfo))
 }
 
@@ -111,7 +111,7 @@ func (vh VsnHandler) Delete(c *gin.Context) {
 			"vsn": vsn,
 		}))
 	} else {
-		result, _ := vh.Client.HDel(vsn_key, vsn).Result()
+		result, _ := vh.Client.HDel(CacheVsnKey, vsn).Result()
 		c.JSON(http.StatusOK, respone.Success(map[string]int64{
 			"count": result,
 		}))
