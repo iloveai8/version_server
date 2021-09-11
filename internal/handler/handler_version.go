@@ -23,19 +23,20 @@ func NewVsnHandler(redis *redis.Client) *VsnHandler {
 func (vh VsnHandler) GetAll(c *gin.Context) {
 	result, _ := vh.Client.HVals(vsn_key).Result()
 
-	var vsnList []*mod.Vsn
-	for _, vsnStr := range result {
-		vsn := mod.NewVsn()
-		_ = json.Unmarshal([]byte(vsnStr), vsn)
-		vsnList = append(vsnList, vsn)
-	}
-
-	//vsnList := make([]*mod.Vsn, len(result), cap(result))
+	//eg1
+	//var vsnList []*mod.Vsn
 	//for _, vsnStr := range result {
 	//	vsn := mod.NewVsn()
 	//	_ = json.Unmarshal([]byte(vsnStr), vsn)
 	//	vsnList = append(vsnList, vsn)
 	//}
+	//eg2
+	vsnList1 := make([]*mod.Vsn, len(result), cap(result))
+	for i, vsnStr := range result {
+		vsn := mod.NewVsn()
+		_ = json.Unmarshal([]byte(vsnStr), vsn)
+		vsnList1[i] = vsn
+	}
 
 	c.JSON(http.StatusOK, respone.Success(vsnList))
 }
