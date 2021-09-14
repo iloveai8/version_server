@@ -74,7 +74,6 @@ func initConfig() {
 
 		pwd, err := os.Getwd()
 		cobra.CheckErr(err)
-
 		// Search config in home directory with name ".game_slots_vsn" (without extension).
 		viper.AddConfigPath(pwd)
 		viper.AddConfigPath("conf")
