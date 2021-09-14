@@ -2,6 +2,7 @@ package handler
 
 import (
 	`encoding/json`
+	`fmt`
 	`game_slots_vsn/internal/mod`
 	`game_slots_vsn/internal/respone`
 	`github.com/gin-gonic/gin`
@@ -58,49 +59,43 @@ func (vh VsnHandler) Get(c *gin.Context) {
 
 //Insert 存储vsn信息
 func (vh VsnHandler) Insert(c *gin.Context) {
-	vsn := c.PostForm("vsn")
-	srvUrl := c.PostForm("srvUrl")
-	resUrl := c.PostForm("resUrl")
-	//c.MustBindWith()
-	//c.BindJSON(mod.Vsn{})
-	if vsn == "" || srvUrl == "" || resUrl == "" {
+	buf := make([]byte, 1024)
+	n, _ := c.Request.Body.Read(buf)
+	fmt.Println(string(buf[:n]))
+	newVsn := mod.NewVsn()
+	err := json.Unmarshal(buf[:n], newVsn)
+	if err != nil {
 		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, map[string]string{
-			"vsn":    vsn,
-			"srvUrl": srvUrl,
-			"resUrl": resUrl,
+			"message": string(buf[:n]),
 		}))
+	}
+	if newVsn.Vsn == "" || newVsn.SrvUrl == "" || newVsn.ResUrl == "" {
+		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, newVsn))
 		return
 	}
-	newVsn := mod.NewVsn()
-	newVsn.Vsn = vsn
-	newVsn.SrvUrl = srvUrl
-	newVsn.ResUrl = resUrl
 	marshal, _ := json.Marshal(newVsn)
-	vh.Client.HSet(CacheVsnKey, vsn, marshal)
+	vh.Client.HSet(CacheVsnKey, newVsn.Vsn, marshal)
 	c.JSON(http.StatusOK, respone.Success(newVsn))
 }
 
 //Update 存储vsn信息
 func (vh VsnHandler) Update(c *gin.Context) {
 	vsn := c.Query("vsn")
-	if vsn == "" {
+
+	buf := make([]byte, 1024)
+	n, _ := c.Request.Body.Read(buf)
+	fmt.Println(string(buf[:n]))
+	newVsn := mod.NewVsn()
+	err := json.Unmarshal(buf[:n], newVsn)
+	if err != nil || vsn == "" || newVsn.SrvUrl == "" || newVsn.ResUrl == "" {
 		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, map[string]string{
-			"vsn": vsn,
+			"message": string(buf[:n]),
 		}))
-		return
 	}
-	result, _ := vh.Client.HGet(CacheVsnKey, vsn).Result()
-	vsnInfo := mod.NewVsn()
-	_ = json.Unmarshal([]byte(result), vsnInfo)
-
-	srvUrl := c.DefaultPostForm("srvUrl", vsnInfo.SrvUrl)
-	resUrl := c.DefaultPostForm("resUrl", vsnInfo.ResUrl)
-
-	vsnInfo.SrvUrl = srvUrl
-	vsnInfo.ResUrl = resUrl
-	marshal, _ := json.Marshal(vsnInfo)
+	newVsn.Vsn = vsn
+	marshal, _ := json.Marshal(newVsn)
 	vh.Client.HSet(CacheVsnKey, vsn, marshal)
-	c.JSON(http.StatusOK, respone.Success(vsnInfo))
+	c.JSON(http.StatusOK, respone.Success(newVsn))
 }
 
 //Delete 存储vsn信息

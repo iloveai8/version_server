@@ -2,8 +2,8 @@ package mod
 
 type Vsn struct {
 	Vsn    string `json:"vsn"`
-	SrvUrl string `json:"server_url"`
-	ResUrl string `json:"resource_url"`
+	SrvUrl string `json:"srvUrl"`
+	ResUrl string `json:"resUrl"`
 }
 
 func NewVsn() * Vsn {
