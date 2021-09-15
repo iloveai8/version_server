@@ -10,7 +10,7 @@ all: help
 .PHONY: run
 run:
 	echo "run config:${config}"
-	go run -race main.go --config=${config}
+	@go run -race main.go --config=${config}
 
 ###===================================================================
 ### build
