@@ -16,7 +16,7 @@ limitations under the License.
 package main
 
 import (
-	`game_slots_vsn/cmd`
+	"game_slots_vsn/cmd"
 )
 
 func main() {
