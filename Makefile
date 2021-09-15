@@ -1,17 +1,25 @@
-BINARY_NAME=GSVsnServer
-MAIN_PATH=main.go
+config=./conf/dev.yaml
+exeName=GSVsnServer
+exeFunc=main.go
 
 all: help
 
-.PHONY:run
+###===================================================================
+### run
+###===================================================================
+.PHONY: run
 run:
-	go run -race main.go --config=./conf/dev.yaml
+	@echo "run config:${config}"
+	go run -race main.go --config=${config}
 
-.PHONY:build
+###===================================================================
+### build
+###===================================================================
+.PHONY: build
 build:
-	@echo build
-	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o $(BINARY_NAME) $(MAIN_PATH)
-	@echo "execute file size:`du -sh $(BINARY_NAME)`"
+	@echo "build start...."
+	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o $(exeName) $(exeFunc)
+	@echo "build end! generate execute file size:`du -sh $(exeName)`"
 
 ###===================================================================
 ### other
