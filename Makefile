@@ -9,7 +9,7 @@ all: help
 ###===================================================================
 .PHONY: run
 run:
-	@echo "startting gs-vsn-server,config:${config}"
+	@echo "starting gs-vsn-server,config:${config}"
 	@go run -race main.go --config=${config}
 
 ###===================================================================
