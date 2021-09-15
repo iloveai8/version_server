@@ -26,4 +26,4 @@ build:
 ###===================================================================
 .PHONY: help
 help:
-	 echo "Usage make run|build"
+	 @echo "Usage make run|build"
