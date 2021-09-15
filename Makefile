@@ -9,9 +9,9 @@ run:
 
 .PHONY:build
 build:
-	@echo build_test
+	@echo build
 	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o $(BINARY_NAME) $(MAIN_PATH)
-	@echo "可执行文件大小为:`du -sh $(BINARY_NAME)`"
+	@echo "execute file size:`du -sh $(BINARY_NAME)`"
 
 ###===================================================================
 ### other
