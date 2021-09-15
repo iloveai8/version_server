@@ -9,7 +9,7 @@ all: help
 ###===================================================================
 .PHONY: run
 run:
-	@echo "run config:${config}"
+	echo "run config:${config}"
 	go run -race main.go --config=${config}
 
 ###===================================================================
@@ -17,13 +17,13 @@ run:
 ###===================================================================
 .PHONY: build
 build:
-	@echo "build start...."
+	echo "build start...."
 	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o $(exeName) $(exeFunc)
-	@echo "build end! generate execute file size:`du -sh $(exeName)`"
+	echo "build end! generate execute file size:`du -sh $(exeName)`"
 
 ###===================================================================
 ### other
 ###===================================================================
 .PHONY: help
 help:
-	 @echo "Usage make run|build"
+	 echo "Usage make run|build"
