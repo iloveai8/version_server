@@ -4,6 +4,3 @@ server:
   port: 9091
 
 redis:
-  host: "192.168.1.33:6380"
-  db: 15
-  poolsize: 10

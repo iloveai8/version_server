@@ -37,3 +37,19 @@ func redisOptions(redisAddr string, db, poolSize int) *redis.Options {
 func GetClient() *redis.Client {
 	return _client
 }
+
+//var _client *redis.Client
+////selfInit Redis初期化连接 获取平台的广告位信息
+//func selfInit(masterName, passWord string, poolSize int, host []string) error {
+//	_client = redis.NewFailoverClient(&redis.FailoverOptions{
+//		MasterName:    masterName,
+//		SentinelAddrs: host,
+//		PoolSize:      poolSize,
+//		Password:      passWord,
+//	})
+//	if _, err := _client.Ping().Result(); err != nil {
+//		return err
+//	}
+//	return nil
+//}
+

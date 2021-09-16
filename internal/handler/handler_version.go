@@ -51,7 +51,14 @@ func (vh VsnHandler) Get(c *gin.Context) {
 		}))
 		return
 	}
-	result, _ := vh.Client.HGet(CacheVsnKey, vsn).Result()
+	result, err := vh.Client.HGet(CacheVsnKey, vsn).Result()
+	if err != nil {
+		c.JSON(http.StatusOK, respone.Fail(respone.ResultNotFound, map[string]string{
+			"vsn": vsn,
+		}))
+		return
+	}
+
 	vsnInfo := mod.NewVsn()
 	_ = json.Unmarshal([]byte(result), vsnInfo)
 	c.JSON(http.StatusOK, respone.Success(vsnInfo))
@@ -73,6 +80,7 @@ func (vh VsnHandler) Insert(c *gin.Context) {
 		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, newVsn))
 		return
 	}
+	fmt.Println("add enable:", newVsn.Enable)
 	marshal, _ := json.Marshal(newVsn)
 	vh.Client.HSet(CacheVsnKey, newVsn.Vsn, marshal)
 	c.JSON(http.StatusOK, respone.Success(newVsn))
@@ -94,6 +102,8 @@ func (vh VsnHandler) Update(c *gin.Context) {
 	}
 	newVsn.Vsn = vsn
 	marshal, _ := json.Marshal(newVsn)
+
+	fmt.Println("update enable:", newVsn.Enable)
 	vh.Client.HSet(CacheVsnKey, vsn, marshal)
 	c.JSON(http.StatusOK, respone.Success(newVsn))
 }

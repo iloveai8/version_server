@@ -3,6 +3,7 @@ package respone
 var (
 	OK           = Error{200, "ok"}
 	ParamsError  = Error{201, "参数错误"}
+	ResultNotFound  = Error{202, "数据不存在"}
 )
 
 type Error struct {
