@@ -18,7 +18,9 @@ package cmd
 import (
 	"fmt"
 	`game_slots_vsn/internal`
-	`game_slots_vsn/internal/config`
+	`game_slots_vsn/pkg/config`
+	"game_slots_vsn/pkg/logger"
+	"game_slots_vsn/pkg/redis"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -39,6 +41,8 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
+		logger.InitLogger(config.G.Log)
+		redis.InitRedis(config.G.Redis)
 		internal.Run()
 	},
 }
@@ -71,7 +75,6 @@ func initConfig() {
 	} else {
 		// Find home directory.
 		//home, err := os.UserHomeDir()
-
 		pwd, err := os.Getwd()
 		cobra.CheckErr(err)
 		// Search config in home directory with name ".game_slots_vsn" (without extension).
@@ -80,12 +83,11 @@ func initConfig() {
 		viper.SetConfigType("yaml")
 		viper.SetConfigName("dev")
 	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
+	//viper.AutomaticEnv() // read in environment variables that match
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		_, _ = fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-		config.Init()
+	if err := viper.ReadInConfig(); err != nil {
+		cobra.CheckErr(err)
 	}
+	_, _ = fmt.Fprintln(os.Stderr, "Using Config File:", viper.ConfigFileUsed())
+	config.InitConfig()
 }

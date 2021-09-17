@@ -5,33 +5,25 @@ import (
 	`fmt`
 	`game_slots_vsn/internal/mod`
 	`game_slots_vsn/internal/respone`
+	"game_slots_vsn/pkg/redis"
 	`github.com/gin-gonic/gin`
-	`github.com/go-redis/redis`
 	`net/http`
 )
 
 const CacheVsnKey string = "vsn."
 
 type VsnHandler struct {
-	Client *redis.Client
+
 }
 
-func NewVsnHandler(redis *redis.Client) *VsnHandler {
-	return &VsnHandler{Client: redis}
+func NewVsnHandler() *VsnHandler {
+	return &VsnHandler{}
 }
 
 //GetAll 获取所有vsn 信息
 func (vh VsnHandler) GetAll(c *gin.Context) {
-	result, _ := vh.Client.HVals(CacheVsnKey).Result()
+	result, _ := redis.Client.HVals(CacheVsnKey).Result()
 
-	//eg1
-	//var vsnInfoList []*mod.Vsn
-	//for _, vsnStr := range result {
-	//	vsn := mod.NewVsn()
-	//	_ = json.Unmarshal([]byte(vsnStr), vsn)
-	//	vsnInfoList = append(vsnInfoList, vsn)
-	//}
-	//eg2
 	vsnInfoList := make([]*mod.Vsn, len(result), cap(result))
 	for i, vsnStr := range result {
 		vsn := mod.NewVsn()
@@ -51,7 +43,7 @@ func (vh VsnHandler) Get(c *gin.Context) {
 		}))
 		return
 	}
-	result, err := vh.Client.HGet(CacheVsnKey, vsn).Result()
+	result, err := redis.Client.HGet(CacheVsnKey, vsn).Result()
 	if err != nil {
 		c.JSON(http.StatusOK, respone.Fail(respone.ResultNotFound, map[string]string{
 			"vsn": vsn,
@@ -82,7 +74,7 @@ func (vh VsnHandler) Insert(c *gin.Context) {
 	}
 	fmt.Println("add enable:", newVsn.Enable)
 	marshal, _ := json.Marshal(newVsn)
-	vh.Client.HSet(CacheVsnKey, newVsn.Vsn, marshal)
+	redis.Client.HSet(CacheVsnKey, newVsn.Vsn, marshal)
 	c.JSON(http.StatusOK, respone.Success(newVsn))
 }
 
@@ -104,7 +96,7 @@ func (vh VsnHandler) Update(c *gin.Context) {
 	marshal, _ := json.Marshal(newVsn)
 
 	fmt.Println("update enable:", newVsn.Enable)
-	vh.Client.HSet(CacheVsnKey, vsn, marshal)
+	redis.Client.HSet(CacheVsnKey, vsn, marshal)
 	c.JSON(http.StatusOK, respone.Success(newVsn))
 }
 
@@ -116,7 +108,7 @@ func (vh VsnHandler) Delete(c *gin.Context) {
 			"vsn": vsn,
 		}))
 	} else {
-		result, _ := vh.Client.HDel(CacheVsnKey, vsn).Result()
+		result, _ := redis.Client.HDel(CacheVsnKey, vsn).Result()
 		c.JSON(http.StatusOK, respone.Success(map[string]int64{
 			"count": result,
 		}))

@@ -1,6 +1,27 @@
-# 正式环境
-server:
-  ip: "192.168.1.33"
+# 开发环境
+web:
+  ip: ""
   port: 9091
 
 redis:
+  # redis driver name:redis|redisSentinel
+  driverName: redisSentinel
+  # redisSentinel
+  db: 0
+  poolSize: 100
+  password: J3eosdiSnk
+  # redis sentinel
+  masterName: mymaster
+  hosts:
+    - 10.113.7.61:26379
+    - 10.113.10.195:26379
+    - 10.113.16.32:26379
+
+log:
+  fileName: "./logs/game-server-vsn.log"
+  maxSize: 10
+  maxBackups: 1
+  maxAges: 30
+  compress: true
+  level: info
+

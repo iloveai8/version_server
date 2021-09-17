@@ -1,29 +1,25 @@
-## 开发环境
-#server:
-#  ip: "10.0.121.183"
-#  port: 9091
-#
-#redis:
-#  #  redis|redisSentinel
-#  diriverName: redis
-#  host:
-#    - "10.113.7.61:26379"
-#    - "10.113.10.195:26379"
-#    - "10.113.16.32:26379"
-#  name: mymaster
-#  max_idle: 100
-#  max_active: 10
-#  password: J3eosdiSnk
-#
-#  db: 15
-#  poolsize: 10
 # 开发环境
-server:
-  ip: "10.0.121.183"
+web:
+  ip: ""
   port: 9091
 
 redis:
-  host: "192.168.1.33:6380"
+  driverName: redis
   db: 15
-  poolsize: 10
+  poolSize: 10
+  host: 192.168.1.33:6380
 
+log:
+  fileEnable: true
+  fileName: "./logs/game-server-vsn.log"
+  fileLevel: info
+
+  consoleEnable: true
+  consoleLevel: info
+
+  maxSize: 10
+  maxBackups: 1
+  maxAges: 30
+  compress: true
+
+  jsonEnable: true
