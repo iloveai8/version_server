@@ -1,9 +1,9 @@
 package respone
 
 var (
-	OK           = Error{200, "ok"}
-	ParamsError  = Error{201, "参数错误"}
-	ResultNotFound  = Error{202, "数据不存在"}
+	OK              = Error{200, "ok"}
+	ParamsError     = Error{201, "params error"}
+	VersionNotFound = Error{202, "version not found"}
 )
 
 type Error struct {

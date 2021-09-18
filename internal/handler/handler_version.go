@@ -47,7 +47,7 @@ func (vh VsnHandler) Get(c *gin.Context) {
 	result, err := redis.Client.HGet(CacheVsnKey, vsn).Result()
 	if err != nil {
 		logger.Logger.Errorf("get vsn err:%v", err)
-		c.JSON(http.StatusOK, respone.Fail(respone.ResultNotFound, map[string]string{
+		c.JSON(http.StatusOK, respone.Fail(respone.VersionNotFound, map[string]string{
 			"vsn": vsn,
 		}))
 		return
