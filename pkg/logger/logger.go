@@ -59,6 +59,9 @@ func InitLogger(c *config.LogConfig) {
 		zap.AddCaller(),
 		zap.AddCallerSkip(1),
 	).Sugar()
+
+	gawd, _ := os.Getwd()
+	Logger.Info("pwd", gawd)
 	defer Logger.Sync()
 }
 
