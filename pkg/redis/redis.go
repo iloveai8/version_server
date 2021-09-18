@@ -28,7 +28,7 @@ func InitRedis(c *config.RedisConfig) {
 	if _, err := Client.Ping().Result(); err != nil {
 		panic(errors.New("init redis error"))
 	}
-	logger.Logger.Info("redis start success.", c)
+	logger.Logger.Infof("redis:%v start success.", c)
 }
 
 // redis option

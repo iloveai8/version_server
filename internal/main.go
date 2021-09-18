@@ -14,7 +14,7 @@ import (
 //Run 程序入口
 func Run() {
 	go api.StartServer(config.G.Web)
-	logger.Logger.Info("service start success.", config.G.Web)
+	logger.Logger.Infof("web:%v start success.", config.G.Web)
 	Signal()
 }
 

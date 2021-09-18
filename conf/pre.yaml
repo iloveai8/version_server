@@ -11,7 +11,7 @@ redis:
 
 log:
   fileEnable: true
-  fileName: "./logs/game-server-vsn.log"
+  fileName: "/home/apps/game_slots_vsn/logs/game-server-vsn.log"
   fileLevel: info
 
   consoleEnable: true
