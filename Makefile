@@ -1,4 +1,4 @@
-CONFIG=./conf/dev.yaml
+CONFIG=./conf/pre.yaml
 BINARY="GSVsnServer"
 MAIN=main.go
 
