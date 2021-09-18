@@ -5,8 +5,7 @@ MAIN=main.go
 .PHONY: all build run gotool clean help
 all: help
 build:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-	@go build -a -installsuffix cgo -o $(BINARY) $(MAIN)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o $(BINARY) $(MAIN)
 run:
 	@go run ./ --config=${CONFIG}
 gotool:
