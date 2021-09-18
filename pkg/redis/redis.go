@@ -3,6 +3,7 @@ package redis
 import (
 	`errors`
 	`game_slots_vsn/pkg/config`
+	"game_slots_vsn/pkg/logger"
 	"github.com/go-redis/redis"
 	`time`
 )
@@ -27,6 +28,7 @@ func InitRedis(c *config.RedisConfig) {
 	if _, err := Client.Ping().Result(); err != nil {
 		panic(errors.New("init redis error"))
 	}
+	logger.Logger.Info("redis start success.", c)
 }
 
 // redis option
