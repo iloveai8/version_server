@@ -4,6 +4,7 @@ import (
 	`fmt`
 	`game_slots_vsn/internal/api`
 	"game_slots_vsn/pkg/config"
+	"game_slots_vsn/pkg/logger"
 	`os`
 	`os/signal`
 	`syscall`
@@ -13,6 +14,7 @@ import (
 //Run 程序入口
 func Run() {
 	go api.StartServer(config.G.Web)
+	logger.Logger.Info("service start success.", config.G.Web)
 	Signal()
 }
 

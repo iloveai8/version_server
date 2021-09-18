@@ -8,6 +8,7 @@ import (
 	ginzap "github.com/gin-contrib/zap"
 	`github.com/gin-gonic/gin`
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -43,6 +44,7 @@ func StartServer(web *config.WebConfig) {
 		vsn.DELETE("/vsn", vsnHandler.Delete)   //根据id删除用户
 	}
 	if err := router.Run(addr); err != nil {
-		logger.Logger.Info("service start fail.")
+		logger.Logger.Info("service start fail.",err)
+		os.Exit(0)
 	}
 }
