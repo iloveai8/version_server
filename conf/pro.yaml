@@ -1,4 +1,4 @@
-# 开发环境
+# 正式环境
 web:
   ip: ""
   port: 9091
@@ -18,10 +18,15 @@ redis:
     - 10.113.16.32:26379
 
 log:
+  fileEnable: true
   fileName: "./logs/game-server-vsn.log"
-  maxSize: 10
-  maxBackups: 1
+  fileLevel: info
+
+  consoleEnable: false
+  consoleLevel: info
+
+  maxSize: 20
+  maxBackups: 10
   maxAges: 30
   compress: true
-  level: info
-
+  jsonEnable: true

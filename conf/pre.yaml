@@ -1,4 +1,4 @@
-# 开发环境
+# 33环境
 web:
   ip: ""
   port: 9091
@@ -6,15 +6,19 @@ web:
 redis:
   driverName: redis
   db: 15
-  poolSize: 10
-  host: 192.168.1.33:6380
+  poolSize: 20
+  host: 192.168.1.33:6379
 
 log:
+  fileEnable: true
   fileName: "./logs/game-server-vsn.log"
-  maxSize: 10
-  maxBackups: 1
+  fileLevel: info
+
+  consoleEnable: true
+  consoleLevel: info
+
+  maxSize: 20
+  maxBackups: 10
   maxAges: 30
   compress: true
-  level: info
-
-
+  jsonEnable: true

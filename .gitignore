@@ -1,3 +1,5 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea/
-./logs/
+go.mod
+go.sum
+logs

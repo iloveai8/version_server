@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/cobra"
 	`github.com/spf13/viper`
 	`os`
 )
@@ -49,7 +52,19 @@ type RedisConfig struct {
 
 //init AppConfig eg:mysql redis.....
 func InitConfig() {
+	if err := viper.ReadInConfig(); err != nil {
+		cobra.CheckErr(err)
+	}
 	if err := viper.Unmarshal(G); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, "Using Config File:", viper.ConfigFileUsed())
+		_, _ = fmt.Fprintln(os.Stderr, "config modify fail.", err)
 		os.Exit(0)
 	}
+	viper.WatchConfig()
+	viper.OnConfigChange(func(in fsnotify.Event) {
+		if err := viper.Unmarshal(G); err != nil {
+			_, _ = fmt.Fprintln(os.Stderr, "config modify fail.", err)
+			os.Exit(0)
+		}
+	})
 }

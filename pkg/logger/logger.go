@@ -2,37 +2,14 @@ package logger
 
 import (
 	"game_slots_vsn/pkg/config"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
-	"time"
 )
 
 //Level logger Level
 type Level string
-
-type Configuration struct {
-	//  是否开启控制台日志输出
-	ConsoleStdoutEnable bool
-	//  控制台日志是否是 JSON 格式
-	ConsoleStdoutIsJSONFormat bool
-	// Level 控制台日志等级
-	ConsoleStdoutLevel Level
-
-	// 是否开启控制台日志输出
-	FileStdoutEnable bool
-	// 控制台日志是否是 JSON 格式
-	FileStdoutIsJSONFormat bool
-	// Level 控制台日志等级
-	FileStdoutLevel Level
-	// 写入文件位置
-	FileStdoutFileLocation string
-	FileStdoutLogMaxSize   int
-	FileStdoutCompress     bool
-	FileStdoutLogMaxAge    int
-}
 
 const (
 	//DebugLevel has verbose message
@@ -48,62 +25,9 @@ const (
 )
 
 var (
-	Logger  *zap.Logger
-	//Logger *zap.SugaredLogger
+	Logger *zap.SugaredLogger
 )
 
-//
-//// InitLogger 初始化Logger
-//func InitLogger(c *config.LogConfig) {
-//	encoder := doGetEncoder()
-//	writeSync := doGetLogWriter(c.FileName, c.MaxSize, c.MaxBackups, c.MaxAges)
-//
-//	var l = new(zapcore.Level)
-//	err := l.UnmarshalText([]byte(c.Level))
-//	if err != nil {
-//		return
-//	}
-//	core := zapcore.NewCore(encoder, writeSync, l)
-//	Logger = zap.New(core, zap.AddCaller())
-//}
-//
-//func doGetEncoder() zapcore.Encoder {
-//	encoderConfig := zap.NewProductionEncoderConfig()
-//	encoderConfig.TimeKey = "time"
-//	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-//	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
-//	return zapcore.NewJSONEncoder(encoderConfig)
-//}
-//
-//func doGetLogWriter(fileName string, maxSize, maxBackup, maxAge int) zapcore.WriteSyncer {
-//	lumberJackLogger := &lumberjack.Logger{
-//		Filename:   fileName,
-//		MaxSize:    maxSize,
-//		MaxBackups: maxBackup,
-//		MaxAge:     maxAge,
-//	}
-//	return zapcore.AddSync(lumberJackLogger)
-//}
-
-func GinLogger() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		start := time.Now()
-		path := c.Request.URL.Path
-		query := c.Request.URL.RawQuery
-		c.Next()
-		costTime := time.Since(start)
-		Logger.Info(path,
-			zap.Int("status", c.Writer.Status()),
-			zap.String("method", c.Request.Method),
-			zap.String("path", path),
-			zap.String("query", query),
-			zap.String("ip", c.ClientIP()),
-			zap.String("user-agent", c.Request.UserAgent()),
-			zap.String("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()),
-			zap.Duration("costTime", costTime),
-		)
-	}
-}
 func InitLogger(c *config.LogConfig) {
 	cores := make([]zapcore.Core, 0)
 
@@ -134,7 +58,8 @@ func InitLogger(c *config.LogConfig) {
 		zap.AddStacktrace(zapcore.ErrorLevel),
 		zap.AddCaller(),
 		zap.AddCallerSkip(1),
-	)
+	).Sugar()
+	defer Logger.Sync()
 }
 
 func getEncoder(JsonEnable bool) zapcore.Encoder {
@@ -142,11 +67,14 @@ func getEncoder(JsonEnable bool) zapcore.Encoder {
 	encoderConfig.TimeKey = "time"
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	encoderConfig.EncodeLevel = zapcore.LowercaseLevelEncoder
+
+	var encoder zapcore.Encoder
 	if JsonEnable {
-		return zapcore.NewJSONEncoder(encoderConfig)
+		encoder = zapcore.NewJSONEncoder(encoderConfig)
 	} else {
-		return zapcore.NewConsoleEncoder(encoderConfig)
+		encoder = zapcore.NewConsoleEncoder(encoderConfig)
 	}
+	return encoder
 }
 
 func getZapLevel(level Level) zapcore.Level {

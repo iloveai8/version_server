@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	`game_slots_vsn/internal`
 	`game_slots_vsn/pkg/config`
 	"game_slots_vsn/pkg/logger"
@@ -83,11 +82,5 @@ func initConfig() {
 		viper.SetConfigType("yaml")
 		viper.SetConfigName("dev")
 	}
-	//viper.AutomaticEnv() // read in environment variables that match
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err != nil {
-		cobra.CheckErr(err)
-	}
-	_, _ = fmt.Fprintln(os.Stderr, "Using Config File:", viper.ConfigFileUsed())
 	config.InitConfig()
 }

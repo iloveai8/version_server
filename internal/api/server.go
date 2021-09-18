@@ -5,8 +5,10 @@ import (
 	"game_slots_vsn/internal/handler"
 	`game_slots_vsn/pkg/config`
 	"game_slots_vsn/pkg/logger"
+	ginzap "github.com/gin-contrib/zap"
 	`github.com/gin-gonic/gin`
 	"net/http"
+	"time"
 )
 
 func StartServer(web *config.WebConfig) {
@@ -19,10 +21,11 @@ func StartServer(web *config.WebConfig) {
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
-	router.Use(
-		logger.GinLogger(),
-		gin.Recovery(),
-	)
+	router.Use(ginzap.Ginzap(logger.Logger.Desugar(), time.RFC3339, true))
+	// Logs all panic to error log
+	//   - stack means whether output the stack info.
+	router.Use(ginzap.RecoveryWithZap(logger.Logger.Desugar(), true))
+
 	router.NoRoute(func(c *gin.Context) {
 		c.String(http.StatusNotFound, "Not router")
 	})
