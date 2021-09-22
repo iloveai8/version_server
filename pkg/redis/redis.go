@@ -19,8 +19,10 @@ var Client *redis.Client
 func InitRedis(c *config.RedisConfig) {
 	switch c.DriverName {
 	case DriverRedis:
+		logger.Logger.Infof("redis match driver:%v.", DriverSentinel)
 		Client = redis.NewClient(redisOptions(c))
 	case DriverSentinel:
+		logger.Logger.Infof("redis match driver:%v.", DriverSentinel)
 		Client = redis.NewFailoverClient(sentinelOptions(c))
 	default:
 		panic(errors.New("connection not available"))
