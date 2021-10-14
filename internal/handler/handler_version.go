@@ -108,6 +108,7 @@ func (vh VsnHandler) Insert(c *gin.Context) {
 		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, map[string]string{
 			"message": string(buf[:n]),
 		}))
+		return
 	}
 	if newVsn.Vsn == "" || newVsn.SrvUrl == "" || newVsn.ResUrl == "" {
 		logger.Logger.Errorf("add vsn:%v", newVsn)
@@ -134,6 +135,7 @@ func (vh VsnHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, map[string]string{
 			"message": string(buf[:n]),
 		}))
+		return
 	}
 	newVsn.Vsn = vsn
 	marshal, _ := json.Marshal(newVsn)
@@ -172,8 +174,18 @@ func (vh VsnHandler) InsertGmConf(c *gin.Context) {
 		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, map[string]string{
 			"message": string(buf[:n]),
 		}))
+		return
 	}
-	redis.Client.Set(CacheGMConfKey, globalConf, 0)
+	marshal, _ := json.Marshal(globalConf)
+	_, err = redis.Client.Set(CacheGMConfKey, marshal, 0).Result()
+	if err != nil {
+		logger.Logger.Errorf("set global conf err:%v", err)
+		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, map[string]string{
+			"message": er,
+		}))
+		return
+	}
+
 	logger.Logger.Infof("set global conf:%v", globalConf)
 	c.JSON(http.StatusOK, respone.Success(globalConf))
 }
