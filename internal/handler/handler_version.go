@@ -11,7 +11,22 @@ import (
 	`net/http`
 )
 
-const CacheVsnKey string = "vsn."
+const (
+	CacheVsnKey    string = "vsn."
+	CacheGMConfKey string = "gm.conf."
+)
+
+var IPMap = map[string]int{
+	"127.0.0.1":       1,
+	"40.83.97.197":    1,
+	"129.226.60.247":  1,
+	"47.75.45.195":    1,
+	"129.226.189.243": 1,
+	"47.75.59.239":    1,
+	"119.81.164.4":    1,
+	"1.202.246.19":    1,
+	"106.120.91.66":   1,
+}
 
 type VsnHandler struct {
 }
@@ -24,14 +39,23 @@ func NewVsnHandler() *VsnHandler {
 func (vh VsnHandler) GetAll(c *gin.Context) {
 	result, _ := redis.Client.HVals(CacheVsnKey).Result()
 
-	vsnInfoList := make([]*mod.Vsn, len(result), cap(result))
+	vsnList := make([]*mod.Vsn, len(result), cap(result))
 	for i, vsnStr := range result {
 		vsn := mod.NewVsn()
 		_ = json.Unmarshal([]byte(vsnStr), vsn)
-		vsnInfoList[i] = vsn
+		vsnList[i] = vsn
 	}
-	logger.Logger.Infof("vsn list:%v", vsnInfoList)
-	c.JSON(http.StatusOK, respone.Success(vsnInfoList))
+	logger.Logger.Infof("vsnInfo list:%v", vsnList)
+
+	result1, _ := redis.Client.Get(CacheGMConfKey).Result()
+	gmConf := mod.NewGmConf()
+	_ = json.Unmarshal([]byte(result1), gmConf)
+	logger.Logger.Infof("gmConf:%v", gmConf)
+
+	c.JSON(http.StatusOK, respone.Success(map[string]interface{}{
+		"vsnList": vsnList,
+		"gmConf":  gmConf,
+	}))
 }
 
 //Get 根据vsn获取信息
@@ -54,8 +78,21 @@ func (vh VsnHandler) Get(c *gin.Context) {
 	}
 	vsnInfo := mod.NewVsn()
 	_ = json.Unmarshal([]byte(result), vsnInfo)
-	logger.Logger.Infof("vsn:%v", vsnInfo)
-	fmt.Printf("vsn:%v", vsnInfo)
+
+	result, err = redis.Client.Get(CacheGMConfKey).Result()
+	gmConf := mod.NewGmConf()
+	_ = json.Unmarshal([]byte(result), gmConf)
+	logger.Logger.Infof("gmConf:%v", gmConf)
+	if gmConf.GMEnable {
+		ip := c.ClientIP()
+		if _, ok := IPMap[ip]; ok {
+			logger.Logger.Infof(" client ip:%v is in white list:%v", ip, IPMap)
+
+			vsnInfo.SrvUrl = gmConf.GMSrvUrl
+			vsnInfo.ResUrl = gmConf.GMResUrl
+		}
+	}
+	logger.Logger.Infof("vsnInfo:%v", vsnInfo)
 	c.JSON(http.StatusOK, respone.Success(vsnInfo))
 }
 
@@ -122,4 +159,21 @@ func (vh VsnHandler) Delete(c *gin.Context) {
 			"count": result,
 		}))
 	}
+}
+
+//edit gm conf
+func (vh VsnHandler) InsertGmConf(c *gin.Context) {
+	buf := make([]byte, 1024)
+	n, _ := c.Request.Body.Read(buf)
+	globalConf := mod.NewGmConf()
+	err := json.Unmarshal(buf[:n], globalConf)
+	if err != nil || globalConf.GMSrvUrl == "" || globalConf.GMResUrl == "" {
+		logger.Logger.Errorf("set global conf err:%v", globalConf)
+		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, map[string]string{
+			"message": string(buf[:n]),
+		}))
+	}
+	redis.Client.Set(CacheGMConfKey, globalConf, 0)
+	logger.Logger.Infof("set global conf:%v", globalConf)
+	c.JSON(http.StatusOK, respone.Success(globalConf))
 }

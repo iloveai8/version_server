@@ -42,9 +42,11 @@ func StartServer(web *config.WebConfig) {
 		vsn.POST("/vsn", vsnHandler.Insert)     //保存新用户
 		vsn.PUT("/vsn", vsnHandler.Update)      //根据id更新用户
 		vsn.DELETE("/vsn", vsnHandler.Delete)   //根据id删除用户
+
+		vsn.POST("/gmConf", vsnHandler.InsertGmConf) //保存GM开关配置
 	}
 	if err := router.Run(addr); err != nil {
-		logger.Logger.Info("service start fail.",err)
+		logger.Logger.Info("service start fail.", err)
 		os.Exit(0)
 	}
 }
