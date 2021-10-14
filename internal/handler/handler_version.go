@@ -177,15 +177,7 @@ func (vh VsnHandler) InsertGmConf(c *gin.Context) {
 		return
 	}
 	marshal, _ := json.Marshal(globalConf)
-	_, err = redis.Client.Set(CacheGMConfKey, marshal, 0).Result()
-	if err != nil {
-		logger.Logger.Errorf("set global conf err:%v", err)
-		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, map[string]string{
-			"message": er,
-		}))
-		return
-	}
-
+	redis.Client.Set(CacheGMConfKey, marshal, 0)
 	logger.Logger.Infof("set global conf:%v", globalConf)
 	c.JSON(http.StatusOK, respone.Success(globalConf))
 }
