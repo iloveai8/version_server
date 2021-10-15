@@ -8,6 +8,7 @@ import (
 	"game_slots_vsn/pkg/logger"
 	"game_slots_vsn/pkg/redis"
 	`github.com/gin-gonic/gin`
+	"net"
 	`net/http`
 )
 
@@ -85,8 +86,13 @@ func (vh VsnHandler) Get(c *gin.Context) {
 	logger.Logger.Infof("gmConf:%v", gmConf)
 	if gmConf.GMEnable {
 		ip := c.ClientIP()
-		if _, ok := IPMap[ip]; ok {
-			logger.Logger.Infof(" client ip:%v is in white list:%v", ip, IPMap)
+		if matchIp(ip) {
+			logger.Logger.Infof(" client ip:%v is in inner white list:%v", ip, IPMap)
+
+			vsnInfo.SrvUrl = gmConf.GMSrvUrl
+			vsnInfo.ResUrl = gmConf.GMResUrl
+		} else if _, ok := IPMap[ip]; ok {
+			logger.Logger.Infof(" client ip:%v is in out company white list:%v", ip, IPMap)
 
 			vsnInfo.SrvUrl = gmConf.GMSrvUrl
 			vsnInfo.ResUrl = gmConf.GMResUrl
@@ -180,4 +186,15 @@ func (vh VsnHandler) InsertGmConf(c *gin.Context) {
 	redis.Client.Set(CacheGMConfKey, marshal, 0)
 	logger.Logger.Infof("set global conf:%v", globalConf)
 	c.JSON(http.StatusOK, respone.Success(globalConf))
+}
+
+func matchIp(IP string) bool {
+	//255.0.0.0
+	network := "10.0.0.0/8"
+	_, subnet, _ := net.ParseCIDR(network)
+	if subnet.Contains(net.ParseIP(IP)) {
+		fmt.Println("addr:", IP, "in subnet")
+		return true
+	}
+	return false
 }
