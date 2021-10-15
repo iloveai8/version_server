@@ -50,8 +50,8 @@ func (vh VsnHandler) GetAll(c *gin.Context) {
 	_ = json.Unmarshal([]byte(result1), gmConfInfo)
 	logger.Logger.Infof(" ==>gmConfInfo:%v vsnInfoList:%v", gmConfInfo, vsnList)
 	c.JSON(http.StatusOK, respone.Success(map[string]interface{}{
-		"vsnList":    vsnList,
-		"gmConfInfo": gmConfInfo,
+		"vsnList": vsnList,
+		"gmConf":  gmConfInfo,
 	}))
 }
 
