@@ -87,12 +87,12 @@ func (vh VsnHandler) Get(c *gin.Context) {
 	if gmConf.GMEnable {
 		ip := c.ClientIP()
 		if matchIp(ip) {
-			logger.Logger.Infof(" client ip:%v is in inner white list:%v", ip, IPMap)
+			logger.Logger.Infof(" ========>client ip:%v is in inner white list:%v", ip, IPMap)
 
 			vsnInfo.SrvUrl = gmConf.GMSrvUrl
 			vsnInfo.ResUrl = gmConf.GMResUrl
 		} else if _, ok := IPMap[ip]; ok {
-			logger.Logger.Infof(" client ip:%v is in out company white list:%v", ip, IPMap)
+			logger.Logger.Infof(" ========>client ip:%v is in out company white list:%v", ip, IPMap)
 
 			vsnInfo.SrvUrl = gmConf.GMSrvUrl
 			vsnInfo.ResUrl = gmConf.GMResUrl
