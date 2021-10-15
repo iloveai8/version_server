@@ -18,7 +18,6 @@ const (
 )
 
 var IPMap = map[string]int{
-	"127.0.0.1":       1,
 	"40.83.97.197":    1,
 	"129.226.60.247":  1,
 	"47.75.45.195":    1,
@@ -46,16 +45,13 @@ func (vh VsnHandler) GetAll(c *gin.Context) {
 		_ = json.Unmarshal([]byte(vsnStr), vsn)
 		vsnList[i] = vsn
 	}
-	logger.Logger.Infof("vsnInfo list:%v", vsnList)
-
 	result1, _ := redis.Client.Get(CacheGMConfKey).Result()
-	gmConf := mod.NewGmConf()
-	_ = json.Unmarshal([]byte(result1), gmConf)
-	logger.Logger.Infof("gmConf:%v", gmConf)
-
+	gmConfInfo := mod.NewGmConf()
+	_ = json.Unmarshal([]byte(result1), gmConfInfo)
+	logger.Logger.Infof(" ==>gmConfInfo:%v vsnInfoList:%v", gmConfInfo, vsnList)
 	c.JSON(http.StatusOK, respone.Success(map[string]interface{}{
-		"vsnList": vsnList,
-		"gmConf":  gmConf,
+		"vsnList":    vsnList,
+		"gmConfInfo": gmConfInfo,
 	}))
 }
 
@@ -83,23 +79,30 @@ func (vh VsnHandler) Get(c *gin.Context) {
 	result, err = redis.Client.Get(CacheGMConfKey).Result()
 	gmConf := mod.NewGmConf()
 	_ = json.Unmarshal([]byte(result), gmConf)
-	logger.Logger.Infof("gmConf:%v", gmConf)
+	isGM := false
 	if gmConf.GMEnable {
+		logger.Logger.Warnf(" ==>gm enable:%v ", gmConf.GMEnable)
 		ip := c.ClientIP()
 		if matchIp(ip) {
-			logger.Logger.Infof(" ========>client ip:%v is in inner white list:%v", ip, IPMap)
-
+			logger.Logger.Warnf(" ==>client ip:%v is in inner white list:%v", ip, IPMap)
 			vsnInfo.SrvUrl = gmConf.GMSrvUrl
 			vsnInfo.ResUrl = gmConf.GMResUrl
+			isGM = true
 		} else if _, ok := IPMap[ip]; ok {
-			logger.Logger.Infof(" ========>client ip:%v is in out company white list:%v", ip, IPMap)
-
+			logger.Logger.Warnf(" ==>client ip:%v is in out company white list:%v", ip, IPMap)
 			vsnInfo.SrvUrl = gmConf.GMSrvUrl
 			vsnInfo.ResUrl = gmConf.GMResUrl
+			isGM = true
 		}
 	}
-	logger.Logger.Infof("vsnInfo:%v", vsnInfo)
-	c.JSON(http.StatusOK, respone.Success(vsnInfo))
+	logger.Logger.Infof(" ==>gmConf:%v vsnInfo:%v", gmConf, vsnInfo)
+	reply := map[string]interface{}{
+		"isGm":   isGM,
+		"srvUrl": vsnInfo.SrvUrl,
+		"resUrl": vsnInfo.ResUrl,
+		"enable": vsnInfo.Enable,
+	}
+	c.JSON(http.StatusOK, respone.Success(reply))
 }
 
 //Insert 存储vsn信息
@@ -107,8 +110,8 @@ func (vh VsnHandler) Insert(c *gin.Context) {
 	buf := make([]byte, 1024)
 	n, _ := c.Request.Body.Read(buf)
 	fmt.Println(string(buf[:n]))
-	newVsn := mod.NewVsn()
-	err := json.Unmarshal(buf[:n], newVsn)
+	newVsnInfo := mod.NewVsn()
+	err := json.Unmarshal(buf[:n], newVsnInfo)
 	if err != nil {
 		logger.Logger.Errorf("add vsn unmarshal err:%v", err)
 		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, map[string]string{
@@ -116,16 +119,15 @@ func (vh VsnHandler) Insert(c *gin.Context) {
 		}))
 		return
 	}
-	if newVsn.Vsn == "" || newVsn.SrvUrl == "" || newVsn.ResUrl == "" {
-		logger.Logger.Errorf("add vsn:%v", newVsn)
-		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, newVsn))
+	if newVsnInfo.Vsn == "" || newVsnInfo.SrvUrl == "" || newVsnInfo.ResUrl == "" {
+		logger.Logger.Errorf("add vsn:%v", newVsnInfo)
+		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, newVsnInfo))
 		return
 	}
-	marshal, _ := json.Marshal(newVsn)
-	redis.Client.HSet(CacheVsnKey, newVsn.Vsn, marshal)
-
-	logger.Logger.Infof("add vsn:%v", newVsn)
-	c.JSON(http.StatusOK, respone.Success(newVsn))
+	marshal, _ := json.Marshal(newVsnInfo)
+	redis.Client.HSet(CacheVsnKey, newVsnInfo.Vsn, marshal)
+	logger.Logger.Infof(" ==>add vsnInfo:%v", newVsnInfo)
+	c.JSON(http.StatusOK, respone.Success(newVsnInfo))
 }
 
 //Update 存储vsn信息
@@ -134,21 +136,22 @@ func (vh VsnHandler) Update(c *gin.Context) {
 
 	buf := make([]byte, 1024)
 	n, _ := c.Request.Body.Read(buf)
-	newVsn := mod.NewVsn()
-	err := json.Unmarshal(buf[:n], newVsn)
-	if err != nil || vsn == "" || newVsn.SrvUrl == "" || newVsn.ResUrl == "" {
-		logger.Logger.Errorf("update vsn:%v", newVsn)
+	newVsnInfo := mod.NewVsn()
+	err := json.Unmarshal(buf[:n], newVsnInfo)
+	if err != nil || vsn == "" || newVsnInfo.SrvUrl == "" || newVsnInfo.ResUrl == "" {
+		logger.Logger.Errorf("update vsn:%v", newVsnInfo)
 		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, map[string]string{
 			"message": string(buf[:n]),
 		}))
 		return
 	}
-	newVsn.Vsn = vsn
-	marshal, _ := json.Marshal(newVsn)
+	newVsnInfo.Vsn = vsn
+	marshal, _ := json.Marshal(newVsnInfo)
 
 	redis.Client.HSet(CacheVsnKey, vsn, marshal)
-	logger.Logger.Infof("update vsn:%v", newVsn)
-	c.JSON(http.StatusOK, respone.Success(newVsn))
+	logger.Logger.Infof(" ==>update vsnInfo:%v", newVsnInfo)
+	c.JSON(http.StatusOK, respone.Success(newVsnInfo))
+	return
 }
 
 //Delete 存储vsn信息
@@ -159,33 +162,33 @@ func (vh VsnHandler) Delete(c *gin.Context) {
 		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, map[string]string{
 			"vsn": vsn,
 		}))
-	} else {
-		result, _ := redis.Client.HDel(CacheVsnKey, vsn).Result()
-
-		logger.Logger.Infof("delete vsn:%v", vsn)
-		c.JSON(http.StatusOK, respone.Success(map[string]int64{
-			"count": result,
-		}))
+		return
 	}
+	result, _ := redis.Client.HDel(CacheVsnKey, vsn).Result()
+	logger.Logger.Infof(" ==>delete vsn:%v result:%v", vsn, result)
+	c.JSON(http.StatusOK, respone.Success(map[string]int64{
+		"count": result,
+	}))
+	return
 }
 
 //edit gm conf
 func (vh VsnHandler) InsertGmConf(c *gin.Context) {
 	buf := make([]byte, 1024)
 	n, _ := c.Request.Body.Read(buf)
-	globalConf := mod.NewGmConf()
-	err := json.Unmarshal(buf[:n], globalConf)
-	if err != nil || globalConf.GMSrvUrl == "" || globalConf.GMResUrl == "" {
-		logger.Logger.Errorf("set global conf err:%v", globalConf)
+	gmConfInfo := mod.NewGmConf()
+	err := json.Unmarshal(buf[:n], gmConfInfo)
+	if err != nil || gmConfInfo.GMSrvUrl == "" || gmConfInfo.GMResUrl == "" {
+		logger.Logger.Errorf("set global conf err:%v", gmConfInfo)
 		c.JSON(http.StatusOK, respone.Fail(respone.ParamsError, map[string]string{
 			"message": string(buf[:n]),
 		}))
 		return
 	}
-	marshal, _ := json.Marshal(globalConf)
+	marshal, _ := json.Marshal(gmConfInfo)
 	redis.Client.Set(CacheGMConfKey, marshal, 0)
-	logger.Logger.Infof("set global conf:%v", globalConf)
-	c.JSON(http.StatusOK, respone.Success(globalConf))
+	logger.Logger.Infof(" ==>set gmConfInfo:%v", gmConfInfo)
+	c.JSON(http.StatusOK, respone.Success(gmConfInfo))
 }
 
 func matchIp(IP string) bool {
