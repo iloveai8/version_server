@@ -18,14 +18,15 @@ const (
 )
 
 var IPMap = map[string]int{
-	"40.83.97.197":    1,
-	"129.226.60.247":  1,
-	"47.75.45.195":    1,
-	"129.226.189.243": 1,
-	"47.75.59.239":    1,
-	"119.81.164.4":    1,
 	"1.202.246.19":    1,
+	"40.83.97.197":    1,
+	"47.75.45.195":    1,
+	"47.75.59.239":    1,
+	"103.85.165.146":  1,
 	"106.120.91.66":   1,
+	"119.81.164.4":    1,
+	"129.226.60.247":  1,
+	"129.226.189.243": 1,
 }
 
 type VsnHandler struct {
@@ -193,6 +194,8 @@ func (vh VsnHandler) InsertGmConf(c *gin.Context) {
 
 func matchIp(IP string) bool {
 	//255.0.0.0
+	//测试网段建议连接公司无线信号fotoable-WIFI6
+	//该信号内网地址：10.0.132.0/23
 	network := "10.0.0.0/8"
 	_, subnet, _ := net.ParseCIDR(network)
 	if subnet.Contains(net.ParseIP(IP)) {
