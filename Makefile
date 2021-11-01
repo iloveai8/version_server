@@ -1,5 +1,5 @@
-ENV=${env}
-VSN=${vsn}
+ENV=dev
+VSN=1.0.0
 PROJECT=game_slots_vsn
 EXE_NAME=gs_vsn
 MAIN=main.go
