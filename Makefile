@@ -42,7 +42,9 @@ push_image: build_image
 
 help:
 	@echo "usage cmd: "
-	@echo " --make build - generate exe binary file"
-	@echo " --make run - run main"
+	@echo " --make fmt - fmt vet"
 	@echo " --make clean - rm exe binary file"
-	@echo " --make gotool - fmt vet"
+	@echo " --make build - generate exe binary file"
+	@echo " --make run - build and run main"
+	@echo " --make build_image - build docker image"
+	@echo " --make push_image - build docker image and push harbor"
