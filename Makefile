@@ -1,21 +1,30 @@
-VSN=$(vsn)
-
-CONFIG=./conf/pre.yaml
-BINARY="GSVsnServer"
+EXE_NAME=gs_vsn
 MAIN=main.go
 
-.PHONY: all build run gotool clean help
+.PHONY: all help fmt clean build run
+
 all: help
-build:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-	@go build -a -installsuffix cgo -o $(BINARY) $(MAIN)
-run:
-	@go run ./ --config=${CONFIG}
-gotool:
+
+fmt:
+	@echo fmt
 	go fmt ./
 	go vet ./
+
 clean:
-	@if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
+	@echo clean
+	@if [ -f ${EXE_NAME} ] ; then rm ${EXE_NAME} ; fi
+	@echo clean finish
+
+build:clean fmt
+	@echo build
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64
+	@go build -a -installsuffix cgo -o $(EXE_NAME) $(MAIN)
+	@echo build finish
+
+run:build
+	@echo run
+	@{EXE_NAME} --config=conf/dev.yaml
+
 help:
 	@echo "usage cmd: "
 	@echo " --make build - generate exe binary file"
