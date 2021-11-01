@@ -8,8 +8,8 @@ HarborRegistry=harbor.nuclearport.com/jackpotland/${PROJECT}/
 .PHONY: all help fmt clean build run build_image push_image
 
 all: help
-	@echo "vsn is $(vsn)"
-	@echo "env is $(env)"
+	@echo "vsn is $(VSN)"
+	@echo "env is $(ENV)"
 
 fmt:
 	@echo fmt......
