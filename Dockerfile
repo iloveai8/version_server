@@ -7,7 +7,7 @@ WORKDIR /home/service
 #ADD conf /conf/${ENV_NAME}.yaml
 ADD conf .
 ADD gs_vsn .
+
 ENV ENVNAME dev
-#CMD 构建容器后调用，也就是在容器启动时才进行调用。
-ENTRYPOINT gs_vsn  "--config=/conf/${ENV_NAME}.yml"
+ENTRYPOINT gs_vsn  "--config=./conf/${ENV_NAME}.yml"
 
