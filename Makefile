@@ -1,5 +1,5 @@
-ENV=if not $(env) then dev
-VSN=if not $(vsn) then 1.0.0
+ENV=dev
+VSN=1.0.0
 PROJECT=game_slots_vsn
 EXE_NAME=gs_vsn
 MAIN=main.go
