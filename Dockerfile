@@ -9,5 +9,5 @@ ADD conf .
 ADD game_slots_vsn .
 
 ENV ENVNAME dev
-ENTRYPOINT game_slots_vsn  "--config=./conf/${ENV_NAME}.yml"
+ENTRYPOINT ./game_slots_vsn  "--config=./conf/${ENV_NAME}.yml"
 
