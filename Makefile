@@ -1,5 +1,6 @@
+ENV=${env}
 VSN=${vsn}
-PROJECT=${project}
+PROJECT=game_slots_vsn
 EXE_NAME=gs_vsn
 MAIN=main.go
 HarborRegistry=harbor.nuclearport.com/jackpotland/${PROJECT}/
@@ -7,6 +8,8 @@ HarborRegistry=harbor.nuclearport.com/jackpotland/${PROJECT}/
 .PHONY: all help fmt clean build run build_image push_image
 
 all: help
+	@echo "vsn is $(vsn)"
+	@echo "env is $(env)"
 
 fmt:
 	@echo fmt......
