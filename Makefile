@@ -32,8 +32,10 @@ run:build
 build_image:build
 	@echo build image......
 	@docker build -no-cache -t $(HarborRegistry)$(PROJECT):$(VSN) -f Dockerfile .
-	@docker tag $(PROJECT):$(VSN) $(HarborRegistry)$(PROJECT):$(VSN)
 	@echo build image finish end
+	@echo image tag......
+	@docker tag $(PROJECT):$(VSN) $(HarborRegistry)$(PROJECT):$(VSN)
+	@echo image tag end
 
 push_image: build_image
 	@echo push image......
