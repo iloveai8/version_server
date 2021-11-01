@@ -1,3 +1,5 @@
+VSN=$(vsn)
+
 CONFIG=./conf/pre.yaml
 BINARY="GSVsnServer"
 MAIN=main.go

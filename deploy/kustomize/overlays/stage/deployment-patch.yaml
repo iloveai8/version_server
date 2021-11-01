@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aman
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      imagePullSecrets:
+        - name: admin-secret
+      containers:
+        - name: aman
+          image: "harbor.nuclearport.com/platform-base-service/aman-stage:latest"
+          env:
+            - name: VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ENV_NAME
+              value: "stage"
+          volumeMounts:
+            - mountPath: /var/log/aman/
+              name: service-log
+      volumes:
+        - hostPath:
+            path: /logs/go/aman
+            type: DirectoryOrCreate
+          name: service-log

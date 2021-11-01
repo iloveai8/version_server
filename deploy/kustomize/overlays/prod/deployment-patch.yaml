@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aman
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "false"
+        sidecar.istio.io/inject: 'false'
+    spec:
+      containers:
+        - env:
+            - name: VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ENV_NAME
+              valueFrom:
+                configMapKeyRef:
+                  key: env
+                  name: aman-config
+          image: 'harbor.nuclearport.com/platform-base-service/aman-prod:latest'
+          imagePullPolicy: Always
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sleep
+                  - "30"
+          name: aman
+          ports:
+            - containerPort: 50600
+          volumeMounts:
+            - mountPath: /var/log/aman/
+              name: service-log
+      imagePullSecrets:
+        - name: admin-secret
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - hostPath:
+            path: /logs/go/aman
+            type: DirectoryOrCreate
+          name: service-log
