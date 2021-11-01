@@ -3,7 +3,7 @@ VSN=1.0.0
 PROJECT=game_slots_vsn
 EXE_NAME=game_slots_vsn
 MAIN=main.go
-HarborRegistry:=harbor.nuclearport.com/jackpotland/${PROJECT}/
+HarborRegistry:=harbor.nuclearport.com/jackpotland/${PROJECT}
 
 .PHONY: all help fmt clean build run build_image push_image
 
