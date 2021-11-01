@@ -7,8 +7,8 @@ all: help
 
 fmt:
 	@echo fmt
-	go fmt ./
-	go vet ./
+	@go fmt ./
+	@go vet ./
 
 clean:
 	@echo clean
@@ -22,8 +22,8 @@ build:clean fmt
 	@echo build finish
 
 run:build
-	@echo run
-	@{EXE_NAME} --config=conf/dev.yaml
+	@echo run ${EXE_NAME}
+	@./$(EXE_NAME) --config=conf/dev.yaml
 
 help:
 	@echo "usage cmd: "
