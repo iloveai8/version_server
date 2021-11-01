@@ -1,7 +1,7 @@
 ENV=dev
 VSN=1.0.0
 PROJECT=game_slots_vsn
-EXE_NAME=gs_vsn
+EXE_NAME=game_slots_vsn
 MAIN=main.go
 HarborRegistry:=harbor.nuclearport.com/jackpotland/${PROJECT}/
 
