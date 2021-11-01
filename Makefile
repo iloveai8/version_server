@@ -13,13 +13,13 @@ fmt:
 clean:
 	@echo clean
 	@if [ -f ${EXE_NAME} ] ; then rm ${EXE_NAME} ; fi
-	@echo clean finish
+	@echo clean finish end
 
 build:clean fmt
 	@echo build
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64
 	@go build -a -installsuffix cgo -o $(EXE_NAME) $(MAIN)
-	@echo build finish
+	@echo build finish end
 
 run:build
 	@echo run ${EXE_NAME}
