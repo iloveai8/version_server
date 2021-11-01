@@ -1,9 +1,9 @@
-ENV=dev
-VSN=1.0.0
-PROJECT=game_slots_vsn
-EXE_NAME=gs_vsn
-MAIN=main.go
-HarborRegistry=harbor.nuclearport.com/jackpotland/${PROJECT}/
+ENV:=if not $(env) then dev
+VSN:=if not $(vsn) then 1.0.0
+PROJECT:=game_slots_vsn
+EXE_NAME:=gs_vsn
+MAIN:=main.go
+HarborRegistry:=harbor.nuclearport.com/jackpotland/${PROJECT}/
 
 .PHONY: all help fmt clean build run build_image push_image
 
