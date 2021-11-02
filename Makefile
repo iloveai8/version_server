@@ -28,13 +28,11 @@ build:clean fmt
 run:build
 	@echo run $(EXEC_NAME) $(ENV) $(VSN)
 	@./$(EXEC_NAME) --config=conf/$(ENV).yaml
-	@clean
 
 build_image:build
 	@echo build image......
 	@docker build --no-cache -t $(TEAM)$(PROJECT):$(VSN) -f Dockerfile .
 	@echo build image finish end
-	@clean
 
 push_image: build_image
 	@echo push image......
