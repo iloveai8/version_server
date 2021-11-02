@@ -36,7 +36,7 @@ build_image:build
 
 push_image: build_image
 	@echo push image......
-	@docker tag $(HarborRegistry)/$(TEAM)/$(PROJECT):$(VSN)
+	@docker tag $(TEAM)/$(PROJECT):$(VSN) $(HarborRegistry)/$(TEAM)/$(PROJECT):$(VSN)
 	@docker push $(HarborRegistry)/$(TEAM)/$(PROJECT):$(VSN)
 	@echo push image finish end
 
