@@ -21,7 +21,7 @@ clean:
 
 build:clean fmt
 	@echo build......
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64
+	@set CGO_ENABLED=0 GOOS=linux GOARCH=amd64
 	@go build -a -installsuffix cgo -o $(EXEC_NAME) $(MAIN)
 	@echo build finish end
 
