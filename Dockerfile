@@ -4,5 +4,7 @@ WORKDIR /home/service/game_slots_vsn
 COPY game_slots_vsn .
 COPY conf/ conf/
 ENV ENV dev
-RUN ls -al
+RUN pwd \
+    && env \
+    && ls -al
 ENTRYPOINT ./game_slots_vsn  --config=./conf/${ENV}.yaml

@@ -1,9 +1,10 @@
 ENV=dev
 VSN=1.0.0
+TEAM=jackpotland
 PROJECT=game_slots_vsn
-EXE_NAME=game_slots_vsn
+EXEC_NAME=game_slots_vsn
 MAIN=main.go
-HarborRegistry:=harbor.nuclearport.com/jackpotland/${PROJECT}
+HarborRegistry=harbor.nuclearport.com
 
 .PHONY: all help fmt clean build run build_image push_image
 
@@ -19,27 +20,27 @@ fmt:
 
 clean:
 	@echo clean......
-	@if [ -f ${EXE_NAME} ] ; then rm ${EXE_NAME} ; fi
+	@if [ -f $(EXEC_NAME) ] ; then rm $(EXEC_NAME) ; fi
 	@echo clean finish end
 
 build:clean fmt
 	@echo build......
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-	@go build -a -installsuffix cgo -o $(EXE_NAME) $(MAIN)
+	@go build -a -installsuffix cgo -o $(EXEC_NAME) $(MAIN)
 	@echo build finish end
 
 run:build
-	@echo run ${EXE_NAME}
-	@./$(EXE_NAME) --config=conf/dev.yaml
+	@echo run $(EXEC_NAME) $(ENV) $(VSN)
+	@./$(EXEC_NAME) --config=conf/$(ENV).yaml
 
 build_image:build
 	@echo build image......
-	@docker build --no-cache -t $(HarborRegistry):$(VSN) -f Dockerfile .
+	@docker build --no-cache -t $(TEAM)$(PROJECT):$(VSN) -f Dockerfile .
 	@echo build image finish end
 
 push_image: build_image
 	@echo push image......
-	@docker push $(HarborRegistry):$(VSN)
+	@docker push $(HarborRegistry)$(TEAM)$(PROJECT):$(VSN)
 	@echo push image finish end
 
 help:
