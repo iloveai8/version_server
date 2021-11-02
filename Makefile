@@ -31,12 +31,11 @@ run:build
 
 build_image:build
 	@echo build image......
-	@docker build --no-cache -t $(TEAM)/$(PROJECT):$(VSN) -f Dockerfile .
+	@docker build --no-cache -t $(HarborRegistry)/$(TEAM)/$(PROJECT):$(VSN) -f Dockerfile .
 	@echo build image finish end
 
 push_image: build_image
 	@echo push image......
-	@docker tag $(TEAM)/$(PROJECT):$(VSN) $(HarborRegistry)/$(TEAM)/$(PROJECT):$(VSN)
 	@docker push $(HarborRegistry)/$(TEAM)/$(PROJECT):$(VSN)
 	@echo push image finish end
 
