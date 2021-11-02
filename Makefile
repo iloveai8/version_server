@@ -1,5 +1,5 @@
-ENV=dev
-VSN=1.0.0
+ENV=${env}
+VSN=${vsn}
 TEAM=jackpotland
 PROJECT=game_slots_vsn
 EXEC_NAME=game_slots_vsn
