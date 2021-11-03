@@ -34,6 +34,10 @@ func StartServer(web *config.WebConfig) {
 		c.String(http.StatusOK, "ok")
 	})
 
+	router.GET("/heartbeat", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"version": os.Getenv("VERSION"), "time": time.Now()})
+	})
+
 	vsnHandler := handler.NewVsnHandler()
 	vsn := router.Group("v1")
 	{

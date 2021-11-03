@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: vsn-deployment
+    namespace: default
+spec:
+    replicas: 3
+    metadata:
+      labels:
+        app: nginx
+    template:
+        spec:
+            containers:
+                -   name: aman
+                    imagePullPolicy: IfNotPresent
+                    ports:
+                        -   containerPort: 50600
+                    lifecycle:
+                        preStop:
+                            exec:
+                                command: ["sleep", "30"]
+            terminationGracePeriodSeconds: 30
+            imagePullSecrets:
+                -   name: admin-secret
