@@ -1,9 +1,0 @@
-commonLabels:
-  app: aman
-namePrefix: stage-
-resources:
-  - ../../base
-patchesStrategicMerge:
-  - deployment-patch.yaml
-  - remove-hpa.yaml
-  - memorylimit_patch.yaml

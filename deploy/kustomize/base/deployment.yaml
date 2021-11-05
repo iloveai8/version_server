@@ -1,24 +1,73 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: vsn-deployment
-    namespace: default
+    namespace: jackpotland
+    name: gsv-deployment
+    labels:
+        app: gsv-deployment
 spec:
-    replicas: 3
-    metadata:
-      labels:
-        app: nginx
+    replicas: 1
+    selector:
+        matchLabels:
+            app: gsv-deployment
     template:
+        metadata:
+            labels:
+                app: gsv-deployment
         spec:
             containers:
-                -   name: aman
-                    imagePullPolicy: IfNotPresent
+                -   name: gsv-pod
+                    imagePullPolicy: Always
+                    image: 'harbor.nuclearport.com/jackpotland/game_slots_vsn:1.0.0'
                     ports:
-                        -   containerPort: 50600
-                    lifecycle:
-                        preStop:
-                            exec:
-                                command: ["sleep", "30"]
-            terminationGracePeriodSeconds: 30
+                        -   name: http-9091
+                            protocol: TCP
+                            containerPort: 9091
+                    livenessProbe:
+                        httpGet:
+                            scheme: HTTP
+                            path: /heartbeat
+                            port: 9091
+                        initialDelaySeconds: 10
+                        timeoutSeconds: 1
+                        periodSeconds: 10
+                        successThreshold: 1
+                        failureThreshold: 3
+                    startupProbe:
+                        httpGet:
+                            scheme: HTTP
+                            path: /heartbeat
+                            port: 9091
+                        initialDelaySeconds: 10
+                        timeoutSeconds: 1
+                        periodSeconds: 10
+                        successThreshold: 1
+                        failureThreshold: 3
+                    env:
+                        -   name: env
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: gsv-config
+                                    key: env
+                        -   name: vsn
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: gsv-config
+                                    key: vsn
+            affinity:
+                podAntiAffinity:
+                    preferredDuringSchedulingIgnoredDuringExecution:
+                        -   weight: 100
+                            podAffinityTerm:
+                                labelSelector:
+                                    matchLabels:
+                                        app: gsv
+                                topologyKey: kubernetes.io/hostname
+
             imagePullSecrets:
-                -   name: admin-secret
+                -   name: jackpotland-image-repository-secret
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxUnavailable: 50%
+            maxSurge: 50%

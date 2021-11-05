@@ -1,10 +1,10 @@
 commonLabels:
-  app: aman
-namePrefix: prod-
+    app: game-slots-vsn
+namePrefix: pro-
 resources:
-  - ../../base
+    - ../../base2
 patchesStrategicMerge:
-  - deployment-patch.yaml
-  - healthcheck_patch.yaml
-  - memorylimit_patch.yaml
-  - remove-hpa.yaml
+    - patch-deployment.yaml
+    - patch-healthcheck.yaml
+    - patch-memorylimit.yaml
+    - remove-hpa.yaml

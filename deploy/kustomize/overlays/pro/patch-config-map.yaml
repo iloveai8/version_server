@@ -1,0 +1,8 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+    namespace: jackpotland
+    name: gsv-config
+data:
+    env: dev
+    vsn: 1.0.1

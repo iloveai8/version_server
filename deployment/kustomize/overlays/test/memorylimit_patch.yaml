@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: aman
+spec:
+    template:
+        spec:
+            containers:
+                -   name: aman
+                    resources:
+                        requests:
+                            cpu: 50m
+                            memory: 64Mi
+                        limits:
+                            cpu: 100m
+                            memory: 128Mi

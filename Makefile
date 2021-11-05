@@ -1,16 +1,16 @@
 ENV=${env}
 VSN=${vsn}
-TEAM=jackpotland
-PROJECT=game_slots_vsn
-EXEC_NAME=game_slots_vsn
+PROJECT=gsv
+EXEC_NAME=gsv
 MAIN=main.go
-HarborRegistry=harbor.nuclearport.com
+HarborRegistry=harbor.nuclearport.com/jackpotland
+DeployPath=deploy/kustomize/overlays
 
-.PHONY: all help fmt clean build run build_image push_image
+.PHONY: all help fmt clean build run build_image push_image deploy
 
 all: help
 	@echo "vsn is $(VSN)"
-	@echo "env is $(ENV)"
+	@echo "env is $(ENV)"jackpotland
 
 fmt:
 	@go fmt ./
@@ -31,13 +31,22 @@ run:build
 
 build_image:build
 	@echo build image......
-	@docker build --no-cache -t $(HarborRegistry)/$(TEAM)/$(PROJECT):$(VSN) -f Dockerfile .
+	@docker build --no-cache -t $(HarborRegistry)/$(PROJECT):$(VSN) -f Dockerfile .
 	@echo build image finish end
 
 push_image: build_image
 	@echo push image......
-	@docker push $(HarborRegistry)/$(TEAM)/$(PROJECT):$(VSN)
+	@docker push $(HarborRegistry)/$(PROJECT):$(VSN)
 	@echo push image finish end
+
+# env:dev pre pro vsn:1.0.0
+deploy:
+	@echo deploy env:$(ENV) vsn:$(VSN)
+	@cd $(DeployPath)/$(ENV)......
+	@kustomize edit set image $(HarborRegistry)/$(PROJECT):$(VSN)
+	@kustomize build $(DeployPath)/$(ENV)
+		#| kubectl --kubeconfig $(config) apply -f -
+	@echo deploy env:$(ENV) vsn:$(VSN) finish end
 
 help:
 	@echo "usage cmd: "
@@ -47,3 +56,4 @@ help:
 	@echo " --make run - build and run main"
 	@echo " --make build_image - build docker image"
 	@echo " --make push_image - build docker image and push harbor"
+	@echo " --deploy server env and vsn to online"

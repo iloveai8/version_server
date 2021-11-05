@@ -1,0 +1,52 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+    annotations:
+        kubectl.kubernetes.io/last-applied-configuration: >
+            {"apiVersion":"networking.istio.io/v1beta1","kind":"VirtualService","metadata":{"annotations":{},"name":"fortune-virtual","namespace":"advertise"},"spec":{"gateways":["fortune-gateway"],"hosts":["fortune.ftads.net"],"http":[{"match":[{"uri":{"prefix":"/order"}}],"route":[{"destination":{"host":"prod-fortune-order-svc-5","port":{"number":30000}}}]},{"match":[{"headers":{"app_id":{"regex":"^100035|100036$"}},"uri":{"prefix":"/order"}}],"route":[{"destination":{"host":"prod-fortune-order-svc-5","port":{"number":30000}}}]},{"match":[{"headers":{"app_id":{"regex":"^100035|100036$"}},"uri":{"prefix":"/track"}}],"route":[{"destination":{"host":"prod-fortune-track-svc-4","port":{"number":30100}}}]},{"match":[{"uri":{"prefix":"/track"}}],"route":[{"destination":{"host":"prod-fortune-track-svc-4","port":{"number":30100}}}]}]}}
+    name: fortune-virtual
+    namespace: advertise
+spec:
+    gateways:
+        - fortune-gateway
+    hosts:
+        - fortune.ftads.net
+    http:
+        -   match:
+                -   headers:
+                        app_id:
+                            regex: ^100035|100036|100009|100096$
+                    uri:
+                        prefix: /order
+            route:
+                -   destination:
+                        host: prod-fortune-order-svc-35
+                        port:
+                            number: 30000
+        -   match:
+                -   uri:
+                        prefix: /order
+            route:
+                -   destination:
+                        host: prod-fortune-order-svc-33
+                        port:
+                            number: 30000
+        -   match:
+                -   headers:
+                        app_id:
+                            regex: ^100035|100036|100009$
+                    uri:
+                        prefix: /track
+            route:
+                -   destination:
+                        host: prod-fortune-track-svc-10
+                        port:
+                            number: 30100
+        -   match:
+                -   uri:
+                        prefix: /track
+            route:
+                -   destination:
+                        host: prod-fortune-track-svc-10
+                        port:
+                            number: 30100

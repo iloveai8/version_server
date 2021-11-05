@@ -1,9 +1,12 @@
 commonLabels:
-  app: aman
-namePrefix: test-
+  app: gsv
+namespace: jackpotland
+namePrefix: a-
+nameSuffix: -pro
 resources:
-  - ../../base
+  - ../../base2
 patchesStrategicMerge:
   - deployment-patch.yaml
+  - patch-healthcheck.yaml
+  - patch-memorylimit.yaml
   - remove-hpa.yaml
-  - memorylimit_patch.yaml

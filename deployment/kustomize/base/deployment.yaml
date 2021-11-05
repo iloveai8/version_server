@@ -1,13 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: vsn-deployment
-    namespace: default
+    name: aman
 spec:
-    replicas: 3
-    metadata:
-      labels:
-        app: nginx
+    replicas: 1
     template:
         spec:
             containers:
