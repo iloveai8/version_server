@@ -1,6 +1,6 @@
 ENV=${env}
 VSN=${vsn}
-PROJECT=gsv
+APP=gsv
 EXEC_NAME=gsv
 MAIN=main.go
 HarborRegistry=harbor.nuclearport.com/jackpotland
@@ -31,12 +31,12 @@ run:build
 
 build_image:build
 	@echo build image......
-	@docker build --no-cache -t $(HarborRegistry)/$(PROJECT):$(VSN) -f Dockerfile .
+	@docker build --no-cache -t $(HarborRegistry)/$(APP):$(VSN) -f Dockerfile .
 	@echo build image finish end
 
 push_image: build_image
 	@echo push image......
-	@docker push $(HarborRegistry)/$(PROJECT):$(VSN)
+	@docker push $(HarborRegistry)/$(APP):$(VSN)
 	@echo push image finish end
 
 # env:dev|pre|pro vsn:1.0.0
@@ -45,11 +45,11 @@ deploy:
 	@echo $(DeployPath)/$(ENV)
 	@cd $(DeployPath)/$(ENV) \
 		&& pwd \
-		&& kustomize edit set namesuffix -- -$(ENV)-$(VSN) \
-		&& kustomize edit set label app:$(PROJECT)-$(ENV)-$(VSN) \
-		&& kustomize edit set image $(HarborRegistry)/$(PROJECT):$(VSN) \
-		&& kustomize edit add configmap gsv-config-$(ENV)-$(VSN) --from-literal=vsn=$(VSN) \
+		&& kustomize edit set namesuffix -- -$(ENV)-v$(VSN) \
+		&& kustomize edit set label app-env-vsn:$(APP)-$(ENV)-$(VSN) evn:$(ENV) vsn:$(VSN)\
+		&& kustomize edit set image $(HarborRegistry)/$(APP):$(VSN) \
 		&& kustomize build $(DeployPath)/$(ENV) \
+#		&& kustomize edit add configmap gsv-config-$(ENV)-v$(VSN) --from-literal=vsn=$(VSN) \
 		#| kubectl --kubeconfig $(config) apply -f -
 	@echo deploy env:$(ENV) vsn:$(VSN) finish end
 

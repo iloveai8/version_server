@@ -1,10 +1,14 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: jackpotland
-
 resources:
     - ../../base
+
+
+nameSuffix: -dev-v
+commonLabels:
+    app: gsv
+    env: dev
 
 patchesStrategicMerge:
     - patch-config.yaml
@@ -12,14 +16,4 @@ patchesStrategicMerge:
     - patch-deployment-health.yaml
     - patch-deployment-memory.yaml
     - patch-hpa.yaml
-    -
-nameSuffix: -dev-v
-commonLabels:
-    app: gsv
-    env: dev
-#
-#configMapGenerator:
-#    -   literals:
-#            - vsn=1.0.0
-#            - env=pro
-#        name: gsv-config
+
