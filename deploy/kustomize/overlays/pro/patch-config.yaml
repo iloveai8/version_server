@@ -2,5 +2,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
     name: gsv-config
-    data:
-        env: pro
+data:
+    env: pro
+    vsn:1.0.0
