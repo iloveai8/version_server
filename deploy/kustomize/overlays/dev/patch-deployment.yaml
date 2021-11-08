@@ -19,7 +19,7 @@ spec:
                 -   name: jackpotland-image-repository-secret
             containers:
                 -   name: gsv-pod
-                    image: 'harbor.nuclearport.com/jackpotland/game_slots_vsn:latest'
+                    image: 'harbor.nuclearport.com/jackpotland/gsv:latest'
                     imagePullPolicy: Always
                     ports:
                         -   name: http-9091
