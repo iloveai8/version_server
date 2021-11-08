@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
     name: gsv-config
     data:
-        env: dev
+#        env: dev
