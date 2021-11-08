@@ -1,5 +1,6 @@
 ENV=${env}
 VSN=${vsn}
+Config=$(config)
 APP=gsv
 EXEC_NAME=gsv
 MAIN=main.go
@@ -48,8 +49,9 @@ deploy:
 		&& kustomize edit set namesuffix -- -$(ENV)-v$(VSN) \
 		&& kustomize edit set label app-env-vsn:$(APP)-$(ENV)-$(VSN) env:$(ENV) vsn:$(VSN) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(VSN) \
+		&& kustomize edit add configmap gsv-config-$(ENV)-v$(VSN) --from-literal vsn=$(VSN) \
 		&& cd - \
-		&& kustomize build $(DeployPath)/$(ENV) |kubectl --kubeconfig $(config) apply -f -
+		&& kustomize build $(DeployPath)/$(ENV) | kubectl --kubeconfig $(Config) apply -f -
 	@echo deploy env:$(ENV) vsn:$(VSN) finish end
 
 help:
