@@ -39,7 +39,7 @@ push_image: build_image
 	@docker push $(HarborRegistry)/$(PROJECT):$(VSN)
 	@echo push image finish end
 
-# env:dev pre pro vsn:1.0.0
+# env:dev|pre|pro vsn:1.0.0
 deploy:
 	@echo deploy env:$(ENV) vsn:$(VSN) ......
 	@echo $(DeployPath)/$(ENV)
@@ -48,9 +48,8 @@ deploy:
 		&& kustomize edit set namesuffix -- -$(ENV)-$(VSN) \
 		&& kustomize edit set label app:$(PROJECT)-$(ENV)-$(VSN) \
 		&& kustomize edit set image $(HarborRegistry)/$(PROJECT):$(VSN) \
-		&& kustomize edit add configmap gsv-config-$(ENV)-$(VSN) --from-literal=env=$(ENV) --from-literal=vsn=$(VSN) \
-		&& cd - \
-	@kustomize build $(DeployPath)/$(ENV)
+		&& kustomize edit add configmap gsv-config-$(ENV)-$(VSN) --from-literal=vsn=$(VSN) \
+		&& kustomize build $(DeployPath)/$(ENV) \
 		#| kubectl --kubeconfig $(config) apply -f -
 	@echo deploy env:$(ENV) vsn:$(VSN) finish end
 
