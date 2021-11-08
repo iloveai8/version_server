@@ -47,7 +47,7 @@ deploy:
 	@echo $(DeployPath)/$(ENV)
 	@cd $(DeployPath)/$(ENV) \
 		&& kustomize edit set namesuffix -- -$(ENV)-v$(VSN) \
-		&& kustomize edit add configmap gsv-config-$(ENV)-v$(VSN) --behavior=replace --from-literal vsn=$(VSN) \
+		&& kustomize edit add configmap gsv-config --behavior=merge --from-literal vsn=$(VSN) \
 		&& kustomize edit set label app-env-vsn:$(APP)-$(ENV)-$(VSN) env:$(ENV) vsn:$(VSN) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(VSN) \
 		&& cd - \
