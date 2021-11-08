@@ -47,11 +47,11 @@ deploy:
 	@echo $(DeployPath)/$(ENV)
 	@cd $(DeployPath)/$(ENV) \
 		&& kustomize edit set namesuffix -- -$(ENV)-v$(VSN) \
-		&& kustomize edit add configmap gsv-config --behavior=merge --from-literal vsn=$(VSN) \
 		&& kustomize edit set label app-env-vsn:$(APP)-$(ENV)-$(VSN) env:$(ENV) vsn:$(VSN) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(VSN) \
+		&& kustomize edit add configmap gsv-config --behavior=replace --from-literal vsn=$(VSN) \
 		&& cd - \
-		&& kustomize build $(DeployPath)/$(ENV) | kubectl --kubeconfig $(Config) apply -f -
+		&& kustomize build $(DeployPath)/$(ENV) | kubectl apply -f -
 	@echo deploy env:$(ENV) vsn:$(VSN) finish end
 
 help:
