@@ -14,6 +14,7 @@ all: help
 
 fmt:
 	@go fmt ./
+
 	@go vet ./
 
 clean:
@@ -47,9 +48,8 @@ deploy:
 		&& kustomize edit set namesuffix -- -$(ENV)-v$(VSN) \
 		&& kustomize edit set label app-env-vsn:$(APP)-$(ENV)-$(VSN) env:$(ENV) vsn:$(VSN) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(VSN) \
-
-	@kustomize build $(DeployPath)/$(ENV) | xargs echo
-#	@kustomize build $(DeployPath)/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
+		&& cd - \
+		&& kustomize build $(DeployPath)/$(ENV) |kubectl --kubeconfig $(config) apply -f -
 	@echo deploy env:$(ENV) vsn:$(VSN) finish end
 
 help:
