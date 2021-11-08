@@ -1,5 +1,0 @@
-namespace: base2-service
-resources:
-    - deployment.yaml
-    - service.yaml
-    - hpa.yaml

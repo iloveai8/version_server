@@ -1,17 +1,11 @@
 kind: Service
 apiVersion: v1
 metadata:
-    namespace: jackpotland
     name: gsv-service
-    labels:
-        app: gsv-service
 spec:
+    type: NodePort
     ports:
         -   name: http-19091
-            protocol: TCP
             port: 19091
             targetPort: 9091
-            nodePort: 30375
-    selector:
-        app: gsv-deployment
-    type: NodePort
+            protocol: TCP

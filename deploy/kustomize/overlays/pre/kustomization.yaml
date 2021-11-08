@@ -13,10 +13,10 @@ patchesStrategicMerge:
     - patch-deployment-memory.yaml
     - patch-hpa.yaml
     -
-nameSuffix: -pro-v
+nameSuffix: -pro-e
 commonLabels:
     app: gsv
-    env: pro
+    env: pre
 #
 #configMapGenerator:
 #    -   literals:

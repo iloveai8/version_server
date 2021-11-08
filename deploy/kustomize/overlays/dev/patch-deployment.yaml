@@ -4,7 +4,7 @@ metadata:
     name: gsv-deployment
 spec:
     replicas: 1
-    revisionHistoryLimit: 10
+    revisionHistoryLimit: 3
     progressDeadlineSeconds: 600
     strategy:
         type: RollingUpdate

@@ -1,5 +1,6 @@
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-    name: aman
-$patch: delete
+    name: gsv-hpa
+spec:
+    maxReplicas: 10

@@ -1,12 +1,25 @@
-commonLabels:
-  app: gsv
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 namespace: jackpotland
-namePrefix: a-
-nameSuffix: -pro
+
 resources:
-  - ../../base2
+    - ../../base
+
 patchesStrategicMerge:
-  - deployment-patch.yaml
-  - patch-healthcheck.yaml
-  - patch-memorylimit.yaml
-  - remove-hpa.yaml
+    - patch-config.yaml
+    - patch-deployment.yaml
+    - patch-deployment-health.yaml
+    - patch-deployment-memory.yaml
+    - patch-hpa.yaml
+    -
+nameSuffix: -pro-e
+commonLabels:
+    app: gsv
+    env: dev
+#
+#configMapGenerator:
+#    -   literals:
+#            - vsn=1.0.0
+#            - env=pro
+#        name: gsv-config
