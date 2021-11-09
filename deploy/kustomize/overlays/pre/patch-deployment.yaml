@@ -28,7 +28,7 @@ spec:
 #          command:
 #            - ./gsv
 #          args:
-#              - '--config=./conf/pre.yaml'
+#              - '--config=./conf/${env}.yaml'
           env:
             - name: env
               valueFrom:
