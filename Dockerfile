@@ -3,6 +3,8 @@ MAINTAINER Jackpotland
 WORKDIR /home/service/gsv
 COPY gsv .
 COPY conf/ conf/
-
-CMD "--config=./conf/${env}.yaml"
-ENTRYPOINT ./gsv
+ENV env dev
+RUN pwd \
+    && env \
+    && ls -al
+ENTRYPOINT ./gsv  --config=./conf/${env}.yaml

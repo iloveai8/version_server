@@ -19,7 +19,7 @@ var Client *redis.Client
 func InitRedis(c *config.RedisConfig) {
 	switch c.DriverName {
 	case DriverRedis:
-		logger.Logger.Infof("redis match driver:%v.", DriverSentinel)
+		logger.Logger.Infof("redis match driver:%v.", DriverRedis)
 		Client = redis.NewClient(redisOptions(c))
 	case DriverSentinel:
 		logger.Logger.Infof("redis match driver:%v.", DriverSentinel)
