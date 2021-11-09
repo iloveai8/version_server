@@ -44,9 +44,8 @@ push_image: build_image
 	@echo push image finish end
 
 # env:dev|pre|pro vsn:1.0.0
-deploy:
-	@echo deploy env:$(ENV) vsn:$(VSN) vsn:${VSN//\./\-} ......
-	@echo $(DeployPath)/$(ENV)
+deploy::
+	@echo deploy env:$(ENV) vsn:$(VSN)......
 	@cd $(DeployPath)/$(ENV) \
 		&& kustomize edit set namesuffix -- -$(ENV)-v${subst .,-,${VSN}}\
 		&& kustomize edit set label app-env-vsn:$(APP)-$(ENV)-$(VSN) env:$(ENV) vsn:$(VSN) \

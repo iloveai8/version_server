@@ -1,11 +1,11 @@
 kind: Service
 apiVersion: v1
 metadata:
-    name: gsv-service
+  name: gsv-service
 spec:
-    type: NodePort
-    ports:
-        -   name: http-19091
-            port: 19091
-            targetPort: 9091
-            protocol: TCP
+  type: NodePort
+  ports:
+    - name: http-19091
+      port: 19091
+      targetPort: 9091
+      protocol: TCP

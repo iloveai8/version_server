@@ -1,40 +1,40 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-    name: gsv-deployment
+  name: gsv-deployment
 spec:
-    replicas: 2
-    revisionHistoryLimit: 10
-    progressDeadlineSeconds: 600
-    strategy:
-        type: RollingUpdate
-        rollingUpdate:
-            maxUnavailable: 50%
-            maxSurge: 50%
-    template:
-        spec:
-            restartPolicy: Always
-            terminationGracePeriodSeconds: 30
-            imagePullSecrets:
-                -   name: jackpotland-image-repository-secret
-            containers:
-                -   name: gsv-pod
-                    image: 'harbor.nuclearport.com/jackpotland/gsv:latest'
-                    imagePullPolicy: Always
-                    ports:
-                        -   name: http-9091
-                            containerPort: 9091
-                            protocol: TCP
-                    env:
-                        -   name: env
-                            valueFrom:
-                                configMapKeyRef:
-                                    name: gsv-config
-                                    key: env
-                        -   name: vsn
-                            valueFrom:
-                                configMapKeyRef:
-                                    name: gsv-config
-                                    key: vsn
+  replicas: 3
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+      maxSurge: 50%
+  template:
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      imagePullSecrets:
+        - name: jackpotland-image-repository-secret
+      containers:
+        - name: gsv-pod
+          image: 'harbor.nuclearport.com/jackpotland/gsv:latest'
+          imagePullPolicy: Always
+          ports:
+            - name: http-9091
+              containerPort: 9091
+              protocol: TCP
+          env:
+            - name: env
+              valueFrom:
+                configMapKeyRef:
+                  name: gsv-config
+                  key: env
+            - name: vsn
+              valueFrom:
+                configMapKeyRef:
+                  name: gsv-config
+                  key: vsn
 
 

@@ -1,11 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: gsv-deployment
+  name: gsv-deployment
 spec:
-    replicas: 1
-    template:
-        spec:
-            containers:
-                -   name: gsv-pod
-                    imagePullPolicy: IfNotPresent
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: gsv-pod
+          imagePullPolicy: IfNotPresent
+
