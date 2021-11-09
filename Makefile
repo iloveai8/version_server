@@ -11,7 +11,7 @@ DeployPath=deploy/kustomize/overlays
 
 all: help
 	@echo "vsn is $(VSN)"
-	@echo "env is $(ENV)"jackpotland
+	@echo "env is $(ENV)"
 
 fmt:
 	@go fmt ./
@@ -27,15 +27,18 @@ build:clean fmt
 	@go build -a -installsuffix cgo -o $(EXEC_NAME) $(MAIN)
 	@echo build finish end
 
+# env:dev|pre|pro vsn:1.0.0
 run:build
 	@echo run $(EXEC_NAME) $(ENV) $(VSN)
 	@./$(EXEC_NAME) --config=conf/$(ENV).yaml
 
+# vsn:1.0.0
 build_image:build
 	@echo build image......
 	@docker build --no-cache -t $(HarborRegistry)/$(APP):$(VSN) -f Dockerfile .
 	@echo build image finish end
 
+# vsn:1.0.0
 push_image: build_image
 	@echo push image......
 	@docker push $(HarborRegistry)/$(APP):$(VSN)
@@ -43,11 +46,12 @@ push_image: build_image
 
 # env:dev|pre|pro vsn:1.0.0
 deploy:
-	@echo deploy env:$(ENV) vsn:$(VSN) ......
+	@echo deploy env:$(ENV) vsn:$(VSN) ${VSN//\./\-} ......
 	@echo $(DeployPath)/$(ENV)
 	@cd $(DeployPath)/$(ENV) \
-		&& kustomize edit set namesuffix -- -$(ENV)-v$(VSN) \
+		&& kustomize edit set namesuffix -- -$(ENV)-v${VSN//\./\-} \
 		&& kustomize edit set label app-env-vsn:$(APP)-$(ENV)-$(VSN) env:$(ENV) vsn:$(VSN) \
+		&& kustomize edit set annotation app-env-vsn:$(APP)-$(ENV)-$(VSN)\
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(VSN) \
 #		&& kustomize edit add configmap gsv-config --behavior=replace --from-literal vsn=$(VSN) \
 		&& cd - \
