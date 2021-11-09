@@ -2,18 +2,24 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: jackpotland
 resources:
-    - ../../base
+- ../../base
 
 
-nameSuffix: -pro-v
+nameSuffix: -pro-v1-1-1
 commonLabels:
-    app: gsv
-    env: pro
+  app: gsv
+  app-env-vsn: gsv-pro-1.1.1
+  env: pro
+  vsn: 1.1.1
 
 patchesStrategicMerge:
-    - patch-config.yaml
-    - patch-deployment.yaml
-    - patch-deployment-health.yaml
-    - patch-deployment-memory.yaml
-    - patch-hpa.yaml
-
+- patch-config.yaml
+- patch-deployment.yaml
+- patch-deployment-health.yaml
+- patch-deployment-memory.yaml
+- patch-hpa.yaml
+commonAnnotations:
+  app-env-vsn: gsv-pro-1.1.1
+images:
+- name: harbor.nuclearport.com/jackpotland/gsv
+  newTag: 1.1.1
