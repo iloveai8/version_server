@@ -25,6 +25,10 @@ spec:
             - name: http-9091
               containerPort: 9091
               protocol: TCP
+          command:
+            - gsv
+            args:
+              - '--config=./conf/${env}.yaml'
           env:
             - name: env
               valueFrom:
