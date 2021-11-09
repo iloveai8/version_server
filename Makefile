@@ -34,6 +34,7 @@ run:build
 # vsn:1.0.0
 build_image:build
 	@echo build image......
+	@docker rmi -f $(HarborRegistry)/$(APP):$(VSN)
 	@docker build --no-cache -t $(HarborRegistry)/$(APP):$(VSN) -f Dockerfile .
 	@echo build image finish end
 
