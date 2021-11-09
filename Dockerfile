@@ -3,7 +3,6 @@ MAINTAINER Jackpotland
 WORKDIR /home/service/gsv
 COPY gsv .
 COPY conf/ conf/
-CMD --config=./conf/${env}.yaml
 ENTRYPOINT ./gsv  --config=./conf/${env}.yaml
 
 #docker build --no-cache -t harbor.nuclearport.com/jackpotland/gsv:1.0.0 -f Dockerfile .
