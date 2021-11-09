@@ -48,11 +48,12 @@ deploy:
 	@echo deploy env:$(ENV) vsn:$(VSN) ${VSN//\./\-} ......
 	@echo $(DeployPath)/$(ENV)
 	@cd $(DeployPath)/$(ENV) \
-		&& kustomize edit set namesuffix -- -$(ENV)-v${VSN//\./\-} \
+		&& kustomize edit set namesuffix -- -$(ENV)-v${VSN//\./\-}  \
+		&& kustomize edit add annotation kubesphere.io/description:'平台系统-认证服务-生产环境-'$(ver) \
 		&& kustomize edit set label app-env-vsn:$(APP)-$(ENV)-$(VSN) env:$(ENV) vsn:$(VSN) \
 		&& kustomize edit set annotation app-env-vsn:$(APP)-$(ENV)-$(VSN)\
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(VSN) \
-#		&& kustomize edit add configmap gsv-config --behavior=replace --from-literal vsn=$(VSN) \
+		&& kustomize edit add configmap gsv-config --behavior=replace --from-literal vsn=$(VSN) \
 		&& cd - \
 		&& kustomize build $(DeployPath)/$(ENV) | kubectl apply -f -
 	@echo deploy env:$(ENV) vsn:$(VSN) finish end
