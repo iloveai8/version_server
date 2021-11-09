@@ -27,7 +27,7 @@ spec:
               protocol: TCP
           command:
             - gsv
-            args:
+          args:
               - '--config=./conf/${env}.yaml'
           env:
             - name: env
