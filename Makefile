@@ -15,7 +15,6 @@ all: help
 
 fmt:
 	@go fmt ./
-
 	@go vet ./
 
 clean:
