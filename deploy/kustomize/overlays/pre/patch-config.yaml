@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: gsv-config
-data:
-  env: pre
-  vsn: 1.0.0

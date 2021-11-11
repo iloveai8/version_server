@@ -51,8 +51,10 @@ deploy::
 		&& kustomize edit set label app-env-vsn:$(APP)-$(ENV)-$(VSN) env:$(ENV) vsn:$(VSN) \
 		&& kustomize edit set annotation app-env-vsn:$(APP)-$(ENV)-$(VSN)\
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(VSN) \
+		&& kustomize edit add configmap gsv-config --behavior=create --from-literal env=$(ENV) \
+		&& kustomize edit add configmap gsv-config --behavior=merge --from-literal vsn=$(VSN) \
 		&& cd - \
-		&& kustomize build $(DeployPath)/$(ENV) | kubectl apply -f -
+		&& kustomize build $(DeployPath)/$(ENV)
 	@echo deploy env:$(ENV) vsn:$(VSN) finish end
 
 help:
