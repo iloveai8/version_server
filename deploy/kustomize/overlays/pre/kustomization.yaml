@@ -1,11 +1,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: jackpotland
+nameSuffix: -pre
+commonLabels:
+  app: gsv
+  env: pre
+commonAnnotations:
+  app: gsv
+  env: pre
+  kubesphere.io/description: "game slots version server pre"
+
 resources:
-  - ../../base
+  - ../../base/
 
 patchesStrategicMerge:
-  - patch-deployment.yaml
-  - patch-deployment-health.yaml
-  - patch-deployment-memory.yaml
+  - patch-deploy.yaml
   - patch-hpa.yaml
+  - patch-cm.yaml

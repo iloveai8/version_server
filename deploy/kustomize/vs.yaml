@@ -1,0 +1,50 @@
+apiVersion: networking.istio.io/v1alpha3
+#https://istio.io/latest/zh/docs/reference/config/networking/virtual-service/
+kind: VirtualService
+metadata:
+  annotations:
+    app: gsv
+  labels:
+    app: gsv
+  name: gsv-vs
+  namespace: gsv
+spec:
+  gateways:
+    - gsv-gw
+  hosts:
+    - "*.jackpotlandslots.com"
+  http:
+    - match:
+        - uri:
+            prefix: /dev/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: gsv-svc-dev
+            port:
+              number: 19091
+    - match:
+        - uri:
+            prefix: /pre/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: gsv-svc-pre
+            port:
+              number: 19091
+    - match:
+        - headers:
+            vsn:
+              exact: 1.0.0
+          uri:
+            prefix: /pro/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: gsv-svc-pro-v1-0-0
+            port:
+              number: 19091
+

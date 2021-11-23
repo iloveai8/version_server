@@ -26,10 +26,32 @@ build:clean fmt
 	@go build -a -installsuffix cgo -o $(EXEC_NAME) $(MAIN)
 	@echo build finish end
 
-# env:dev|pre|pro vsn:1.0.0
+# env:dev|pre|pro
 run:build
-	@echo run $(EXEC_NAME) $(ENV) $(VSN)
+	@echo run --rm $(EXEC_NAME) $(ENV) $(VSN)
 	@./$(EXEC_NAME) --config=conf/$(ENV).yaml
+
+# env:dev|pre
+build_stage_image:build
+	@echo  ......build stage $(ENV) image......
+	@docker rmi -f $(HarborRegistry)/$(APP):$(ENV)
+	@docker build --rm  --no-cache -t $(HarborRegistry)/$(APP):$(ENV) -f Dockerfile .
+	@echo  ......build stage $(ENV) image finish end
+
+# env:dev|pre
+push_stage_image: build_stage_image
+	@echo  ......push stage $(ENV) image......
+	@docker push $(HarborRegistry)/$(APP):$(ENV)
+	@echo  ......push stage $(ENV) image finish end
+
+# env:dev|pre|pro vsn:1.0.0
+deploy_stage:
+	@echo  ......deploy stage env:$(ENV)......
+	@kustomize build $(DeployPath)/overlays/$(ENV) | kubectl apply -f -
+	@kubectl apply -f $(DeployPath)/gw.yaml
+	@kubectl apply -f $(DeployPath)/vs.yaml
+	@echo  ......deploy stage env:$(ENV) finish end
+
 
 # vsn:1.0.0
 build_image:build
@@ -44,7 +66,7 @@ push_image: build_image
 	@echo push image finish end
 
 # env:dev|pre|pro vsn:1.0.0
-deploy::
+deploy:
 	@echo deploy env:$(ENV) vsn:$(VSN)......
 	@cd $(DeployPath)/$(ENV) \
 		&& kustomize edit set namesuffix -- -$(ENV)-v${subst .,-,${VSN}}\

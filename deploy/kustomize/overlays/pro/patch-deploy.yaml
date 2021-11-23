@@ -1,0 +1,65 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: gsv-deploy
+spec:
+  replicas: 3
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 50%
+  template:
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: gsv-deploy
+          image: 'harbor.nuclearport.com/jackpotland/gsv:pro'
+          imagePullPolicy: Always
+          ports:
+            - name: http-9091
+              containerPort: 9091
+              protocol: TCP
+          env:
+            - name: ip
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: env
+              valueFrom:
+                configMapKeyRef:
+                  name: gsv-cm
+                  key: env
+          resources:
+            limits:
+              cpu: 200m
+              memory: 300Mi
+            requests:
+              cpu: 200m
+              memory: 300Mi
+          livenessProbe:
+            httpGet:
+              path: /heartbeat
+              port: 9091
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 15
+            successThreshold: 1
+            failureThreshold: 10
+          readinessProbe:
+            httpGet:
+              path: /heartbeat
+              port: 9091
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 15
+            successThreshold: 1
+            failureThreshold: 10
+      imagePullSecrets:
+        - name: gsv-secret
+

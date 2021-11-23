@@ -8,11 +8,11 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: gsv-deployment
+    name: gsv-deploy
   metrics:
     - type: Resource
       resource:
         name: cpu
         target:
-          averageUtilization: 85
           type: Utilization
+          averageUtilization: 95

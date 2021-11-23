@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1alpha3
+#https://istio.io/latest/zh/docs/reference/config/networking/gateway/
+kind: Gateway
+metadata:
+  annotations:
+    app: gsv
+  labels:
+    app: gsv
+  name: gsv-gw
+  namespace: gsv
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "vsn.jackpotlandslots.com"

@@ -3,4 +3,16 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: gsv-hpa
 spec:
+  minReplicas: 1
   maxReplicas: 10
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gsv-deploy
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 90
