@@ -34,7 +34,7 @@ build_stage:build
 	@echo  ......build stage $(ENV) image finish end
 
 # env:dev|pre
-push_stage: build_stage
+push_stage:
 	@echo  ......push stage $(ENV) image......
 	@docker push $(HarborRegistry)/$(APP):$(ENV)
 	@echo  ......push stage $(ENV) image finish end
@@ -55,7 +55,7 @@ build_pro:build
 	@echo  ......build stage pro vsn=$(VSN) image finish end
 
 # vsn:1.0.0
-push_pro: build_pro
+push_pro:
 	@echo  ......push stage pro vsn=$(VSN) image......
 	@docker push $(HarborRegistry)/$(APP):pro.$(VSN)
 	@echo  ......push stage pro vsn=$(VSN)  image finish end
