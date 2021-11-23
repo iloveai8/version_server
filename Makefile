@@ -83,11 +83,11 @@ deploy_pro:
 
 help:
 	@echo "usage cmd: "
-	@echo " --make clean 		- rm executer"
-	@echo " --make build 		- build executer"
-	@echo " --make build_stage 	- build stage(dev|pre) image eg:env=dev|env=pre"
-	@echo " --make push_stage 	- push stage(dev|pre) image to harbor eg:env=dev|env=pre"
+	@echo " --make clean - rm executer"
+	@echo " --make build - build executer"
+	@echo " --make build_stage - build stage(dev|pre) image eg:env=dev|env=pre"
+	@echo " --make push_stage - push stage(dev|pre) image to harbor eg:env=dev|env=pre"
 	@echo " --make deploy_stage - deploy stage(dev|pre) eg:env=dev|env=pre"
-	@echo " --make build_pro 	- build pro image eg:vsn=1.0.0"
-	@echo " --make push_pro 	- push pro image to harbor eg:vsn=1.0.0"
-	@echo " --make deploy_pro 	- deploy pro vsn=1.0.0 online eg:vsn=1.0.0"
+	@echo " --make build_pro - build pro image eg:vsn=1.0.0"
+	@echo " --make push_pro - push pro image to harbor eg:vsn=1.0.0"
+	@echo " --make deploy_pro - deploy pro vsn=1.0.0 online eg:vsn=1.0.0"
