@@ -12,7 +12,7 @@ spec:
   gateways:
     - gsv-gw
   hosts:
-    - "*.jackpotlandslots.com"
+    - "vsn.jackpotlandslots.com"
   http:
     - match:
         - uri:
