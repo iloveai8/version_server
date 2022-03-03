@@ -18,7 +18,7 @@ library 'fotoable-libs'
 
     //以下参数为多分支构建参数
     //测试环境
-    if ("${BRANCH}" == "dev"){
+    if ("${BRANCH}" == "ch"){
         // 测试环境发版节点
         map.put('node','master')
         // 部署环境
