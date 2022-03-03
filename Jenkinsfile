@@ -22,7 +22,7 @@ library 'fotoable-libs'
         // 测试环境发版节点
         map.put('node','master')
         // 部署环境
-        map.put('DEPENV','test')
+        map.put('DEPENV','pre')
         map.put('cluster', "k8s")
 
     //预发布环境
@@ -30,7 +30,7 @@ library 'fotoable-libs'
         // 预发布环境发版节点
         map.put('node','aws-nuclearport-jenkins')
         // 部署环境
-        map.put('DEPENV','ha')
+        map.put('DEPENV','dev')
         map.put('cluster', "eks")
 
     //生产环境
