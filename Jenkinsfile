@@ -18,19 +18,19 @@ library 'fotoable-libs'
 
     //以下参数为多分支构建参数
     //测试环境
-    if ("${BRANCH}" == "ch"){
+    if ("${BRANCH}" == "develop"){
         // 测试环境发版节点
         map.put('node','master')
         // 部署环境
-        map.put('DEPENV','pre')
+        map.put('DEPENV','dev')
         map.put('cluster', "k8s")
 
     //预发布环境
-    } else if("${BRANCH}" == "release"){
+    } else if("${BRANCH}" == "ch"){
         // 预发布环境发版节点
         map.put('node','aws-nuclearport-jenkins')
         // 部署环境
-        map.put('DEPENV','dev')
+        map.put('DEPENV','pre')
         map.put('cluster', "eks")
 
     //生产环境
@@ -38,7 +38,7 @@ library 'fotoable-libs'
         // 生产环境发版节点
         map.put('node','aws-nuclearport-jenkins')
         // 部署环境
-        map.put('DEPENV','online')
+        map.put('DEPENV','pro')
         map.put('cluster', "eks")
     }
 
