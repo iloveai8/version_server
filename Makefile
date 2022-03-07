@@ -1,5 +1,6 @@
 ENV=${env}
 VSN=${vsn}
+config=${config}
 APP=gsv
 EXEC_NAME=gsv
 MAIN=main.go
@@ -71,7 +72,7 @@ deploy_pro:
 		&& kustomize edit set image $(HarborRegistry)/$(APP):pro.$(VSN) \
 		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal vsn=$(VSN) \
 		&& cd - \
-		&& kustomize build $(DeployPath)/overlays/pro | kubectl apply -f - \
+		&& kustomize build $(DeployPath)/overlays/pro | kubectl --kubeconfig={config} apply -f - \
 		&& kubectl apply -f $(DeployPath)/gw.yaml \
         && kubectl apply -f $(DeployPath)/vs.yaml \
 
