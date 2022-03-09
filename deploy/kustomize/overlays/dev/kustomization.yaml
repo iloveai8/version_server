@@ -15,4 +15,4 @@ resources:
 patchesStrategicMerge:
   - patch-deploy.yaml
   - patch-hpa.yaml
- #- patch-cm.yaml
+  - patch-cm.yaml

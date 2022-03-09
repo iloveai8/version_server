@@ -1,0 +1,39 @@
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: gsv-test
+  namespace: gsv
+  annotations:
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    kubernetes.io/ingress.class: alb
+    kubesphere.io/alias-name: gsv-ingress
+  finalizers:
+    - ingress.k8s.aws/resources
+spec:
+  rules:
+    - host: test-vsn.jackpotlandslots.com
+      http:
+        paths:
+          - path: /dev/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: gsv-service-dev
+                port:
+                  number: 19091
+          - path: /pre/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: gsv-service-pre
+                port:
+                  number: 19091
+          - path: /pro/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: gsv-service-pro
+                port:
+                  number: 19091
