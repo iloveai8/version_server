@@ -20,21 +20,21 @@ spec:
     - host: test-vsn.jackpotlandslots.com
       http:
         paths:
-          - path: /dev/*
+          - path: /*
             pathType: ImplementationSpecific
             backend:
               service:
                 name: gsv-service-dev
                 port:
                   number: 19091
-          - path: /pre/*
+          - path: /*
             pathType: ImplementationSpecific
             backend:
               service:
                 name: gsv-service-pre
                 port:
                   number: 19091
-          - path: /pro/*
+          - path: /*
             pathType: ImplementationSpecific
             backend:
               service:
