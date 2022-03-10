@@ -4,6 +4,9 @@ metadata:
   name: gsv-test
   namespace: gsv
   annotations:
+    #   需要更换掉自己的证书
+    alb.ingress.kubernetes.io/certificate-arn: >
+      arn:aws:acm:us-east-2:392975326882:certificate/828eec7f-325b-44c2-9a84-a8176e26020a
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: '10'
     alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
     alb.ingress.kubernetes.io/success-codes: '200'
@@ -11,6 +14,15 @@ metadata:
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/actions.gsv-service-dev: >
+      {
+        "type":"fixed-response",
+        "fixedResponseConfig":{"contentType":"text/plain","statusCode":"200","messageBody":"Path is /path2 OR /anno/path2"}
+      }
+    alb.ingress.kubernetes.io/conditions.gsv-service-dev: >
+      [
+        {"field":"path-pattern","pathPatternConfig":{"values":["/dev"]}}
+      ]
     kubernetes.io/ingress.class: alb
     kubesphere.io/alias-name: gsv-ingress
   finalizers:
@@ -20,22 +32,22 @@ spec:
     - host: test-vsn.jackpotlandslots.com
       http:
         paths:
-          - path: /*
-            pathType: ImplementationSpecific
+          - path: /dev
+            pathType: Prefix
             backend:
               service:
                 name: gsv-service-dev
                 port:
                   number: 19091
-          - path: /*
-            pathType: ImplementationSpecific
+          - path: /pre
+            pathType: Prefix
             backend:
               service:
                 name: gsv-service-pre
                 port:
                   number: 19091
-          - path: /*
-            pathType: ImplementationSpecific
+          - path: /pro
+            pathType: Prefix
             backend:
               service:
                 name: gsv-service-pro
