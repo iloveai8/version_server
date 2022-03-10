@@ -1,0 +1,42 @@
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: payment-ingress
+  namespace: base-service
+  annotations:
+    alb.ingress.kubernetes.io/actions.payment-canary: >
+      {"type":"forward","forwardConfig":{"targetGroups":[{"serviceName":"prod-payment-service-svc-17","servicePort":50100,"weight":100}]}}
+    alb.ingress.kubernetes.io/conditions.payment-canary: >
+      [{"field":"http-header","httpHeaderConfig":{"httpHeaderName":"app_id","values":["100009","100096"]}}]
+    alb.ingress.kubernetes.io/certificate-arn: >-
+      arn:aws:acm:us-east-2:392975326882:certificate/828eec7f-325b-44c2-9a84-a8176e26020a
+    alb.ingress.kubernetes.io/healthcheck-path: /heartbeat
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    #    target-type:标注流量模式  ip |实例模式
+    #    实例模式：Ingress 流量从 ALB 出发并到达为您的服务开放的 NodePort。然后将流量路由至集群内的容器 Pod。在此模式中，数据包始终会跳跃两次后才会到达目的地。
+    #    ip 模式：Ingress 流量从 ALB 出发，然后直接到达集群内的容器 Pod。如要使用此模式，Kubernetes 集群的联网插件（也就是 适用于 Kubernetes 的 AWS CNI 插件）必须将 ENI 上的第二个 IP 地址作为 Pod IP。在此模式中，数据包始终会跳跃一次就到达目的地。
+    alb.ingress.kubernetes.io/target-type: ip
+    kubernetes.io/ingress.class: alb
+    kubesphere.io/creator: panzhiqiang
+  finalizers:
+    - ingress.k8s.aws/resources
+spec:
+  rules:
+    - host: temp-payment.akgoo.net
+      http:
+        paths:
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: payment-canary
+                port:
+                  name: use-annotation
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: prod-payment-service-svc-17
+                port:
+                  number: 50100

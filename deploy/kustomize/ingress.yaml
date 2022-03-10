@@ -4,6 +4,7 @@ metadata:
   name: gsv-test
   namespace: gsv
   annotations:
+    alb.ingress.kubernetes.io/healthcheck-path: /heartbeat
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
