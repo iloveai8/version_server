@@ -19,14 +19,12 @@ metadata:
         "type":"forward",
         "forwardConfig":{
           "targetGroups":[
-            {"serviceName":"gsv-service-dev","weight":100}
+            {"serviceName":"gsv-service-dev"}
           ]
         }
       }
-    alb.ingress.kubernetes.io/conditions.gsv-service-dev: >
-      [
-        {"field":"path-pattern","pathPatternConfig":{"values":["/dev"]}}
-      ]
+    alb.ingress.kubernetes.io/conditions.payment-canary: >
+      [{"field":"http-header","httpHeaderConfig":{"httpHeaderName":"env","values":["dev"]}}]
     kubernetes.io/ingress.class: alb
     kubesphere.io/alias-name: gsv-ingress
   finalizers:
@@ -36,7 +34,7 @@ spec:
     - host: test-vsn.jackpotlandslots.com
       http:
         paths:
-          - path: /
+          - path: /*
             pathType: ImplementationSpecific
             backend:
               service:
