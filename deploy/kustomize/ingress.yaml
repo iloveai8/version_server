@@ -23,8 +23,10 @@ metadata:
           ]
         }
       }
-    alb.ingress.kubernetes.io/conditions.payment-canary: >
-      [{"field":"http-header","httpHeaderConfig":{"httpHeaderName":"env","values":["dev"]}}]
+    alb.ingress.kubernetes.io/conditions.gsv-service-dev: >
+      [
+        {"field":"http-header","httpHeaderConfig":{"httpHeaderName":"env","values":["dev"]}}
+      ]
     kubernetes.io/ingress.class: alb
     kubesphere.io/alias-name: gsv-ingress
   finalizers:
