@@ -14,19 +14,6 @@ metadata:
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/actions.gsv-service-dev: >
-      {
-        "type":"forward",
-        "forwardConfig":{
-          "targetGroups":[
-            {"serviceName":"gsv-service-dev"}
-          ]
-        }
-      }
-    alb.ingress.kubernetes.io/conditions.gsv-service-dev: >
-      [
-        {"field":"http-header","httpHeaderConfig":{"httpHeaderName":"env","values":["dev"]}}
-      ]
     kubernetes.io/ingress.class: alb
     kubesphere.io/alias-name: gsv-ingress
   finalizers:
@@ -36,14 +23,14 @@ spec:
     - host: test-vsn.jackpotlandslots.com
       http:
         paths:
-          - path: /*
-            pathType: ImplementationSpecific
+          - path: /dev
+            pathType: Prefix
             backend:
               service:
                 name: gsv-service-dev
                 port:
                   number: 19091
-          - path: /pre/
+          - path: /pre
             pathType: Prefix
             backend:
               service:
