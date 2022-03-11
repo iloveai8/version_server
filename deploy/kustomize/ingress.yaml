@@ -1,7 +1,7 @@
 kind: Ingress
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: gsv-test
+  name: gsv-ingress
   namespace: gsv
   annotations:
     #   需要更换掉自己的证书
@@ -20,7 +20,7 @@ metadata:
     - ingress.k8s.aws/resources
 spec:
   rules:
-    - host: test-vsn.jackpotlandslots.com
+    - host: slot-gsv.jackpotlandslots.com
       http:
         paths:
           - path: /dev

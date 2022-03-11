@@ -9,7 +9,6 @@ library 'fotoable-libs'
     //构建分支，读取多分支构建的分支
     def BRANCH = env.BRANCH_NAME
 
-
     //以下参数需要研发人员修改
     //拉取代码库的地址
     map.put('REPO_URL',"git@gitlab.ftsview.com:ExternalProjects/TimeCapsuleStudio/game_slots_vsn.git")
@@ -41,7 +40,5 @@ library 'fotoable-libs'
         map.put('DEPENV','pro')
         map.put('cluster', "eks")
     }
-
-
 // 环境使用方法(dev为测试环境请使用k8s;stage为预发布使用ekst;master为生产环境请使用eks)
 ch ("cluster",map)
