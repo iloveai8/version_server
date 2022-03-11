@@ -13,9 +13,6 @@ metadata:
     alb.ingress.kubernetes.io/healthcheck-path: /heartbeat
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
     alb.ingress.kubernetes.io/scheme: internet-facing
-    #    target-type:标注流量模式  ip |实例模式
-    #    实例模式：Ingress 流量从 ALB 出发并到达为您的服务开放的 NodePort。然后将流量路由至集群内的容器 Pod。在此模式中，数据包始终会跳跃两次后才会到达目的地。
-    #    ip 模式：Ingress 流量从 ALB 出发，然后直接到达集群内的容器 Pod。如要使用此模式，Kubernetes 集群的联网插件（也就是 适用于 Kubernetes 的 AWS CNI 插件）必须将 ENI 上的第二个 IP 地址作为 Pod IP。在此模式中，数据包始终会跳跃一次就到达目的地。
     alb.ingress.kubernetes.io/target-type: ip
     kubernetes.io/ingress.class: alb
     kubesphere.io/creator: panzhiqiang
