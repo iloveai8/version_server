@@ -30,11 +30,20 @@ func StartServer(web *config.WebConfig) {
 	router.NoRoute(func(c *gin.Context) {
 		c.String(http.StatusNotFound, "Not router")
 	})
+	router.GET("/:env/favicon.ico", func(c *gin.Context) {
+		c.String(http.StatusOK, "ok")
+	})
 	router.GET("/favicon.ico", func(c *gin.Context) {
 		c.String(http.StatusOK, "ok")
 	})
-
 	router.GET("/heartbeat", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"vsn":  os.Getenv("vsn"),
+			"env":  os.Getenv("env"),
+			"time": time.Now(),
+		})
+	})
+	router.GET("/:env/heartbeat", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"vsn":  os.Getenv("vsn"),
 			"env":  os.Getenv("env"),
@@ -43,7 +52,7 @@ func StartServer(web *config.WebConfig) {
 	})
 
 	vsnHandler := handler.NewVsnHandler()
-	vsn := router.Group("v1")
+	vsn := router.Group("/:env/v1").Group("/v1")
 	{
 		vsn.GET("vsn/list", vsnHandler.GetAll)          //获取所有用户
 		vsn.GET("vsn", vsnHandler.Get)                  //根据id获取用户
