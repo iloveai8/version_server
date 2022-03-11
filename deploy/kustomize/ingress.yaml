@@ -14,15 +14,15 @@ metadata:
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/actions.gsv-service-dev: >
-      {
-        "type":"fixed-response",
-        "fixedResponseConfig":{"contentType":"text/plain","statusCode":"200","messageBody":"Path is /path2 OR /anno/path2"}
-      }
-    alb.ingress.kubernetes.io/conditions.gsv-service-dev: >
-      [
-        {"field":"path-pattern","pathPatternConfig":{"values":["/dev"]}}
-      ]
+#    alb.ingress.kubernetes.io/actions.gsv-service-dev: >
+#      {
+#        "type":"fixed-response",
+#        "fixedResponseConfig":{"contentType":"text/plain","statusCode":"200","messageBody":"Path is /path2 OR /anno/path2"}
+#      }
+#    alb.ingress.kubernetes.io/conditions.gsv-service-dev: >
+#      [
+#        {"field":"path-pattern","pathPatternConfig":{"values":["/dev"]}}
+#      ]
     kubernetes.io/ingress.class: alb
     kubesphere.io/alias-name: gsv-ingress
   finalizers:
@@ -32,21 +32,21 @@ spec:
     - host: test-vsn.jackpotlandslots.com
       http:
         paths:
-          - path: /dev
+          - path: /dev/
             pathType: Prefix
             backend:
               service:
                 name: gsv-service-dev
                 port:
                   number: 19091
-          - path: /pre
+          - path: /pre/
             pathType: Prefix
             backend:
               service:
                 name: gsv-service-pre
                 port:
                   number: 19091
-          - path: /pro
+          - path: /pro/
             pathType: Prefix
             backend:
               service:
