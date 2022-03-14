@@ -28,26 +28,27 @@ run:build
 	@echo run --rm $(EXEC_NAME) $(ENV) $(VSN)
 	@./$(EXEC_NAME) --config=conf/$(ENV).yaml
 
-# env:dev|pre vsn=BuildNum
+# env:dev|pre ver=BuildNum
 build_stage:build
 	@echo  ......build stage $(ENV).$(BUILD_NUM) image......
 	@docker rmi -f $(HarborRegistry)/$(APP):$(ENV).$(BUILD_NUM)
 	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):$(ENV).$(BUILD_NUM) -f Dockerfile .
 	@echo  ......build stage $(ENV).$(BUILD_NUM) image finish end
 
-# env:dev|pre vsn=BuildNum
+# env:dev|pre ver=BuildNum
 push_stage:
 	@echo  ......push stage $(ENV).$(BUILD_NUM)- image......
 	@docker push $(HarborRegistry)/$(APP):$(ENV).$(BUILD_NUM)
 	@echo  ......push stage $(ENV).$(BUILD_NUM) image finish end
 
-# env:dev|pre vsn=build_num
+# env:dev|pre ver=build_num
 deploy_stage:
 	@echo ......deploy $(ENV) vsn=$(BUILD_NUM) ......;source /etc/profile ;which aws ;echo $PATH
+
 	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit set namesuffix -- -$(ENV)-v${BUILD_NUM} \
-		&& kustomize edit set label vsn:$(BUILD_NUM) \
-		&& kustomize edit set annotation vsn:$(BUILD_NUM)\
+		&& kustomize edit set namesuffix -- -$(ENV)-v$(BUILD_NUM) \
+		&& kustomize edit set label ver:$(BUILD_NUM) \
+		&& kustomize edit set annotation ver:$(BUILD_NUM)\
 		&& kustomize edit add annotation kubesphere.io/description:'game slots version server '$(ENV)-$(BUILD_NUM) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(BUILD_NUM) \
 		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal vsn=$(BUILD_NUM) \
@@ -55,7 +56,7 @@ deploy_stage:
 		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
-	@echo  ......deploy $(ENV) vsn=$(BUILD_NUM) finish end......
+	@echo  ......deploy $(ENV) ver=$(BUILD_NUM) finish end......
 
 # vsn:1.0.0
 build_pro:build
@@ -94,9 +95,9 @@ help:
 	@echo "usage cmd: "
 	@echo " --make clean - rm executer"
 	@echo " --make build - build executer"
-	@echo " --make build_stage - build stage(dev|pre) image eg:env=dev vsn=BuildNum|env=pre vsn=BuildNum"
-	@echo " --make push_stage - push stage(dev|pre) image to harbor eg:env=dev vsn=BuildNum|env=pre vsn=BuildNum"
-	@echo " --make deploy_stage - deploy stage(dev|pre) eg:env=dev vsn=BuildNum|env=pre vsn=BuildNum"
+	@echo " --make build_stage - build stage(dev|pre) image eg:env=dev ver=BuildNum|env=pre ver=BuildNum"
+	@echo " --make push_stage - push stage(dev|pre) image to harbor eg:env=dev ver=BuildNum|env=pre ver=BuildNum"
+	@echo " --make deploy_stage - deploy stage(dev|pre) eg:env=dev ver=BuildNum|env=pre ver=BuildNum"
 	@echo " --make build_pro - build pro image eg:vsn=1.0.0"
 	@echo " --make push_pro - push pro image to harbor eg:vsn=1.0.0"
 	@echo " --make deploy_pro - deploy pro vsn=1.0.0 online eg:vsn=1.0.0"
