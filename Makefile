@@ -1,5 +1,6 @@
 ENV=${env}
 VER='${ver}'
+VSN=${vsn}
 config=${config}
 APP=gsv
 EXEC_NAME=gsv
@@ -45,7 +46,6 @@ deploy_stage:
 	@echo ......deploy $(ENV) $(VER) ......
 	@cd $(DeployPath)/overlays/$(ENV) \
 		&& kustomize edit set label ver:$(VER) \
-		&& kustomize edit set annotation ver:$(VER)\
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
 		&& cd - \
 		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
