@@ -44,13 +44,9 @@ push_stage:
 # env:dev|pre ver=build_num
 deploy_stage:
 	@echo ......deploy $(ENV) $(VER) ......
-	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
-		&& cd - \
-		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
-		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
-
-	@echo  ......deploy $(ENV) $(VER) finish end......
+	@kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f -
+	@kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml
+	@echo ......deploy stage $(ENV) $(VER) finish end
 
 # vsn:1.0.0
 build_pro:build
