@@ -1,5 +1,5 @@
 ENV=${env}
-VER=${ver}
+VER='${ver}'
 config=${config}
 APP=gsv
 EXEC_NAME=gsv
