@@ -43,9 +43,9 @@ push_stage:
 
 # env:dev|pre vsn=build_num
 deploy_stage:
-	@echo  ......deploy $(ENV) vsn=$(BUILD_NUM) ......
+	@echo ......deploy $(ENV) vsn=$(BUILD_NUM) ......;source /etc/profile ;which aws ;echo $PATH
 	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit set namesuffix -- -$(ENV)-v${subst .,-,${BUILD_NUM}} \
+		&& kustomize edit set namesuffix -- -$(ENV)-v${BUILD_NUM} \
 		&& kustomize edit set label vsn:$(BUILD_NUM) \
 		&& kustomize edit set annotation vsn:$(BUILD_NUM)\
 		&& kustomize edit add annotation kubesphere.io/description:'game slots version server '$(ENV)-$(VSN) \
@@ -66,13 +66,13 @@ build_pro:build
 
 # vsn:1.0.0
 push_pro:
-	@echo  ......push stage pro vsn=$(VSN) image......
+	@echo ......push stage pro vsn=$(VSN) image......
 	@docker push $(HarborRegistry)/$(APP):pro.$(VSN)
-	@echo  ......push stage pro vsn=$(VSN)  image finish end
+	@echo ......push stage pro vsn=$(VSN)  image finish end
 
 # vsn:1.0.0
 deploy_pro:
-	@echo  ......deploy pro vsn=$(VSN) ......
+	@echo  ......deploy pro vsn=$(VSN) ......;source /etc/profile ;which aws ;echo $PATH
 	@cd $(DeployPath)/overlays/pro \
 		&& kustomize edit set namesuffix -- -pro-v${subst .,-,${VSN}} \
 		&& kustomize edit set label vsn:$(VSN) \
