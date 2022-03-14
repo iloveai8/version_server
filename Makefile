@@ -43,7 +43,7 @@ push_stage:
 # env:dev|pre|pro
 deploy_stage:
 	@echo  ......deploy stage env:$(ENV)......
-	@kustomize build $(DeployPath)/overlays/$(ENV) | kubectl apply -f -
+	@kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f -
 	@kubectl --kubeconfig $(config) apply -f $(DeployPath)/gw.yaml
 	@kubectl --kubeconfig $(config) apply -f $(DeployPath)/vs.yaml
 	@echo  ......deploy stage env:$(ENV) finish end
