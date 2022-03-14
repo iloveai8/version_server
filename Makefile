@@ -46,7 +46,7 @@ deploy_stage:
 	@echo ......deploy $(ENV) $(VER) ......
 	@cd $(DeployPath)/overlays/$(ENV) \
 		&& kustomize edit add annotation ver:$(VER) \
-		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) \
+		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV) '-' $(VER) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
 		&& cd - \
 		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
@@ -54,26 +54,26 @@ deploy_stage:
 
 	@echo ......deploy stage $(ENV) $(VER) finish end
 
-# vsn:1.0.0
+# ver:1.0.0
 build_pro:build
 	@echo  ......build stage pro $(VER) image......
 	@docker rmi -f $(HarborRegistry)/$(APP):pro.$(VER)
 	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):pro.$(VER) -f Dockerfile .
 	@echo  ......build stage pro $(VER) image finish end
 
-# vsn:1.0.0
+# ver:1.0.0
 push_pro:
 	@echo ......push stage pro $(VER) image......
 	@docker push $(HarborRegistry)/$(APP):pro.$(VSN)
 	@echo ......push stage pro $(VER) image finish end
 
-# vsn:1.0.0
+# ver:1.0.0
 deploy_pro:
-	@echo  ......deploy pro $(VER) ......;source /etc/profile ;which aws ;echo $PATH
+	@echo  ......deploy pro $(VER) ......
 	@cd $(DeployPath)/overlays/pro \
 		&& kustomize edit set namesuffix -- -pro-v${subst .,-,${VER}} \
 		&& kustomize edit set label ver:$(VER) \
-		&& kustomize edit set add ver:$(VER)\
+		&& kustomize edit set add ver:$(VER) \
 		&& kustomize edit add annotation kubesphere.io/description:'game slots version server pro-'$(VER) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):pro.$(VER) \
 		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal ver='$(VER)' \
@@ -94,6 +94,6 @@ help:
 	@echo " --make build_stage - build stage(dev|pre) image eg:env=dev ver=BuildNum|env=pre ver=BuildNum"
 	@echo " --make push_stage - push stage(dev|pre) image to harbor eg:env=dev ver=BuildNum|env=pre ver=BuildNum"
 	@echo " --make deploy_stage - deploy stage(dev|pre) eg:env=dev ver=BuildNum|env=pre ver=BuildNum"
-	@echo " --make build_pro - build pro image eg:vsn=1.0.0"
-	@echo " --make push_pro - push pro image to harbor eg:vsn=1.0.0"
-	@echo " --make deploy_pro - deploy pro vsn=1.0.0 online eg:vsn=1.0.0"
+	@echo " --make build_pro - build pro image eg:ver=1.0.0"
+	@echo " --make push_pro - push pro image to harbor eg:ver=1.0.0"
+	@echo " --make deploy_pro - deploy pro vsn=1.0.0 online eg:ver=1.0.0"
