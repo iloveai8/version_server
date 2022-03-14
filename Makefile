@@ -1,4 +1,5 @@
 ENV=${env}
+VER=${ver}
 config=${config}
 APP=gsv
 EXEC_NAME=gsv
@@ -28,7 +29,6 @@ run:build
 
 # env:dev|pre ver=BuildNum
 build_stage:build
-	VER=${ver}
 	@echo  ......build stage $(ENV).$(VER) image......
 	@docker rmi -f $(HarborRegistry)/$(APP):$(ENV).$(VER)
 	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):$(ENV).$(VER) -f Dockerfile .
@@ -36,14 +36,12 @@ build_stage:build
 
 # env:dev|pre ver=BuildNum
 push_stage:
-	VER=${ver}
 	@echo  ......push stage $(ENV).$(VER) image......
 	@docker push $(HarborRegistry)/$(APP):$(ENV).$(VER)
 	@echo  ......push stage $(ENV).$(VER) image finish end
 
 # env:dev|pre ver=build_num
 deploy_stage:
-	VER=${ver}
 	@echo ......deploy $(ENV) $(VER) ......;source /etc/profile ;which aws ;echo $PATH
 	@cd $(DeployPath)/overlays/$(ENV) \
 	&& kustomize edit set label ver:$(VER) \
@@ -58,7 +56,6 @@ deploy_stage:
 
 # vsn:1.0.0
 build_pro:build
-	VER=${vsn}
 	@echo  ......build stage pro $(VER) image......
 	@docker rmi -f $(HarborRegistry)/$(APP):pro.$(VER)
 	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):pro.$(VER) -f Dockerfile .
@@ -66,14 +63,12 @@ build_pro:build
 
 # vsn:1.0.0
 push_pro:
-	VER=${vsn}
 	@echo ......push stage pro $(VER) image......
 	@docker push $(HarborRegistry)/$(APP):pro.$(VSN)
 	@echo ......push stage pro $(VER) image finish end
 
 # vsn:1.0.0
 deploy_pro:
-	VER=${vsn}
 	@echo  ......deploy pro $(VER) ......;source /etc/profile ;which aws ;echo $PATH
 	@cd $(DeployPath)/overlays/pro \
 		&& kustomize edit set namesuffix -- -pro-v${subst .,-,${VER}} \
