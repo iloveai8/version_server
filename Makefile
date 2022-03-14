@@ -42,9 +42,9 @@ push_stage:
 # env:dev|pre|pro
 deploy_stage:
 	@echo  ......deploy stage env:$(ENV)......
-	@kustomize build $(DeployPath)/overlays/$(ENV) | kubectl apply -f -
-	@kubectl apply -f $(DeployPath)/gw.yaml
-	@kubectl apply -f $(DeployPath)/vs.yaml
+	@kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f -
+	@kubectl --kubeconfig $(config) apply -f $(DeployPath)/gw.yaml
+	@kubectl --kubeconfig $(config) apply -f $(DeployPath)/vs.yaml
 	@echo  ......deploy stage env:$(ENV) finish end
 
 # vsn:1.0.0
@@ -72,8 +72,8 @@ deploy_pro:
 		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal vsn=$(VSN) \
 		&& cd - \
 		&& kustomize build $(DeployPath)/overlays/pro | kubectl apply -f - \
-		&& kubectl apply -f $(DeployPath)/gw.yaml \
-        && kubectl apply -f $(DeployPath)/vs.yaml \
+		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/gw.yaml \
+        && kubectl --kubeconfig $(config) apply -f $(DeployPath)/vs.yaml \
 
 	@echo  ......deploy pro vsn=$(VSN) finish end......
 
