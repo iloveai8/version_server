@@ -1,5 +1,6 @@
 ENV=${env}
 VSN=${vsn}
+BUILD_NUM=${ver}
 config=${config}
 APP=gsv
 EXEC_NAME=gsv
@@ -29,27 +30,27 @@ run:build
 
 # env:dev|pre
 build_stage:build
-	@echo  ......build stage $(ENV) image......
-	@docker rmi -f $(HarborRegistry)/$(APP):$(ENV)
-	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):$(ENV) -f Dockerfile .
+	@echo  ......build stage $(ENV)-$(BUILD_NUM) image......
+	@docker rmi -f $(HarborRegistry)/$(APP):$(ENV)-$(BUILD_NUM)
+	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):$(ENV)-$(BUILD_NUM) -f Dockerfile .
 	@echo  ......build stage $(ENV) image finish end
 
 # env:dev|pre
 push_stage:
-	@echo  ......push stage $(ENV) image......
-	@docker push $(HarborRegistry)/$(APP):$(ENV)
+	@echo  ......push stage $(ENV)-$(BUILD_NUM)- image......
+	@docker push $(HarborRegistry)/$(APP):$(ENV)-$(BUILD_NUM)
 	@echo  ......push stage $(ENV) image finish end
 
-# env:dev|pre|pro
+# env:dev|pre
 deploy_stage:
-	@echo  ......deploy stage env:$(ENV)......; source /etc/profile ;which aws ;echo $PATH
+	@echo  ......deploy stage env:$(ENV)-$(BUILD_NUM)......; source /etc/profile ;which aws ;echo $PATH
 	@kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f -
 	@kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml
 	@echo  ......deploy stage env:$(ENV) finish end
 
 # vsn:1.0.0
 build_pro:build
-	@echo  ......build stage pro vsn=$(VSN)  image......
+	@echo  ......build stage pro vsn=$(VSN) image......
 	@docker rmi -f $(HarborRegistry)/$(APP):pro.$(VSN)
 	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):pro.$(VSN) -f Dockerfile .
 	@echo  ......build stage pro vsn=$(VSN) image finish end

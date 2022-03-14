@@ -35,8 +35,8 @@ spec:
                   key: env
           resources:
             limits:
-              cpu: 40m
-              memory: 240Mi
+              cpu: 100m
+              memory: 300Mi
             requests:
               cpu: 20m
               memory: 120Mi
