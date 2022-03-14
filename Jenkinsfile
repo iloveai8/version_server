@@ -26,7 +26,7 @@ library 'fotoable-libs'
         map.put('cluster', "k8s")
 
     //预发布环境
-    } else if("${BRANCH}" == "ch"){
+    } else if("${BRANCH}" == "pre"){
         // 预发布环境发版节点
         map.put('node','aws-nuclearport-jenkins')
         // 部署环境
