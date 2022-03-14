@@ -40,6 +40,12 @@ library 'fotoable-libs'
         // 部署环境
         map.put('DEPENV','pro')
         map.put('cluster', "eks")
+    } else if ("${BRANCH}" == "pro"){
+        // 生产环境发版节点
+        map.put('node','aws-nuclearport-jenkins')
+        // 部署环境
+        map.put('DEPENV','pro')
+        map.put('cluster', "eks")
     }
 
 
