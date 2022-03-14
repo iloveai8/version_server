@@ -1,5 +1,5 @@
 ENV=${env}
-VER='${ver}'
+VER=${ver}
 VSN=${vsn}
 config=${config}
 APP=gsv
