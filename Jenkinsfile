@@ -26,7 +26,7 @@ library 'fotoable-libs'
         map.put('cluster', "k8s")
 
     //预发布环境
-    } else if("${BRANCH}" == "ch"){
+    } else if("${BRANCH}" == "pre"){
         // 预发布环境发版节点
         map.put('node','aws-nuclearport-jenkins')
         // 部署环境
@@ -44,4 +44,4 @@ library 'fotoable-libs'
 
 
 // 环境使用方法(dev为测试环境请使用k8s;stage为预发布使用ekst;master为生产环境请使用eks)
-ch ("cluster",map)
+game_slots_vsn ("cluster",map)
