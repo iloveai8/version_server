@@ -25,6 +25,14 @@ library 'fotoable-libs'
         map.put('DEPENV','dev')
         map.put('cluster', "k8s")
 
+    
+    } else if ("${BRANCH}" == "dev"){
+        // 测试环境发版节点
+        map.put('node','master')
+        // 部署环境
+        map.put('DEPENV','dev')
+        map.put('cluster', "k8s")
+
     //预发布环境
     } else if("${BRANCH}" == "pre"){
         // 预发布环境发版节点
