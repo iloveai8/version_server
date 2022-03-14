@@ -37,21 +37,22 @@ build_stage:build
 
 # env:dev|pre ver=BuildNum
 push_stage:
-	@echo  ......push stage $(ENV).$(BUILD_NUM)- image......
+	@echo  ......push stage $(ENV).$(BUILD_NUM) image......
 	@docker push $(HarborRegistry)/$(APP):$(ENV).$(BUILD_NUM)
 	@echo  ......push stage $(ENV).$(BUILD_NUM) image finish end
 
 # env:dev|pre ver=build_num
 deploy_stage:
-	@echo ......deploy $(ENV) vsn=$(BUILD_NUM) ......;source /etc/profile ;which aws ;echo $PATH
-
+	@echo ......deploy $(ENV) ver=$(BUILD_NUM) ......;source /etc/profile ;which aws ;echo $PATH
 	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit set namesuffix -- -$(ENV)-v$(BUILD_NUM) \
-		&& kustomize edit set label ver:$(BUILD_NUM) \
-		&& kustomize edit set annotation ver:$(BUILD_NUM)\
-		&& kustomize edit add annotation kubesphere.io/description:'game slots version server '$(ENV)-$(BUILD_NUM) \
+#		&& kustomize edit set namesuffix -- -$(ENV)-v$(BUILD_NUM) \
+#		&& kustomize edit set label ver:$(BUILD_NUM) \
+#		&& kustomize edit set annotation ver:$(BUILD_NUM)\
+#		&& kustomize edit add annotation kubesphere.io/description:'game slots version server '$(ENV)-$(BUILD_NUM) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(BUILD_NUM) \
-		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal vsn=$(BUILD_NUM) \
+
+#		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal ver=$(BUILD_NUM) \
+
 		&& cd - \
 		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
