@@ -46,9 +46,6 @@ deploy_stage:
 	@echo ......deploy $(ENV) $(VER) ......
 	@cd $(DeployPath)/overlays/$(ENV) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
-		&& kustomize edit set label ver:$(VER) \
-		&& kustomize edit set annotation ver:$(VER)\
-		&& kustomize edit add annotation kubesphere.io/description:'game slots version server '$(ENV)-$(VER) \
 		&& cd - \
 		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
