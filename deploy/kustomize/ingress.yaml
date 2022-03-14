@@ -1,0 +1,46 @@
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: gsv-ingress
+  namespace: gsv
+  annotations:
+    #   需要更换掉自己的证书
+    #    alb.ingress.kubernetes.io/certificate-arn: >
+    #      arn:aws:acm:us-east-2:392975326882:certificate/828eec7f-325b-44c2-9a84-a8176e26020a
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '10'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/success-codes: '200'
+    alb.ingress.kubernetes.io/healthcheck-path: /heartbeat
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    kubernetes.io/ingress.class: alb
+    kubesphere.io/alias-name: gsv-ingress
+  finalizers:
+    - ingress.k8s.aws/resources
+spec:
+  rules:
+    - host: slot-gsv.jackpotlandslots.com
+      http:
+        paths:
+          - path: /dev
+            pathType: Prefix
+            backend:
+              service:
+                name: gsv-service-dev
+                port:
+                  number: 19091
+          - path: /pre
+            pathType: Prefix
+            backend:
+              service:
+                name: gsv-service-pre
+                port:
+                  number: 19091
+          - path: /pro
+            pathType: Prefix
+            backend:
+              service:
+                name: gsv-service-pro
+                port:
+                  number: 19091

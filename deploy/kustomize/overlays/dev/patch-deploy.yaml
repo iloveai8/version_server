@@ -3,7 +3,7 @@ apiVersion: apps/v1
 metadata:
   name: gsv-deploy
 spec:
-  replicas: 1
+  replicas: 3
   progressDeadlineSeconds: 600
   strategy:
     type: RollingUpdate
@@ -35,31 +35,20 @@ spec:
                   key: env
           resources:
             limits:
-              cpu: 40m
-              memory: 240Mi
+              cpu: 100m
+              memory: 300Mi
             requests:
-              cpu: 20m
-              memory: 120Mi
+              cpu: 100m
+              memory: 300Mi
           livenessProbe:
             httpGet:
               path: /heartbeat
               port: 9091
               scheme: HTTP
-            initialDelaySeconds: 10
             timeoutSeconds: 1
-            periodSeconds: 15
+            periodSeconds: 10
             successThreshold: 1
-            failureThreshold: 10
-          readinessProbe:
-            httpGet:
-              path: /heartbeat
-              port: 9091
-              scheme: HTTP
-            initialDelaySeconds: 10
-            timeoutSeconds: 1
-            periodSeconds: 15
-            successThreshold: 1
-            failureThreshold: 10
+            failureThreshold: 3
       imagePullSecrets:
         - name: gsv-secret
 
