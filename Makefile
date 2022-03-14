@@ -68,19 +68,19 @@ push_pro:
 
 # ver:1.0.0
 deploy_pro:
-	@echo  ......deploy $(ENV).$(VER) ......
-	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit set nameSuffix -- -acem -$(ENV)-${subst .,-,${VER}}  \
+	@echo  ......deploy pro.$(VER) ......
+	@cd $(DeployPath)/overlays/pro \
+		&& kustomize edit set nameSuffix -- -acem -pro-${subst .,-,${VER}}  \
 		&& kustomize edit set label ver:$(VER) \
 		&& kustomize edit add annotation ver:$(VER) -f \
-		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) -f \
+		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-pro'$(VER) -f \
 		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal ver=$(VER) \
-		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
+		&& kustomize edit set image $(HarborRegistry)/$(APP):pro.$(VER) \
 		&& cd - \
-		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
+		&& kustomize build $(DeployPath)/overlays/pro | kubectl --kubeconfig $(config) apply -f - \
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
-	@echo  ......deploy $(ENV).$(VER) finish end......
+	@echo  ......deploy pro.$(VER) finish end......
 
 .PHONY: all help clean build\
 		build_stage push_stage deploy_stage\
