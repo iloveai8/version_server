@@ -1,4 +1,4 @@
-ENV=${env}
+ENV=${env} 
 VSN=${vsn}
 config=${config}
 APP=gsv
