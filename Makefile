@@ -44,14 +44,13 @@ push_stage:
 # env:dev|pre ver=build_num
 deploy_stage:
 	@echo ......deploy $(ENV) $(VER) ......
-#	@kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f -
-#	@kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml
 
 	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit set namesuffix -- -$(ENV) \
-		&& kustomize edit set image $(HarborRegistry)/$(APP):dev.$(VER) \
+		&& kustomize edit set label ver:$(VER) \
+		&& kustomize edit set annotation ver:$(VER)\
+		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
 		&& cd - \
-		&& kustomize build $(DeployPath)/overlays/dev | kubectl --kubeconfig $(config) apply -f - \
+		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
 	@echo ......deploy stage $(ENV) $(VER) finish end
