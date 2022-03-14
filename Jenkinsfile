@@ -35,12 +35,6 @@ library 'fotoable-libs'
         // 部署环境
         map.put('DEPENV','pro')
         map.put('cluster', "eks")
-    } else if ("${BRANCH}" == "pro"){
-        // 生产环境发版节点
-        map.put('node','aws-nuclearport-jenkins')
-        // 部署环境
-        map.put('DEPENV','pro')
-        map.put('cluster', "eks")
     }
 // 环境使用方法(dev为测试环境请使用k8s;stage为预发布使用ekst;master为生产环境请使用eks)
 game_slots_vsn ("cluster",map)
