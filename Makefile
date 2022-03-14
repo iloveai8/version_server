@@ -1,5 +1,6 @@
 ENV=${env}
 VSN=${vsn}
+config=${config}
 APP=gsv
 EXEC_NAME=gsv
 MAIN=main.go
