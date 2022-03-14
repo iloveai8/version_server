@@ -7,7 +7,6 @@ commonLabels:
 commonAnnotations:
   app: gsv
   env: dev
-  kubesphere.io/description: "game slots version server dev"
 
 resources:
   - ../../base/
