@@ -43,24 +43,13 @@ push_stage:
 # env:dev|pre ver=build_num
 deploy_stage:
 	@echo ......deploy $(ENV).$(VER) ......
-#	@cd $(DeployPath)/overlays/$(ENV) \
-#		&& kustomize edit add annotation ver:$(VER) -f \
-#		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) -f \
-#		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
-#		&& cd - \
-#		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
-#		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
-
 	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit set namesuffix -- -$(ENV) \
-		&& kustomize edit set label ver:$(VER) \
 		&& kustomize edit add annotation ver:$(VER) -f \
 		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) -f \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
 		&& cd - \
 		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
-
 
 	@echo ......deploy stage $(ENV).$(VER) finish end......
 
@@ -72,7 +61,7 @@ deploy_pro:
 		&& kustomize edit set label ver:$(VER) \
 		&& kustomize edit add annotation ver:$(VER) -f \
 		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) -f \
-		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal ver='$(VER)' \
+		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal ver=$(VER) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
 		&& cd - \
 		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
