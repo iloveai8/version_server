@@ -48,10 +48,10 @@ deploy_stage:
 #	@kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml
 
 	@cd $(DeployPath)/overlays/$(ENV) \
+		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal=ver='$(VER)' \
 		&& kustomize edit set label ver:$(VER) \
 		&& kustomize edit set annotation ver:$(VER)\
 		&& kustomize edit set image $(HarborRegistry)/$(APP):dev.$(VER) \
-		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal=ver='$(VER)' \
 		&& cd - \
 		&& kustomize build $(DeployPath)/overlays/dev | kubectl --kubeconfig $(config) apply -f - \
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
