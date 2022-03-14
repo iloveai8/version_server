@@ -52,7 +52,7 @@ deploy_stage:
 #		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
 	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit set namesuffix -- -$(ENV)-111  \
+		&& kustomize edit set namesuffix -- -$(ENV) \
 		&& kustomize edit set label ver:$(VER) \
 		&& kustomize edit add annotation ver:$(VER) -f \
 		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) -f \
