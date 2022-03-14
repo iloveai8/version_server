@@ -53,7 +53,7 @@ deploy_stage:
 		&& kustomize edit set image $(HarborRegistry)/$(APP):dev.$(VER) \
 		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal ver=$(VER) \
 		&& cd - \
-		&& kustomize build $(DeployPath)/overlays/pro | kubectl --kubeconfig $(config) apply -f - \
+		&& kustomize build $(DeployPath)/overlays/dev | kubectl --kubeconfig $(config) apply -f - \
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
 	@echo ......deploy stage $(ENV) $(VER) finish end
