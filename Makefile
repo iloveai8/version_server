@@ -72,8 +72,8 @@ deploy_pro:
 	@cd $(DeployPath)/overlays/$(ENV) \
 		&& kustomize edit set namesuffix -- -$(ENV)-${subst .,-,${VER}} \
 		&& kustomize edit set label ver:$(VER) \
-		&& kustomize edit set add ver:$(VER) \
-		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) \
+		&& kustomize edit add annotation ver:$(VER) -f \
+		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) -f \
 		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal ver=$(VER) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
 		&& cd - \
