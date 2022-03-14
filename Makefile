@@ -27,14 +27,14 @@ run:build
 	@echo run --rm $(EXEC_NAME) $(ENV)
 	@./$(EXEC_NAME) --config=conf/$(ENV).yaml
 
-# env:dev|pre ver=BuildNum
+# env:dev|pre|pro ver=BuildNum|TagNum
 build_stage:build
 	@echo  ......build stage $(ENV).$(VER) image......
 	@docker rmi -f $(HarborRegistry)/$(APP):$(ENV).$(VER)
 	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):$(ENV).$(VER) -f Dockerfile .
 	@echo  ......build stage $(ENV).$(VER) image finish end
 
-# env:dev|pre ver=BuildNum
+# env:dev|pre|pro ver=BuildNum|TagNum
 push_stage:
 	@echo  ......push stage $(ENV).$(VER) image......
 	@docker push $(HarborRegistry)/$(APP):$(ENV).$(VER)
@@ -53,46 +53,32 @@ deploy_stage:
 
 	@echo ......deploy stage $(ENV).$(VER) finish end
 
-# ver:1.0.0
-build_pro:build
-	@echo  ......build stage $(ENV).$(VER) image......
-	@docker rmi -f $(HarborRegistry)/$(APP):$(ENV).$(VER)
-	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):$(ENV).$(VER) -f Dockerfile .
-	@echo  ......build stage $(ENV).$(VER) image finish end
-
-# ver:1.0.0
-push_pro:
-	@echo ......push stage $(ENV).$(VER) image......
-	@docker push $(HarborRegistry)/$(APP):$(ENV).$(VER)
-	@echo ......push stage $(ENV).$(VER) image finish end
-
-# ver:1.0.0
+# env:pro ver=TagNum
 deploy_pro:
-	@echo  ......deploy pro.$(VER) ......
-	@cd $(DeployPath)/overlays/pro \
+	@echo  ......deploy $(ENV).$(VER) ......
+	@cd $(DeployPath)/overlays/$(ENV) \
 		&& kustomize edit set nameSuffix -- -acem -pro-${subst .,-,${VER}}  \
 		&& kustomize edit set label ver:$(VER) \
 		&& kustomize edit add annotation ver:$(VER) -f \
-		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-pro'$(VER) -f \
+		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) -f \
 		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal ver=$(VER) \
-		&& kustomize edit set image $(HarborRegistry)/$(APP):pro.$(VER) \
+		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
 		&& cd - \
-		&& kustomize build $(DeployPath)/overlays/pro | kubectl --kubeconfig $(config) apply -f - \
+		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
 	@echo  ......deploy pro.$(VER) finish end......
 
 .PHONY: all help clean build\
-		build_stage push_stage deploy_stage\
-		build_pro push_pro deploy_pro\
+		build_stage push_stage\
+		deploy_stage\
+		deploy_pro\
 
 help:
 	@echo "usage cmd: "
 	@echo " --make clean - rm executer"
 	@echo " --make build - build executer"
-	@echo " --make build_stage - build stage(dev|pre) image eg:env=dev ver=BuildNum|env=pre ver=BuildNum"
-	@echo " --make push_stage - push stage(dev|pre) image to harbor eg:env=dev ver=BuildNum|env=pre ver=BuildNum"
-	@echo " --make deploy_stage - deploy stage(dev|pre) eg:env=dev ver=BuildNum|env=pre ver=BuildNum"
-	@echo " --make build_pro - build pro image eg:ver=1.0.0"
-	@echo " --make push_pro - push pro image to harbor eg:ver=1.0.0"
-	@echo " --make deploy_pro - deploy pro ver=1.0.0 online eg:ver=1.0.0"
+	@echo " --make build_stage - build stage(dev|pre|pro) image eg:env=dev|pre|pro ver=buildNum|tagNum"
+	@echo " --make push_stage - push stage(dev|pre) image to harbor eg:env=dev|pre|pro ver=buildNum|tagNum"
+	@echo " --make deploy_stage - deploy stage(dev|pre) ver(buildNum) eg:env=dev|pre ver=buildNum"
+	@echo " --make deploy_pro - deploy stage(pro) ver(tagNum) online eg:env=pro ver=tagNum"
