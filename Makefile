@@ -46,7 +46,6 @@ deploy_stage:
 	@cd $(DeployPath)/overlays/$(ENV) \
 		&& kustomize edit set label ver:$(VER) \
 		&& kustomize edit set annotation ver:$(VER)\
-		&& kustomize edit add annotation kubesphere.io/description:'game slots version server '$(ENV)-$(VER) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
 		&& cd - \
 		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \

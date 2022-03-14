@@ -4,9 +4,11 @@ nameSuffix: -dev
 commonLabels:
   app: gsv
   env: dev
+  ver: 0
 commonAnnotations:
   app: gsv
   env: dev
+  ver: 0
 
 resources:
   - ../../base/
