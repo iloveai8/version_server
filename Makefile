@@ -45,8 +45,8 @@ push_stage:
 deploy_stage:
 	@echo ......deploy $(ENV) $(VER) ......
 	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit add annotation {ver:$(VER)} \
-		&& kustomize edit add annotation {"kubesphere.io/description":"game slots version server $(ENV)-$(VER)"} \
+		&& kustomize edit add annotation ver:$(VER) \
+		&& kustomize edit add annotation kubesphere.io/description:'game slots version server' $(ENV) '-' $(VER) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
 		&& cd - \
 		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
@@ -73,7 +73,7 @@ deploy_pro:
 	@cd $(DeployPath)/overlays/pro \
 		&& kustomize edit set namesuffix -- -pro-v${subst .,-,${VER}} \
 		&& kustomize edit set label ver:$(VER) \
-		&& kustomize edit set annotation ver:$(VER)\
+		&& kustomize edit set add ver:$(VER)\
 		&& kustomize edit add annotation kubesphere.io/description:'game slots version server pro-'$(VER) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):pro.$(VER) \
 		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal ver='$(VER)' \
