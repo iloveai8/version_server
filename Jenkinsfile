@@ -41,4 +41,4 @@ library 'fotoable-libs'
         map.put('cluster', "eks")
     }
 // 环境使用方法(dev为测试环境请使用k8s;stage为预发布使用ekst;master为生产环境请使用eks)
-ch ("cluster",map)
+game_slots_vsn ("cluster",map)
