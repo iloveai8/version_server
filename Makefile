@@ -55,32 +55,32 @@ deploy_stage:
 
 # ver:1.0.0
 build_pro:build
-	@echo  ......build stage pro $(VER) image......
-	@docker rmi -f $(HarborRegistry)/$(APP):pro.$(VER)
-	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):pro.$(VER) -f Dockerfile .
-	@echo  ......build stage pro $(VER) image finish end
+	@echo  ......build stage $(ENV) $(VER) image......
+	@docker rmi -f $(HarborRegistry)/$(APP):$(ENV).$(VER)
+	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):$(ENV).$(VER) -f Dockerfile .
+	@echo  ......build stage $(ENV) $(VER) image finish end
 
 # ver:1.0.0
 push_pro:
-	@echo ......push stage pro $(VER) image......
-	@docker push $(HarborRegistry)/$(APP):pro.$(VER)
-	@echo ......push stage pro $(VER) image finish end
+	@echo ......push stage $(ENV) $(VER) image......
+	@docker push $(HarborRegistry)/$(APP):$(ENV).$(VER)
+	@echo ......push stage $(ENV) $(VER) image finish end
 
 # ver:1.0.0
 deploy_pro:
-	@echo  ......deploy pro $(VER) ......
-	@cd $(DeployPath)/overlays/pro \
+	@echo  ......deploy $(ENV) $(VER) ......
+	@cd $(DeployPath)/overlays/$(ENV) \
 		&& kustomize edit set namesuffix -- -pro-v${subst .,-,${VER}} \
 		&& kustomize edit set label ver:$(VER) \
 		&& kustomize edit set add ver:$(VER) \
-		&& kustomize edit add annotation kubesphere.io/description:'game slots version server pro-'$(VER) \
+		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) \
 		&& kustomize edit set image $(HarborRegistry)/$(APP):pro.$(VER) \
 		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal ver='$(VER)' \
 		&& cd - \
-		&& kustomize build $(DeployPath)/overlays/pro | kubectl --kubeconfig $(config) apply -f - \
+		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
-	@echo  ......deploy pro $(VER) finish end......
+	@echo  ......deploy $(ENV) $(VER) finish end......
 
 .PHONY: all help clean build\
 		build_stage push_stage deploy_stage\
