@@ -1,6 +1,5 @@
 ENV=${env}
 VER=${ver}
-VSN=${vsn}
 config=${config}
 APP=gsv
 EXEC_NAME=gsv
@@ -64,7 +63,7 @@ build_pro:build
 # ver:1.0.0
 push_pro:
 	@echo ......push stage pro $(VER) image......
-	@docker push $(HarborRegistry)/$(APP):pro.$(VSN)
+	@docker push $(HarborRegistry)/$(APP):pro.$(VER)
 	@echo ......push stage pro $(VER) image finish end
 
 # ver:1.0.0
@@ -96,4 +95,4 @@ help:
 	@echo " --make deploy_stage - deploy stage(dev|pre) eg:env=dev ver=BuildNum|env=pre ver=BuildNum"
 	@echo " --make build_pro - build pro image eg:ver=1.0.0"
 	@echo " --make push_pro - push pro image to harbor eg:ver=1.0.0"
-	@echo " --make deploy_pro - deploy pro vsn=1.0.0 online eg:ver=1.0.0"
+	@echo " --make deploy_pro - deploy pro ver=1.0.0 online eg:ver=1.0.0"
