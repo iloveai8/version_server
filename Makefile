@@ -70,7 +70,7 @@ push_pro:
 deploy_pro:
 	@echo  ......deploy $(ENV) $(VER) ......
 	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit set namesuffix -- -pro-v${subst .,-,${VER}} \
+		&& kustomize edit set namesuffix -- -$(ENV)-v${subst .,-,${VER}} \
 		&& kustomize edit set label ver:$(VER) \
 		&& kustomize edit set add ver:$(VER) \
 		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) \
