@@ -71,8 +71,8 @@ deploy_pro:
 		&& kustomize edit set image $(HarborRegistry)/$(APP):pro.$(VSN) \
 		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal vsn=$(VSN) \
 		&& cd - \
-		&& kustomize build $(DeployPath)/overlays/pro | kubectl --kubeconfig=${config} apply -f - \
-		&& kubectl apply -f $(DeployPath)/ingress.yaml \
+		&& kustomize build $(DeployPath)/overlays/pro | kubectl --kubeconfig $(config) apply -f - \
+		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
 	@echo  ......deploy pro vsn=$(VSN) finish end......
 
