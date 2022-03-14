@@ -42,15 +42,15 @@ push_stage:
 
 # env:dev|pre ver=build_num
 deploy_stage:
-	@echo ......deploy $(ENV) $(VER) ......;source /etc/profile ;which aws ;echo $PATH
+	@echo ......deploy $(ENV) $(VER) ......
 	@cd $(DeployPath)/overlays/$(ENV) \
-	&& kustomize edit set label ver:$(VER) \
-	&& kustomize edit set annotation ver:$(VER)\
-	&& kustomize edit add annotation kubesphere.io/description:'game slots version server '$(ENV)-$(VER) \
-	&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
-	&& cd - \
-	&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
-	&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
+		&& kustomize edit set label ver:$(VER) \
+		&& kustomize edit set annotation ver:$(VER)\
+		&& kustomize edit add annotation kubesphere.io/description:'game slots version server '$(ENV)-$(VER) \
+		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
+		&& cd - \
+		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
+		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
 	@echo  ......deploy $(ENV) $(VER) finish end......
 
