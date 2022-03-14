@@ -43,19 +43,11 @@ push_stage:
 
 # env:dev|pre vsn=build_num
 deploy_stage:
-	@echo ......deploy $(ENV) vsn=$(BUILD_NUM) ......;source /etc/profile ;which aws ;echo $PATH
-	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit set namesuffix -- -$(ENV)-v${BUILD_NUM} \
-		&& kustomize edit set label vsn:$(BUILD_NUM) \
-		&& kustomize edit set annotation vsn:$(BUILD_NUM)\
-		&& kustomize edit add annotation kubesphere.io/description:'game slots version server '$(ENV)-$(VSN) \
-		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VSN) \
-		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal vsn=$(VSN) \
-		&& cd - \
-		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
-		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
-
-	@echo  ......deploy $(ENV) vsn=$(BUILD_NUM) finish end......
+	@echo  ......deploy stage env:$(ENV)......
+	@kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f -
+	@kubectl --kubeconfig $(config) apply -f $(DeployPath)/gw.yaml
+	@kubectl --kubeconfig $(config) apply -f $(DeployPath)/vs.yaml
+	@echo  ......deploy stage env:$(ENV) finish end
 
 # vsn:1.0.0
 build_pro:build
@@ -81,8 +73,9 @@ deploy_pro:
 		&& kustomize edit set image $(HarborRegistry)/$(APP):pro.$(VSN) \
 		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal vsn=$(VSN) \
 		&& cd - \
-		&& kustomize build $(DeployPath)/overlays/pro | kubectl --kubeconfig $(config) apply -f - \
-		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
+		&& kustomize build $(DeployPath)/overlays/pro | kubectl apply -f - \
+		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/gw.yaml \
+        && kubectl --kubeconfig $(config) apply -f $(DeployPath)/vs.yaml \
 
 	@echo  ......deploy pro vsn=$(VSN) finish end......
 
