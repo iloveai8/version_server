@@ -78,12 +78,7 @@ deploy_pro:
 		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal ver='$(VER)' \
 		&& cd - \
 		&& kustomize build $(DeployPath)/overlays/pro | kubectl --kubeconfig $(config) apply -f - \
-<<<<<<< HEAD
-		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/gw.yaml \
-        && kubectl --kubeconfig $(config) apply -f $(DeployPath)/vs.yaml \
-=======
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
->>>>>>> develop
 
 	@echo  ......deploy pro $(VER) finish end......
 
