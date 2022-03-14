@@ -42,7 +42,7 @@ push_stage:
 
 # env:dev|pre ver=build_num
 deploy_stage:
-	@echo ......deploy $(ENV) $(VER) ......
+	@echo ......deploy $(ENV).$(VER) ......
 	@cd $(DeployPath)/overlays/$(ENV) \
 		&& kustomize edit add annotation ver:$(VER) \
 		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) \
@@ -51,24 +51,24 @@ deploy_stage:
 		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
-	@echo ......deploy stage $(ENV) $(VER) finish end
+	@echo ......deploy stage $(ENV).$(VER) finish end
 
 # ver:1.0.0
 build_pro:build
-	@echo  ......build stage $(ENV) $(VER) image......
+	@echo  ......build stage $(ENV).$(VER) image......
 	@docker rmi -f $(HarborRegistry)/$(APP):$(ENV).$(VER)
 	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):$(ENV).$(VER) -f Dockerfile .
-	@echo  ......build stage $(ENV) $(VER) image finish end
+	@echo  ......build stage $(ENV).$(VER) image finish end
 
 # ver:1.0.0
 push_pro:
-	@echo ......push stage $(ENV) $(VER) image......
+	@echo ......push stage $(ENV).$(VER) image......
 	@docker push $(HarborRegistry)/$(APP):$(ENV).$(VER)
-	@echo ......push stage $(ENV) $(VER) image finish end
+	@echo ......push stage $(ENV).$(VER) image finish end
 
 # ver:1.0.0
 deploy_pro:
-	@echo  ......deploy $(ENV) $(VER) ......
+	@echo  ......deploy $(ENV).$(VER) ......
 	@cd $(DeployPath)/overlays/$(ENV) \
 		&& kustomize edit set namesuffix -- -$(ENV)-${subst .,-,${VER}} \
 		&& kustomize edit set label ver:$(VER) \
@@ -80,7 +80,7 @@ deploy_pro:
 		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
-	@echo  ......deploy $(ENV) $(VER) finish end......
+	@echo  ......deploy $(ENV).$(VER) finish end......
 
 .PHONY: all help clean build\
 		build_stage push_stage deploy_stage\
