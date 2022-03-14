@@ -45,7 +45,7 @@ push_stage:
 deploy_stage:
 	@echo ......deploy $(ENV) ver=$(BUILD_NUM) ......;source /etc/profile ;which aws ;echo $PATH
 	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit set namesuffix -- -$(ENV)-v$(BUILD_NUM) \
+		&& kustomize edit set namesuffix -- -$(ENV)-$(BUILD_NUM) \
 		&& kustomize edit set label ver:$(BUILD_NUM) \
 		&& kustomize edit set annotation ver:$(BUILD_NUM)\
 		&& kustomize edit add annotation kubesphere.io/description:'game slots version server '$(ENV)-$(BUILD_NUM) \
