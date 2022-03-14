@@ -1,6 +1,4 @@
 ENV=${env}
-VSN=${vsn}
-BUILD_NUM=${ver}
 config=${config}
 APP=gsv
 EXEC_NAME=gsv
@@ -25,7 +23,7 @@ build:clean fmt
 
 # env:dev|pre|pro
 run:build
-	@echo run --rm $(EXEC_NAME) $(ENV) $(VSN)
+	@echo run --rm $(EXEC_NAME) $(ENV)
 	@./$(EXEC_NAME) --config=conf/$(ENV).yaml
 
 # env:dev|pre ver=BuildNum
@@ -37,53 +35,57 @@ build_stage:build
 
 # env:dev|pre ver=BuildNum
 push_stage:
+	VER=${ver}
 	@echo  ......push stage $(ENV).$(BUILD_NUM) image......
-	@docker push $(HarborRegistry)/$(APP):$(ENV).$(BUILD_NUM)
+	@docker push $(HarborRegistry)/$(APP):$(ENV).$(VER)
 	@echo  ......push stage $(ENV).$(BUILD_NUM) image finish end
 
 # env:dev|pre ver=build_num
 deploy_stage:
-	@echo ......deploy $(ENV) ver=$(BUILD_NUM) ......;source /etc/profile ;which aws ;echo $PATH
+	VER=${ver}
+	@echo ......deploy $(ENV) $(VER) ......;source /etc/profile ;which aws ;echo $PATH
 	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit set label ver:$(BUILD_NUM) \
-		&& kustomize edit set annotation ver:$(BUILD_NUM)\
-		&& kustomize edit add annotation kubesphere.io/description:'game slots version server '$(ENV)-$(BUILD_NUM) \
-		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(BUILD_NUM) \
-		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal ver=$(BUILD_NUM) \
-		&& cd - \
-		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
-		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
+	&& kustomize edit set label ver:$(VER) \
+	&& kustomize edit set annotation ver:$(VER)\
+	&& kustomize edit add annotation kubesphere.io/description:'game slots version server '$(ENV)-$(VER) \
+	&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
+	&& cd - \
+	&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
+	&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
-	@echo  ......deploy $(ENV) ver=$(BUILD_NUM) finish end......
+	@echo  ......deploy $(ENV) $(VER) finish end......
 
 # vsn:1.0.0
 build_pro:build
-	@echo  ......build stage pro vsn=$(VSN) image......
-	@docker rmi -f $(HarborRegistry)/$(APP):pro.$(VSN)
-	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):pro.$(VSN) -f Dockerfile .
-	@echo  ......build stage pro vsn=$(VSN) image finish end
+	VER=${vsn}
+	@echo  ......build stage pro $(VER) image......
+	@docker rmi -f $(HarborRegistry)/$(APP):pro.$(VER)
+	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):pro.$(VER) -f Dockerfile .
+	@echo  ......build stage pro $(VER) image finish end
 
 # vsn:1.0.0
 push_pro:
-	@echo ......push stage pro vsn=$(VSN) image......
+	VER=${vsn}
+	@echo ......push stage pro $(VER) image......
 	@docker push $(HarborRegistry)/$(APP):pro.$(VSN)
-	@echo ......push stage pro vsn=$(VSN)  image finish end
+	@echo ......push stage pro $(VER) image finish end
 
 # vsn:1.0.0
 deploy_pro:
-	@echo  ......deploy pro vsn=$(VSN) ......;source /etc/profile ;which aws ;echo $PATH
+	VER=${vsn}
+	@echo  ......deploy pro $(VER) ......;source /etc/profile ;which aws ;echo $PATH
 	@cd $(DeployPath)/overlays/pro \
-		&& kustomize edit set namesuffix -- -pro-v${subst .,-,${VSN}} \
-		&& kustomize edit set label vsn:$(VSN) \
-		&& kustomize edit set annotation vsn:$(VSN)\
-		&& kustomize edit add annotation kubesphere.io/description:'game slots version server pro-'$(VSN) \
-		&& kustomize edit set image $(HarborRegistry)/$(APP):pro.$(VSN) \
-		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal vsn=$(VSN) \
+		&& kustomize edit set namesuffix -- -pro-v${subst .,-,${VER}} \
+		&& kustomize edit set label ver:$(VER) \
+		&& kustomize edit set annotation ver:$(VER)\
+		&& kustomize edit add annotation kubesphere.io/description:'game slots version server pro-'$(VER) \
+		&& kustomize edit set image $(HarborRegistry)/$(APP):pro.$(VER) \
+		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal vsn=$(VER) \
 		&& cd - \
 		&& kustomize build $(DeployPath)/overlays/pro | kubectl --kubeconfig $(config) apply -f - \
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
-	@echo  ......deploy pro vsn=$(VSN) finish end......
+	@echo  ......deploy pro $(VER) finish end......
 
 .PHONY: all help clean build\
 		build_stage push_stage deploy_stage\
