@@ -28,17 +28,18 @@ run:build
 
 # env:dev|pre ver=BuildNum
 build_stage:build
-	@echo  ......build stage $(ENV).$(BUILD_NUM) image......
-	@docker rmi -f $(HarborRegistry)/$(APP):$(ENV).$(BUILD_NUM)
-	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):$(ENV).$(BUILD_NUM) -f Dockerfile .
-	@echo  ......build stage $(ENV).$(BUILD_NUM) image finish end
+	VER=${ver}
+	@echo  ......build stage $(ENV).$(VER) image......
+	@docker rmi -f $(HarborRegistry)/$(APP):$(ENV).$(VER)
+	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):$(ENV).$(VER) -f Dockerfile .
+	@echo  ......build stage $(ENV).$(VER) image finish end
 
 # env:dev|pre ver=BuildNum
 push_stage:
 	VER=${ver}
-	@echo  ......push stage $(ENV).$(BUILD_NUM) image......
+	@echo  ......push stage $(ENV).$(VER) image......
 	@docker push $(HarborRegistry)/$(APP):$(ENV).$(VER)
-	@echo  ......push stage $(ENV).$(BUILD_NUM) image finish end
+	@echo  ......push stage $(ENV).$(VER) image finish end
 
 # env:dev|pre ver=build_num
 deploy_stage:
