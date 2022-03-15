@@ -39,14 +39,14 @@ func StartServer(web *config.WebConfig) {
 
 	router.GET("/heartbeat", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"vsn": os.Getenv("vsn"),
+			"vsn": os.Getenv("ver"),
 			"env":os.Getenv("env"),
 			"time": time.Now(),
 		})
 	})
 	router.GET("/:env/heartbeat", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"vsn": os.Getenv("vsn"),
+			"vsn": os.Getenv("ver"),
 			"env":os.Getenv("env"),
 			"time": time.Now(),
 		})
