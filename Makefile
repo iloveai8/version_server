@@ -53,28 +53,28 @@ deploy_stage:
 		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
 	@echo ......deploy stage $(ENV).$(VER) finish end......
-
+#
+#放弃使用多版本
 # env:pro ver=TagNum
-deploy_pro:
-	@echo  ......deploy $(ENV).$(VER) ......
-	@cd $(DeployPath)/overlays/$(ENV) \
-		&& kustomize edit set namesuffix -- -$(ENV)-${subst .,-,${VER}}  \
-		&& kustomize edit set label ver:$(VER) \
-		&& kustomize edit add annotation ver:$(VER) -f \
-		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) -f \
-		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal=ver='v-'$(VER) \
-		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
-		&& cd - \
-		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
-		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
-
-	@echo ......deploy stage $(ENV).$(VER) finish end......
+#deploy_pro:
+#	@echo  ......deploy $(ENV).$(VER) ......
+#	@cd $(DeployPath)/overlays/$(ENV) \
+#		&& kustomize edit set namesuffix -- -$(ENV)-${subst .,-,${VER}}  \
+#		&& kustomize edit set label ver:$(VER) \
+#		&& kustomize edit add annotation ver:$(VER) -f \
+#		&& kustomize edit add annotation kubesphere.io/description:'game slots version server-'$(ENV)$(VER) -f \
+#		&& kustomize edit add configmap gsv-cm --behavior=merge --from-literal=ver='v-'$(VER) \
+#		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
+#		&& cd - \
+#		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
+#		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
+#
+#	@echo ......deploy stage $(ENV).$(VER) finish end......
 
 .PHONY: all help clean compile\
-		build_stage
+		build_stage\
 		push_stage\
 		deploy_stage\
-		deploy_pro\
 
 help:
 	@echo "usage cmd: "
