@@ -33,6 +33,11 @@ spec:
                 configMapKeyRef:
                   name: gsv-cm
                   key: env
+            - name: ver
+              valueFrom:
+                configMapKeyRef:
+                  name: gsv-cm
+                  key: ver
           resources:
             limits:
               cpu: 100m
