@@ -16,19 +16,21 @@ fmt:
 clean:
 	@if [ -f $(EXEC_NAME) ] ; then rm $(EXEC_NAME) ; fi
 
-compile:clean fmt
-	@echo ......build......
+compile:
+	@echo ......compile......
 	@set CGO_ENABLED=0 GOOS=linux GOARCH=amd64
 	@go build -a -installsuffix cgo -o $(EXEC_NAME) $(MAIN)
-	@echo ......build finish end......
+	@echo ......compile finish end......
 
 # env:dev|pre|pro
-run:compile
+run:clean fmt compile
+	@echo  ......run $(ENV).$(VER)......
 	@echo run --rm $(EXEC_NAME) $(ENV)
 	@./$(EXEC_NAME) --config=conf/$(ENV).yaml
+	@echo  ......run $(ENV).$(VER) finish end......
 
 # env:dev|pre|pro ver=BuildNum|TagNum
-build_stage:compile
+build_stage:clean fmt compile
 	@echo  ......build stage $(ENV).$(VER) image......
 	@docker rmi -f $(HarborRegistry)/$(APP):$(ENV).$(VER)
 	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):$(ENV).$(VER) -f Dockerfile .
@@ -40,7 +42,7 @@ push_stage:
 	@docker push $(HarborRegistry)/$(APP):$(ENV).$(VER)
 	@echo  ......push stage $(ENV).$(VER) image finish end......
 
-# env:dev|pre ver=build_num
+# env:dev|pre ver=BuildNum
 deploy_stage:
 	@echo ......deploy $(ENV).$(VER) ......
 	@cd $(DeployPath)/overlays/$(ENV) \
@@ -80,7 +82,7 @@ help:
 	@echo "usage cmd: "
 	@echo " --make clean 		- rm executer"
 	@echo " --make compile 		- build executer"
-	@echo " --make build_stage  - build stage(dev|pre|pro) image 		eg:env=dev|pre|pro ver=buildNum|tagNum"
-	@echo " --make push_stage   - push stage(dev|pre) image to harbor 	eg:env=dev|pre|pro ver=buildNum|tagNum"
-	@echo " --make deploy_stage - deploy stage(dev|pre) ver(buildNum) 	eg:env=dev|pre ver=buildNum"
-	@echo " --make deploy_pro   - deploy stage(pro) ver(tagNum) online 	eg:env=pro ver=tagNum"
+	@echo " --make build_stage  - build stage(dev|pre|pro) image 						eg:env=dev|pre|pro 	ver=BuildNum|tagNum"
+	@echo " --make push_stage   - push stage(dev|pre) ver(BuildNum) image to harbor 	eg:env=dev|pre|pro 	ver=BuildNum|tagNum"
+	@echo " --make deploy_stage - deploy stage(dev|pre) ver(BuildNum) 					eg:env=dev|pre 		ver=BuildNum"
+	@echo " --make deploy_pro   - deploy stage(pro) ver(TagNum) online 					eg:env=pro 			ver=TagNum"
