@@ -30,24 +30,30 @@ func StartServer(web *config.WebConfig) {
 	router.NoRoute(func(c *gin.Context) {
 		c.String(http.StatusNotFound, "Not router")
 	})
+	router.LoadHTMLGlob("static/*")
+	router.GET("/akamai", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{})
+	})
+	router.GET("/:env/akamai", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{})
+	})
 	router.GET("/favicon.ico", func(c *gin.Context) {
 		c.String(http.StatusOK, "ok")
 	})
 	router.GET("/:env/favicon.ico", func(c *gin.Context) {
 		c.String(http.StatusOK, "ok")
 	})
-
 	router.GET("/heartbeat", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"vsn": os.Getenv("ver"),
-			"env":os.Getenv("env"),
+			"vsn":  os.Getenv("ver"),
+			"env":  os.Getenv("env"),
 			"time": time.Now(),
 		})
 	})
 	router.GET("/:env/heartbeat", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"vsn": os.Getenv("ver"),
-			"env":os.Getenv("env"),
+			"vsn":  os.Getenv("ver"),
+			"env":  os.Getenv("env"),
 			"time": time.Now(),
 		})
 	})

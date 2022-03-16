@@ -7,6 +7,19 @@ metadata:
     #   需要更换掉自己的证书
     #    alb.ingress.kubernetes.io/certificate-arn: >
     #      arn:aws:acm:us-east-2:392975326882:certificate/828eec7f-325b-44c2-9a84-a8176e26020a
+    alb.ingress.kubernetes.io/actions.gsv-service-dev: >
+      {
+        "type":"forward",
+        "forwardConfig":{
+            "targetGroups":[
+              {"serviceName":"gs-service-dev"}
+            ]
+        }
+      }
+    alb.ingress.kubernetes.io/conditions.gsv-service-dev: >
+      [
+        {"field":"path-pattern","pathPatternConfig":{"values":["/akamai"]}}
+      ]
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: '10'
     alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
     alb.ingress.kubernetes.io/success-codes: '200'
