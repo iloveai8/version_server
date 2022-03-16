@@ -7,16 +7,16 @@ metadata:
     #   需要更换掉自己的证书
     #    alb.ingress.kubernetes.io/certificate-arn: >
     #      arn:aws:acm:us-east-2:392975326882:certificate/828eec7f-325b-44c2-9a84-a8176e26020a
-    alb.ingress.kubernetes.io/actions.gsv-service-dev: >
+    alb.ingress.kubernetes.io/actions.gsv-service-pre: >
       {
         "type":"forward",
         "forwardConfig":{
             "targetGroups":[
-              {"serviceName":"gs-service-dev"}
+              {"serviceName":"gsv-service-pre"}
             ]
         }
       }
-    alb.ingress.kubernetes.io/conditions.gsv-service-dev: >
+    alb.ingress.kubernetes.io/conditions.gsv-service-pre: >
       [
         {"field":"path-pattern","pathPatternConfig":{"values":["/akamai"]}}
       ]

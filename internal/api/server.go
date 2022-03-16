@@ -43,12 +43,6 @@ func StartServer(web *config.WebConfig) {
 	router.GET("/:env/akamai", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "akamai.html", gin.H{})
 	})
-	router.GET("/favicon.ico", func(c *gin.Context) {
-		c.String(http.StatusOK, "ok")
-	})
-	router.GET("/:env/favicon.ico", func(c *gin.Context) {
-		c.String(http.StatusOK, "ok")
-	})
 	router.GET("/heartbeat", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"vsn":  os.Getenv("ver"),
