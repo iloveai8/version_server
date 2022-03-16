@@ -31,11 +31,17 @@ func StartServer(web *config.WebConfig) {
 		c.String(http.StatusNotFound, "Not router")
 	})
 	router.LoadHTMLGlob("static/*")
-	router.GET("/akamai", func(c *gin.Context) {
+	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", gin.H{})
 	})
-	router.GET("/:env/akamai", func(c *gin.Context) {
+	router.GET("/:env", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", gin.H{})
+	})
+	router.GET("/akamai", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "akamai.html", gin.H{})
+	})
+	router.GET("/:env/akamai", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "akamai.html", gin.H{})
 	})
 	router.GET("/favicon.ico", func(c *gin.Context) {
 		c.String(http.StatusOK, "ok")
