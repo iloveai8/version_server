@@ -1,11 +1,12 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>{{.env}}</title>
   </head>
 
   <body>
     <div id="header">
-      <div id="status"> game version server running!</div>
+      <div id="status"> game version {{.env}}:{{.ver}} server running! </div>
     </div>
   </body>
 </html> 
