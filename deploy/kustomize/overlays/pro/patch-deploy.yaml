@@ -40,11 +40,11 @@ spec:
                   key: ver
           resources:
             limits:
-              cpu: 100m
-              memory: 300Mi
+              cpu: 10m
+              memory: 20Mi
             requests:
-              cpu: 100m
-              memory: 300Mi
+              cpu: 5m
+              memory: 10Mi
           livenessProbe:
             httpGet:
               path: /heartbeat
