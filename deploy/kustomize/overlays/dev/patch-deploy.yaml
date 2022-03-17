@@ -3,12 +3,12 @@ apiVersion: apps/v1
 metadata:
   name: gsv-deploy
 spec:
-  replicas: 3
+  replicas: 2
   progressDeadlineSeconds: 600
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 25%
+      maxUnavailable: 50%
       maxSurge: 50%
   template:
     spec:
@@ -40,11 +40,11 @@ spec:
                   key: ver
           resources:
             limits:
-              cpu: 100m
-              memory: 300Mi
+              cpu: 200m
+              memory: 200Mi
             requests:
               cpu: 100m
-              memory: 300Mi
+              memory: 100Mi
           livenessProbe:
             httpGet:
               path: /heartbeat
