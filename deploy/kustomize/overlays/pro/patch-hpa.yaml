@@ -1,7 +1,7 @@
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: gsv-hpa
+  name: gsv-deploy
 spec:
   minReplicas: 1
   maxReplicas: 10
