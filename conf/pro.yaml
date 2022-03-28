@@ -8,7 +8,7 @@ redis:
   driverName: redisSentinel
   # redisSentinel
   db: 0
-  poolSize: 100
+  poolSize: 30
   password: J3eosdiSnk
   # redis sentinel
   masterName: mymaster
