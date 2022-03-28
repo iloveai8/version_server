@@ -2,4 +2,3 @@ apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
   name: gsv-deploy
-$patch: delete
