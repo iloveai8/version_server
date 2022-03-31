@@ -22,7 +22,7 @@ log:
   fileName: "./logs/game-server-vsn.log"
   fileLevel: info
 
-  consoleEnable: false
+  consoleEnable: true
   consoleLevel: info
 
   maxSize: 20
