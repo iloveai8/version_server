@@ -28,6 +28,7 @@ var IPMap = map[string]int{
 	"119.81.164.4":    1,
 	"129.226.60.247":  1,
 	"129.226.189.243": 1,
+	"43.154.154.31": 1,
 }
 
 type VsnHandler struct {
@@ -83,8 +84,8 @@ func (vh VsnHandler) Get(c *gin.Context) {
 	_ = json.Unmarshal([]byte(result), gmConf)
 	isGM := false
 	if gmConf.GMEnable {
-		logger.Logger.Warnf(" ==>gm enable:%v ", gmConf.GMEnable)
 		ip := c.ClientIP()
+		logger.Logger.Warnf(" ==>gm enable:%v ip:~p", gmConf.GMEnable, ip)
 		if matchIp(ip) {
 			logger.Logger.Warnf(" ==>client ip:%v is in inner white list:%v", ip, IPMap)
 			vsnInfo.SrvUrl = gmConf.GMSrvUrl
