@@ -85,7 +85,7 @@ func (vh VsnHandler) Get(c *gin.Context) {
 	isGM := false
 	if gmConf.GMEnable {
 		ip := c.ClientIP()
-		logger.Logger.Warnf(" ==>gm enable:%v ip:~p", gmConf.GMEnable, ip)
+		logger.Logger.Warnf(" ==>gm enable:%v ip:~%v", gmConf.GMEnable, ip)
 		if matchIp(ip) {
 			logger.Logger.Warnf(" ==>client ip:%v is in inner white list:%v", ip, IPMap)
 			vsnInfo.SrvUrl = gmConf.GMSrvUrl
