@@ -1,15 +1,15 @@
 package handler
 
 import (
-	`encoding/json`
-	`fmt`
-	`game_slots_vsn/internal/mod`
-	`game_slots_vsn/internal/respone`
+	"encoding/json"
+	"fmt"
+	"game_slots_vsn/internal/mod"
+	"game_slots_vsn/internal/respone"
 	"game_slots_vsn/pkg/logger"
 	"game_slots_vsn/pkg/redis"
-	`github.com/gin-gonic/gin`
+	"github.com/gin-gonic/gin"
 	"net"
-	`net/http`
+	"net/http"
 )
 
 const (
@@ -18,17 +18,23 @@ const (
 )
 
 var IPMap = map[string]int{
+	"1.202.246.18":    1,
 	"1.202.246.19":    1,
+	"1.202.246.20":    1,
+	"1.202.246.21":    1,
+	"1.202.246.30":    1,
+	"103.85.165.146":  1,
+	"106.120.91.66":   1,
+	"106.120.91.67":   1,
+	"106.120.91.68":   1,
 	"40.83.97.197":    1,
 	"47.75.45.195":    1,
 	"47.75.59.239":    1,
 	"49.51.197.144":   1,
-	"103.85.165.146":  1,
-	"106.120.91.66":   1,
 	"119.81.164.4":    1,
 	"129.226.60.247":  1,
 	"129.226.189.243": 1,
-	"43.154.154.31": 1,
+	"43.154.154.31":   1,
 }
 
 type VsnHandler struct {
