@@ -220,7 +220,7 @@ func MatchIp(IP string) bool {
 		//	return true
 		//}
 		if IP == SIP {
-			fmt.Println("addr:", IP, "in company ip array:v%", IPArray)
+			logger.Logger.Warnf("ip: %v in company ip array:%v", IP, IPArray)
 			return true
 		}
 	}
