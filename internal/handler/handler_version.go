@@ -83,6 +83,7 @@ func (vh VsnHandler) Get(c *gin.Context) {
 	isGM := false
 	if gmConf.GMEnable {
 		ip := c.ClientIP()
+		logger.Logger.Warnf(" ==>client ip:%v", ip)
 		if MatchIp(ip) {
 			logger.Logger.Warnf(" ==>gm enable:%v client ip:%v is in inner", gmConf.GMEnable, ip)
 			vsnInfo.SrvUrl = gmConf.GMSrvUrl
