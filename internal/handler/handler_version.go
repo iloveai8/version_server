@@ -77,12 +77,6 @@ func (vh VsnHandler) GetAll(c *gin.Context) {
 
 //Get 根据vsn获取信息
 func (vh VsnHandler) Get(c *gin.Context) {
-	ClientIP := ""
-	ClientIP = c.GetHeader("client_ip")
-	logger.Logger.Warnf(" ==>ClientIP:%v", ClientIP)
-	TrueClientIP := ""
-	TrueClientIP = c.GetHeader("true-client-ip")
-	logger.Logger.Warnf(" ==>TrueClientIP:%v", TrueClientIP)
 	vsn := c.Query("vsn")
 	if vsn == "" {
 		logger.Logger.Errorf("get vsn err:%v", vsn)
