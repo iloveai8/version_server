@@ -8,7 +8,6 @@ import (
 	"game_slots_vsn/pkg/logger"
 	"game_slots_vsn/pkg/redis"
 	"github.com/gin-gonic/gin"
-	"net"
 	"net/http"
 )
 
@@ -18,16 +17,36 @@ const (
 )
 
 var IPArray = [...]string{
-	"103.85.165.146/29",
-	"106.120.91.66/28",
-	"106.120.91.67/28",
-	"106.120.91.68/28",
-	"1.202.246.18/28",
-	"1.202.246.19/28",
-	"1.202.246.20/28",
-	"1.202.246.21/28",
-	"1.202.246.30/28",
+	"1.202.246.19",
+	"40.83.97.197",
+	"47.75.45.195",
+	"47.75.59.239",
+	"49.51.197.144",
+	"103.85.165.146",
+	"106.120.91.66",
+	"119.81.164.4",
+	"129.226.60.247",
+	"43.154.154.31",
+	"129.226.189.243",
+	"94.74.105.98",
+	"124.156.132.128",
+	"159.138.38.254",
+	"169.56.143.199",
+	"159.138.154.188",
+	"43.129.242.42",
 }
+
+//var IPArray = [...]string{
+//	"103.85.165.146/29",
+//	"106.120.91.66/28",
+//	"106.120.91.67/28",
+//	"106.120.91.68/28",
+//	"1.202.246.18/28",
+//	"1.202.246.19/28",
+//	"1.202.246.20/28",
+//	"1.202.246.21/28",
+//	"1.202.246.30/28",
+//}
 
 type VsnHandler struct {
 }
@@ -85,7 +104,7 @@ func (vh VsnHandler) Get(c *gin.Context) {
 		ip := c.ClientIP()
 		logger.Logger.Warnf(" ==>client ip:%v", ip)
 		if MatchIp(ip) {
-			logger.Logger.Warnf(" ==>gm enable:%v client ip:%v is in inner", gmConf.GMEnable, ip)
+			logger.Logger.Warnf(" ==>gm enable:%v client ip:%v is in inner", gmConf.GMEnable, IPArray)
 			vsnInfo.SrvUrl = gmConf.GMSrvUrl
 			vsnInfo.ResUrl = gmConf.GMResUrl
 			isGM = true
@@ -193,22 +212,15 @@ func (vh VsnHandler) InsertGmConf(c *gin.Context) {
 	c.JSON(http.StatusOK, respone.Success(gmConfInfo))
 }
 
-//"103.85.165.146/29",
-
-//"106.120.91.66/28",
-//"106.120.91.67/28",
-//"106.120.91.68/28",
-
-//"1.202.246.18/28",
-//"1.202.246.19/28",
-//"1.202.246.20/28",
-//"1.202.246.21/28",
-//"1.202.246.30/28",
 func MatchIp(IP string) bool {
-	for _, network := range IPArray {
-		_, subnet, _ := net.ParseCIDR(network)
-		if subnet.Contains(net.ParseIP(IP)) {
-			fmt.Println("addr:", IP, "in subnet:v%", subnet)
+	for _, SIP := range IPArray {
+		//_, subnet, _ := net.ParseCIDR(network)
+		//if subnet.Contains(net.ParseIP(IP)) {
+		//	fmt.Println("addr:", IP, "in subnet:v%", subnet)
+		//	return true
+		//}
+		if IP == SIP {
+			fmt.Println("addr:", IP, "in company ip array:v%", IPArray)
 			return true
 		}
 	}
