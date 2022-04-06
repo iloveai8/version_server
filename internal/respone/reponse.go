@@ -23,7 +23,7 @@ func Success(data interface{}) Response {
 	return Response{
 		Code:    OK.code,
 		Message: OK.message,
-		Data:  data ,
+		Data:    data,
 	}
 }
 

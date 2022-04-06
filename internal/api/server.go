@@ -1,12 +1,12 @@
 package api
 
 import (
-	`fmt`
+	"fmt"
 	"game_slots_vsn/internal/handler"
-	`game_slots_vsn/pkg/config`
+	"game_slots_vsn/pkg/config"
 	"game_slots_vsn/pkg/logger"
 	ginzap "github.com/gin-contrib/zap"
-	`github.com/gin-gonic/gin`
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
 	"time"
@@ -32,10 +32,10 @@ func StartServer(web *config.WebConfig) {
 	})
 	router.LoadHTMLGlob("static/*")
 	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{"env":os.Getenv("env"), "ver":os.Getenv("ver")})
+		c.HTML(http.StatusOK, "index.html", gin.H{"env": os.Getenv("env"), "ver": os.Getenv("ver")})
 	})
 	router.GET("/:env", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{"env":os.Getenv("env"), "ver":os.Getenv("ver")})
+		c.HTML(http.StatusOK, "index.html", gin.H{"env": os.Getenv("env"), "ver": os.Getenv("ver")})
 	})
 	router.GET("/akamai", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "akamai.html", gin.H{})

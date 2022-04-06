@@ -1,14 +1,14 @@
 package internal
 
 import (
-	`fmt`
-	`game_slots_vsn/internal/api`
+	"fmt"
+	"game_slots_vsn/internal/api"
 	"game_slots_vsn/pkg/config"
 	"game_slots_vsn/pkg/logger"
-	`os`
-	`os/signal`
-	`syscall`
-	`time`
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 //Run 程序入口

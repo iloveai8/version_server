@@ -16,8 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	`game_slots_vsn/internal`
-	`game_slots_vsn/pkg/config`
+	"game_slots_vsn/internal"
+	"game_slots_vsn/pkg/config"
 	"game_slots_vsn/pkg/logger"
 	"game_slots_vsn/pkg/redis"
 	"github.com/spf13/cobra"

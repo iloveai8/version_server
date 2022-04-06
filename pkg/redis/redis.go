@@ -1,11 +1,11 @@
 package redis
 
 import (
-	`errors`
-	`game_slots_vsn/pkg/config`
+	"errors"
+	"game_slots_vsn/pkg/config"
 	"game_slots_vsn/pkg/logger"
 	"github.com/go-redis/redis"
-	`time`
+	"time"
 )
 
 const (
