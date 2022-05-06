@@ -1,8 +1,16 @@
 package consts
 
 const (
+	CacheVsnKey    string = "vsn."
+	CacheGMConfKey string = "gm.conf."
+
 	CacheServerKey string = "v2.server."
 	CacheGMKey     string = "v2.gm."
+
+	ServerTypeDefault int = 0
+	ServerTypeDEV     int = 1
+	ServerTypePRE     int = 2
+	ServerTypePRO     int = 3
 )
 
 var IPList = [...]string{

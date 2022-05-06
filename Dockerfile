@@ -4,7 +4,7 @@ WORKDIR /home/service/gsv
 COPY gsv .
 COPY conf/ conf/
 COPY static/ static/
-ENTRYPOINT ./gsv  --config=./conf/${env}.yaml
+ENTRYPOINT ./gsv  start --config=./conf/${env}.yaml
 
 #docker build --rm --no-cache -t harbor.nuclearport.com/jackpotland/gsv:dev -f Dockerfile .
 #docker run --rm -p 7001:9091 -e env=dev --name gsv-dev -d harbor.nuclearport.com/jackpotland/gsv:dev

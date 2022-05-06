@@ -23,7 +23,8 @@ func (cGM *cGm) AddGM(ctx *gin.Context) {
 	gmInfo := module.NewGM()
 	err := json.Unmarshal(buf[:n], gmInfo)
 
-	if err != nil || gmInfo.GMSrvUrl == "" || gmInfo.GMResUrl == "" {
+	//if err != nil || gmInfo.GMSrvUrl == "" || gmInfo.GMResUrl == "" {
+	if err != nil {
 		logger.Logger.Errorf("add1 gm info error:%v", gmInfo)
 		ctx.JSON(http.StatusOK, rsp.Fail(rsp.ParamsError, map[string]string{}))
 		return

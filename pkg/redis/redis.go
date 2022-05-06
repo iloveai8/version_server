@@ -2,21 +2,41 @@ package redis
 
 import (
 	"errors"
-	"game_slots_vsn/pkg/config"
+	`fmt`
 	"game_slots_vsn/pkg/logger"
 	"github.com/go-redis/redis"
+	`github.com/spf13/viper`
+	`os`
 	"time"
 )
+
+type RedisConf struct {
+	DriverName string `yaml:"driveName"`
+	Host       string `yaml:"addr"`
+
+	MasterName string   `yaml:"masterName"`
+	Hosts      []string `yaml:"hosts"`
+
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
+	PoolSize int    `yaml:"poolSize"`
+}
 
 const (
 	DriverRedis    string = "redis"
 	DriverSentinel string = "redisSentinel"
 )
 
-var Client *redis.Client
+var (
+	c      = &RedisConf{}
+	Client *redis.Client
+)
 
-// init redis
-func InitRedis(c *config.RedisConfig) {
+func Init() {
+	if err := viper.UnmarshalKey("redis", c); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, "config modify fail.", err)
+		os.Exit(0)
+	}
 	switch c.DriverName {
 	case DriverRedis:
 		logger.Logger.Infof("redis match driver:%v.", DriverRedis)
@@ -27,6 +47,7 @@ func InitRedis(c *config.RedisConfig) {
 	default:
 		panic(errors.New("connection not available"))
 	}
+
 	if _, err := Client.Ping().Result(); err != nil {
 		panic(errors.New("init redis error"))
 	}
@@ -34,7 +55,7 @@ func InitRedis(c *config.RedisConfig) {
 }
 
 // redis option
-func redisOptions(c *config.RedisConfig) *redis.Options {
+func redisOptions(c *RedisConf) *redis.Options {
 	return &redis.Options{
 		Addr:               c.Host,
 		DB:                 c.DB,
@@ -49,7 +70,7 @@ func redisOptions(c *config.RedisConfig) *redis.Options {
 }
 
 // redis sentinel option
-func sentinelOptions(c *config.RedisConfig) *redis.FailoverOptions {
+func sentinelOptions(c *RedisConf) *redis.FailoverOptions {
 	return &redis.FailoverOptions{
 		MasterName:         c.MasterName,
 		SentinelAddrs:      c.Hosts,

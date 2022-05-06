@@ -1,15 +1,31 @@
 package logger
 
 import (
-	"game_slots_vsn/pkg/config"
+	`fmt`
+	`github.com/spf13/viper`
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
 )
 
-//Level logger Level
-type Level string
+type (
+	Level   string
+	LogConf struct {
+		FileEnable bool   `yaml:"fileEnable"`
+		FileName   string `yaml:"fileName"`
+		FileLevel  string `yaml:"-,fileLevel"`
+
+		ConsoleEnable bool   `yaml:"consoleEnable"`
+		ConsoleLevel  string `yaml:"-,consoleLevel"`
+
+		MaxSize    int  `yaml:"maxSize"`
+		MaxBackups int  `yaml:"maxBackups"`
+		MaxAges    int  `yaml:"maxAges"`
+		Compress   bool `yaml:"compress"`
+		JsonEnable bool `yaml:"jsonEnable"`
+	}
+)
 
 const (
 	//DebugLevel has verbose message
@@ -25,10 +41,15 @@ const (
 )
 
 var (
+	c      = &LogConf{}
 	Logger *zap.SugaredLogger
 )
 
-func InitLogger(c *config.LogConfig) {
+func Init() {
+	if err := viper.UnmarshalKey("log", c); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, "config modify fail.", err)
+		os.Exit(0)
+	}
 	cores := make([]zapcore.Core, 0)
 
 	if c.ConsoleEnable {

@@ -19,35 +19,36 @@ func Server() *sServer {
 	return &sV
 }
 
-func (sV sServer) GetAllVersion() []*module.Server {
-	serverStrList, _ := redis.Client.HVals(consts.CacheServerKey).Result()
-	serverInfoList := make([]*module.Server, len(serverStrList), cap(serverStrList))
-	for i, serverStr := range serverStrList {
+func (sV sServer) GetAllServer() map[string]*module.Server {
+	m, _ := redis.Client.HGetAll(consts.CacheServerKey).Result()
+	serverMap := make(map[string]*module.Server, len(m))
+	for key, serverStr := range m {
 		serverInfo := module.NewServer()
 		_ = json.Unmarshal([]byte(serverStr), serverInfo)
-		serverInfoList[i] = serverInfo
+		serverMap[key] = serverInfo
 	}
-	return serverInfoList
+	return serverMap
 }
 
-func (sV sServer) GetVersionByKey(Key string) (*module.Server, error) {
-	serverStr, err1 := redis.Client.HGet(consts.CacheServerKey, Key).Result()
+func (sV sServer) GetServerByKey(maxVsn string) (*module.Server, error) {
+	serverStr, err1 := redis.Client.HGet(consts.CacheServerKey, maxVsn).Result()
 	if err1 != nil {
-		return nil, err1
+		serverInfo := module.NewServer()
+		return serverInfo, nil
 	}
 	serverInfo := module.NewServer()
 	_ = json.Unmarshal([]byte(serverStr), serverInfo)
 	return serverInfo, nil
 }
 
-func (sV sServer) AddVersion(server *module.Server) (bool, error) {
+func (sV sServer) AddServer(maxVsn string, server *module.Server) (bool, error) {
 	serverByte, err := json.Marshal(server)
 	if err != nil {
 		return false, err
 	}
-	return redis.Client.HSet(consts.CacheServerKey, server.Vsn, serverByte).Result()
+	return redis.Client.HSet(consts.CacheServerKey, maxVsn, serverByte).Result()
 }
 
-func (sV sServer) DeleteVersion(key string) (int64, error) {
-	return redis.Client.HDel(consts.CacheServerKey, key).Result()
+func (sV sServer) DeleteServer(maxVsn string) (int64, error) {
+	return redis.Client.HDel(consts.CacheServerKey, maxVsn).Result()
 }
