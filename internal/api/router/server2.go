@@ -29,7 +29,7 @@ func RServer2(e *gin.Engine) {
 		v2es.PUT("", controller.Server().UpdateServer)      //根据id更新用户
 		v2es.DELETE("", controller.Server().DeleteServer)   //根据id删除用户
 	}
-	v2eg := v2e.Group("/:env/gm")
+	v2eg := v2e.Group("/gm")
 	{
 		v2eg.PUT("", controller.GM().AddGM) //保存GM开关配置
 	}
