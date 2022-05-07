@@ -71,7 +71,7 @@ func (cV *cServer) GetServer(ctx *gin.Context) {
 			if maxVsn == vsn {
 				subVsnList := server.SubServer
 				for k, v := range subVsnList {
-					if v.Type <= consts.ServerTypeDEV {
+					if v.Type < consts.ServerTypeDEV {
 						delete(subVsnList, k)
 					}
 				}
