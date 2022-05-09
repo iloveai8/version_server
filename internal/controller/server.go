@@ -118,24 +118,32 @@ func (cV *cServer) GetServer(ctx *gin.Context) {
 }
 
 func gmFilter(isGm bool, maxVsn string, server *module.Server, subServerList []*module.SubServer) []*module.SubServer {
-	if isGm {
-		if strings.IndexAny(maxVsn, ".") == -1 {
-			subVsnList := server.SubServer
-			for _, subServer := range subVsnList {
-				if subServer.Type > consts.ServerTypeDefault {
-					subServerList = append(subServerList, subServer)
-				}
-			}
-		} else {
-			subVsnList := server.SubServer
-			for _, subServer := range subVsnList {
-				if subServer.Type > consts.ServerTypeDefault {
-					subServer.Vsn = joinVsn(maxVsn, subServer.Vsn)
-					subServerList = append(subServerList, subServer)
-				}
+	if isGm && strings.IndexAny(maxVsn, ".") == -1 {
+		subVsnList := server.SubServer
+		for _, subServer := range subVsnList {
+			if subServer.Type > consts.ServerTypeDefault {
+				subServerList = append(subServerList, subServer)
 			}
 		}
 	}
+	//if isGm {
+	//	if strings.IndexAny(maxVsn, ".") == -1 {
+	//		subVsnList := server.SubServer
+	//		for _, subServer := range subVsnList {
+	//			if subServer.Type > consts.ServerTypeDefault {
+	//				subServerList = append(subServerList, subServer)
+	//			}
+	//		}
+	//	} else {
+	//		subVsnList := server.SubServer
+	//		for _, subServer := range subVsnList {
+	//			if subServer.Type > consts.ServerTypeDefault {
+	//				subServer.Vsn = joinVsn(maxVsn, subServer.Vsn)
+	//				subServerList = append(subServerList, subServer)
+	//			}
+	//		}
+	//	}
+	//}
 	return subServerList
 }
 
