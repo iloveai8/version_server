@@ -1,18 +1,18 @@
 package controller
 
 import (
-	`encoding/json`
-	`game_slots_vsn/internal/api/rsp`
-	`game_slots_vsn/internal/consts`
-	`game_slots_vsn/internal/module`
-	`game_slots_vsn/internal/service`
-	`game_slots_vsn/internal/utls`
-	`game_slots_vsn/pkg/logger`
-	`github.com/gin-gonic/gin`
-	`net/http`
-	`sort`
-	`strconv`
-	`strings`
+	"encoding/json"
+	"game_slots_vsn/internal/api/rsp"
+	"game_slots_vsn/internal/consts"
+	"game_slots_vsn/internal/module"
+	"game_slots_vsn/internal/service"
+	"game_slots_vsn/internal/utls"
+	"game_slots_vsn/pkg/logger"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"sort"
+	"strconv"
+	"strings"
 )
 
 type cServer struct {
@@ -95,7 +95,7 @@ func (cV *cServer) GetServer(ctx *gin.Context) {
 							delete(subVsnList, k)
 						}
 					} else {
-						if v.Type < consts.ServerTypePRO {
+						if v.Type != consts.ServerTypePRO && v.Type != consts.ServerTypeDefault {
 							delete(subVsnList, k)
 						}
 					}
