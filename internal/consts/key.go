@@ -1,9 +1,6 @@
 package consts
 
 const (
-	CacheVsnKey    string = "vsn."
-	CacheGMConfKey string = "gm.conf."
-
 	CacheServerKey string = "v2.server."
 	CacheGMKey     string = "v2.gm."
 

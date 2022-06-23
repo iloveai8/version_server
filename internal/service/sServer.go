@@ -2,6 +2,7 @@ package service
 
 import (
 	`encoding/json`
+	`fmt`
 	`game_slots_vsn/internal/consts`
 	`game_slots_vsn/internal/module`
 	`game_slots_vsn/pkg/redis`
@@ -19,8 +20,8 @@ func Server() *sServer {
 	return &sV
 }
 
-func (sV sServer) GetAllServer() map[string]*module.Server {
-	m, _ := redis.Client.HGetAll(consts.CacheServerKey).Result()
+func (sV sServer) GetAllServer(platType string) map[string]*module.Server {
+	m, _ := redis.Client.HGetAll(makeServerCacheKey(platType)).Result()
 	serverMap := make(map[string]*module.Server, len(m))
 	for key, serverStr := range m {
 		serverInfo := module.NewServer()
@@ -30,8 +31,8 @@ func (sV sServer) GetAllServer() map[string]*module.Server {
 	return serverMap
 }
 
-func (sV sServer) GetServerByKey(maxVsn string) (*module.Server, error) {
-	serverStr, err1 := redis.Client.HGet(consts.CacheServerKey, maxVsn).Result()
+func (sV sServer) GetServerByKey(platType, maxVsn string) (*module.Server, error) {
+	serverStr, err1 := redis.Client.HGet(makeServerCacheKey(platType), maxVsn).Result()
 	if err1 != nil {
 		serverInfo := module.NewServer()
 		return serverInfo, nil
@@ -41,14 +42,22 @@ func (sV sServer) GetServerByKey(maxVsn string) (*module.Server, error) {
 	return serverInfo, nil
 }
 
-func (sV sServer) AddServer(maxVsn string, server *module.Server) (bool, error) {
+func (sV sServer) AddServer(platType, maxVsn string, server *module.Server) (bool, error) {
 	serverByte, err := json.Marshal(server)
 	if err != nil {
 		return false, err
 	}
-	return redis.Client.HSet(consts.CacheServerKey, maxVsn, serverByte).Result()
+	return redis.Client.HSet(makeServerCacheKey(platType), maxVsn, serverByte).Result()
 }
 
-func (sV sServer) DeleteServer(maxVsn string) (int64, error) {
-	return redis.Client.HDel(consts.CacheServerKey, maxVsn).Result()
+func (sV sServer) DeleteServer(platType, maxVsn string) (int64, error) {
+	return redis.Client.HDel(makeServerCacheKey(platType), maxVsn).Result()
+}
+
+func makeServerCacheKey(platType string) string {
+	key := consts.CacheServerKey
+	if len(platType) > 0 {
+		key = fmt.Sprintf("%s%s.", key, platType)
+	}
+	return key
 }

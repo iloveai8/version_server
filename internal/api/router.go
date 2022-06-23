@@ -7,6 +7,5 @@ import (
 
 func Init(e *gin.Engine) {
 	router.ROther(e)
-	router.RServer1(e)
-	router.RServer2(e)
+	router.RServer(e)
 }

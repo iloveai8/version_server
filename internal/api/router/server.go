@@ -5,7 +5,7 @@ import (
 	`github.com/gin-gonic/gin`
 )
 
-func RServer2(e *gin.Engine) {
+func RServer(e *gin.Engine) {
 	v2 := e.Group("/v2")
 	v2s := v2.Group("server")
 	{
