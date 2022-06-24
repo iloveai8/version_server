@@ -338,11 +338,11 @@ func doPlatType(platType, env, vsn, clientIP string) (bool, []*module.SubServer)
 	for maxVsn, server := range platTypeServerMap {
 		if maxVsn == vsn {
 			subVsnMap := server.SubServer
-			for subVsn, subServer := range subVsnMap {
-				if subServer.Type < consts.ServerTypePRE {
-					delete(subVsnMap, subVsn)
-				}
-			}
+			//for subVsn, subServer := range subVsnMap {
+			//if subServer.Type < consts.ServerTypePRE {
+			//	delete(subVsnMap, subVsn)
+			//}
+			//}
 			if len(subVsnMap) > 0 {
 				maxSubServer := getMaxServer(subVsnMap)
 				maxSubServer.Vsn = joinVsn(maxVsn, maxSubServer.Vsn)
