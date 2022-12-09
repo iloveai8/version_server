@@ -3,14 +3,15 @@ package api
 import "C"
 import (
 	"fmt"
-	`game_slots_vsn/pkg/logger`
-	ginzap `github.com/gin-contrib/zap`
-	`github.com/gin-gonic/gin`
-	`github.com/spf13/viper`
+	"game_slots_vsn/pkg/logger"
 	"os"
-	`os/signal`
-	`syscall`
+	"os/signal"
+	"syscall"
 	"time"
+
+	ginzap "github.com/gin-contrib/zap"
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 type WebConf struct {
@@ -31,7 +32,20 @@ func Run() {
 func startWeb() {
 	gin.SetMode(gin.ReleaseMode)
 	e := gin.New()
-	e.Use(ginzap.Ginzap(logger.Logger.Desugar(), time.RFC3339, true))
+	//e.Use(ginzap.Ginzap(logger.Logger.Desugar(), time.RFC3339, true))
+	e.Use(
+		ginzap.GinzapWithConfig(
+			logger.Logger.Desugar(),
+			&ginzap.Config{
+				TimeFormat: time.RFC3339,
+				UTC:        true,
+				SkipPaths: []string{
+					"/heartbeat",
+					"/favicon.ico",
+				},
+			},
+		),
+	)
 	e.Use(ginzap.RecoveryWithZap(logger.Logger.Desugar(), true))
 
 	Init(e)
