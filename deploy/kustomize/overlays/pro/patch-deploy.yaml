@@ -3,7 +3,7 @@ apiVersion: apps/v1
 metadata:
   name: gsv-deploy
 spec:
-  replicas: 3
+  replicas: 5
   progressDeadlineSeconds: 600
   strategy:
     type: RollingUpdate
@@ -40,11 +40,11 @@ spec:
                   key: ver
           resources:
             limits:
-              cpu: 100m
-              memory: 100Mi
+              cpu: 200m
+              memory: 200Mi
             requests:
-              cpu: 50m
-              memory: 50Mi
+              cpu: 200m
+              memory: 200Mi
           lifecycle:
             preStop:
               exec:
