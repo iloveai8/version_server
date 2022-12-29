@@ -7,7 +7,7 @@ redis:
   driverName: redis
   db: 15
   poolSize: 10
-  host: 192.168.1.33:6379
+  host: 10.240.10.153:6379
 
 log:
   fileEnable: true
