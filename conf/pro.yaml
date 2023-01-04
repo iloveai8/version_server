@@ -4,18 +4,10 @@ web:
   port: 9091
 
 redis:
-  # redis driver name:redis|redisSentinel
-  driverName: redisSentinel
-  # redisSentinel
+  driverName: redis
   db: 0
   poolSize: 10
-  password: J3eosdiSnk
-  # redis sentinel
-  masterName: mymaster
-  hosts:
-    - 10.113.7.61:26379
-    - 10.113.10.195:26379
-    - 10.113.16.32:26379
+  host: gs-redis.dz9dz0.ng.0001.use2.cache.amazonaws.com:6379
 
 log:
   fileEnable: true
