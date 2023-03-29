@@ -6,7 +6,7 @@ import (
 	"game_slots_vsn/internal/consts"
 	"game_slots_vsn/internal/module"
 	"game_slots_vsn/internal/service"
-	`game_slots_vsn/internal/utls`
+	"game_slots_vsn/internal/utls"
 	"game_slots_vsn/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -27,11 +27,15 @@ func (cV *cServer) GetServerList(ctx *gin.Context) {
 
 	serverMap := service.Server().GetAllServer(platType)
 	subServerList := make([]*module.SubServer, 0)
+
 	for maxVsn, server := range serverMap {
 		if strings.IndexAny(maxVsn, ".") == -1 {
 			subServerList = append(subServerList, server.SubServer[maxVsn])
 		} else {
 			subVsnList := server.SubServer
+			if len(subVsnList) == 0 {
+				service.Server().DeleteServer(platType, maxVsn)
+			}
 			for _, subServer := range subVsnList {
 				subServer.Vsn = joinVsn(maxVsn, subServer.Vsn)
 				subServerList = append(subServerList, subServer)
@@ -64,16 +68,18 @@ func (cV *cServer) GetServer(ctx *gin.Context) {
 		return
 	}
 	isGm := false
+	isBlock := false
 	subServerList := make([]*module.SubServer, 0)
 	if len(platType) == 0 {
 		//老版本
-		isGm, subServerList = doDefault(platType, env, vsn, ctx.ClientIP())
+		isGm, isBlock, subServerList = doDefault(platType, env, vsn, ctx.ClientIP())
 	} else {
-		isGm, subServerList = doPlatType(platType, env, vsn, ctx.ClientIP())
+		isGm, isBlock, subServerList = doPlatType(platType, env, vsn, ctx.ClientIP())
 	}
 	ctx.JSON(http.StatusOK, rsp.Success(map[string]interface{}{
 		"serverList": subServerList,
 		"gm":         isGm,
+		"block":      isBlock,
 	}))
 	return
 }
@@ -271,8 +277,10 @@ func getMaxServer(m map[string]*module.SubServer) *module.SubServer {
 	return m[strconv.Itoa(max)]
 }
 
-func doDefault(platType, env, vsn, clientIP string) (bool, []*module.SubServer) {
+func doDefault(platType, env, vsn, clientIP string) (bool, bool, []*module.SubServer) {
+	gmInfo := service.GM().GetGM()
 	isGm := false
+	isBlock := gmInfo.Block
 	subServerList := make([]*module.SubServer, 0)
 	if env == "dev" {
 		isGm = true
@@ -295,7 +303,6 @@ func doDefault(platType, env, vsn, clientIP string) (bool, []*module.SubServer) 
 			}
 		}
 	} else if env == "pro" {
-		gmInfo := service.GM().GetGM()
 		serverMap := service.Server().GetAllServer(platType)
 		isGm = gmInfo.GMEnable && utls.MatchIp(clientIP)
 		for maxVsn, server := range serverMap {
@@ -322,16 +329,17 @@ func doDefault(platType, env, vsn, clientIP string) (bool, []*module.SubServer) 
 			}
 		}
 	}
-	return isGm, subServerList
+	return isGm, isBlock, subServerList
 }
 
-func doPlatType(platType, env, vsn, clientIP string) (bool, []*module.SubServer) {
+func doPlatType(platType, env, vsn, clientIP string) (bool, bool, []*module.SubServer) {
 	isGm := false
+	gmInfo := service.GM().GetGM()
+	isBlock := gmInfo.Block
 	subServerList := make([]*module.SubServer, 0)
 	if env == "dev" {
 		isGm = true
 	} else if env == "pro" {
-		gmInfo := service.GM().GetGM()
 		isGm = gmInfo.GMEnable && utls.MatchIp(clientIP)
 	}
 	platTypeServerMap := service.Server().GetAllServer(platType)
@@ -365,5 +373,5 @@ func doPlatType(platType, env, vsn, clientIP string) (bool, []*module.SubServer)
 			}
 		}
 	}
-	return isGm, subServerList
+	return isGm, isBlock, subServerList
 }

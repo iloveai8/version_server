@@ -1,13 +1,13 @@
 package controller
 
 import (
-	`encoding/json`
-	`game_slots_vsn/internal/api/rsp`
-	`game_slots_vsn/internal/module`
-	`game_slots_vsn/internal/service`
-	`game_slots_vsn/pkg/logger`
-	`github.com/gin-gonic/gin`
-	`net/http`
+	"encoding/json"
+	"game_slots_vsn/internal/api/rsp"
+	"game_slots_vsn/internal/module"
+	"game_slots_vsn/internal/service"
+	"game_slots_vsn/pkg/logger"
+	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type cGm struct {
@@ -22,7 +22,7 @@ func (cGM *cGm) AddGM(ctx *gin.Context) {
 	n, _ := ctx.Request.Body.Read(buf)
 	gmInfo := module.NewGM()
 	err := json.Unmarshal(buf[:n], gmInfo)
-
+	logger.Logger.Infof("gmInfo:%v", gmInfo)
 	//if err != nil || gmInfo.GMSrvUrl == "" || gmInfo.GMResUrl == "" {
 	if err != nil {
 		logger.Logger.Errorf("add1 gm info error:%v", gmInfo)
