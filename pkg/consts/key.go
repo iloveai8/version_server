@@ -10,6 +10,30 @@ const (
 	ServerTypePRO     int = 3
 )
 
+// 配置文件
+const (
+	APP    = "e"
+	Logger = "log"
+	SERVER = "server"
+	REDIS  = "redis"
+	MONGO  = "mongo"
+)
+
+// redis 连接类型
+const (
+	Redis    = "redis"
+	Sentinel = "sentinel"
+	Cluster  = "cluster"
+)
+
+// mongo 连接类型
+const (
+	Mongo      = "mongo"
+	ReplicaSet = "replicaSet"
+	Sharded    = "sharded"
+	Atlas      = "atlas"
+)
+
 var IPList = [...]string{
 	"1.202.246.19",
 	"40.83.97.197",

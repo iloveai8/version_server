@@ -1,13 +1,20 @@
-# 33环境
-web:
-  ip: ""
+server:
+  runMode: "release"
+  ip: "localhost"
   port: 9091
 
 redis:
-  driverName: redis
+  #   redis|
+  driverName: "redis"
+  masterName: "redis"
+  password: ""
+  hosts:
+    - "gs-redis.dz9dz0.ng.0001.use2.redis.amazonaws.com:6379"
   db: 0
   poolSize: 10
-  host: gs-redis.dz9dz0.ng.0001.use2.cache.amazonaws.com:6379
+  maxIdle: 10
+  maxActive: 10
+  idleTimeout: 20000
 
 log:
   fileEnable: true

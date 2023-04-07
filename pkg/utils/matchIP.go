@@ -1,7 +1,7 @@
-package utls
+package utils
 
 import (
-	`game_slots_vsn/internal/consts`
+	"game_slots_vsn/pkg/consts"
 )
 
 func MatchIp(IP string) bool {

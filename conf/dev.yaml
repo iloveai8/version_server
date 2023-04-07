@@ -1,24 +1,30 @@
 # 开发环境
-web:
-  ip: ""
-  port: 9091
+
+server:
+    runMode: "debug"
+    ip: "127.0.0.1"
+    port: 9091
 
 redis:
-  driverName: redis
-  db: 15
-  poolSize: 10
-  host: 10.240.10.153:6379
+    password: ""
+    hosts:
+        - "10.240.10.153:6379"
+    db: 15
+    poolSize: 10
+    maxIdle: 10
+    maxActive: 10
+    idleTimeout: 20000
 
 log:
-  fileEnable: true
-  fileName: "./logs/game-server-vsn.log"
-  fileLevel: info
+    fileEnable: true
+    fileName: "./logs/game-server-vsn.log"
+    fileLevel: info
 
-  consoleEnable: true
-  consoleLevel: info
+    consoleEnable: true
+    consoleLevel: debug
 
-  maxSize: 20
-  maxBackups: 10
-  maxAges: 30
-  compress: true
-  jsonEnable: true
+    maxSize: 20
+    maxBackups: 10
+    maxAges: 30
+    compress: true
+    jsonEnable: true

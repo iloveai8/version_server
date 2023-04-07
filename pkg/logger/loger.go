@@ -1,30 +1,14 @@
 package logger
 
 import (
-	`fmt`
-	`github.com/spf13/viper`
+	"game_slots_vsn/pkg/setting"
+	ginzap "github.com/gin-contrib/zap"
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
-)
-
-type (
-	Level   string
-	LogConf struct {
-		FileEnable bool   `yaml:"fileEnable"`
-		FileName   string `yaml:"fileName"`
-		FileLevel  string `yaml:"-,fileLevel"`
-
-		ConsoleEnable bool   `yaml:"consoleEnable"`
-		ConsoleLevel  string `yaml:"-,consoleLevel"`
-
-		MaxSize    int  `yaml:"maxSize"`
-		MaxBackups int  `yaml:"maxBackups"`
-		MaxAges    int  `yaml:"maxAges"`
-		Compress   bool `yaml:"compress"`
-		JsonEnable bool `yaml:"jsonEnable"`
-	}
+	"time"
 )
 
 const (
@@ -41,23 +25,21 @@ const (
 )
 
 var (
-	c      = &LogConf{}
-	Logger *zap.SugaredLogger
+	sugar *zap.SugaredLogger
 )
 
-func Init() {
-	if err := viper.UnmarshalKey("log", c); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, "config modify fail.", err)
-		os.Exit(0)
-	}
-	cores := make([]zapcore.Core, 0)
+type (
+	Level string
+)
 
+func Setup(c *setting.LoggerSetting) {
+	cores := make([]zapcore.Core, 0)
 	if c.ConsoleEnable {
 		lvl := zap.NewAtomicLevel()
 		lvl.SetLevel(getZapLevel(Level(c.ConsoleLevel)))
 
 		writeSync := zapcore.Lock(os.Stdout)
-		core := zapcore.NewCore(getEncoder(c.JsonEnable), writeSync, lvl)
+		core := zapcore.NewCore(getEncoder(c.FileJsonEnable), writeSync, lvl)
 		cores = append(cores, core)
 	}
 
@@ -66,21 +48,42 @@ func Init() {
 		lvl.SetLevel(getZapLevel(Level(c.FileLevel)))
 		writerSync := zapcore.AddSync(&lumberjack.Logger{
 			Filename:   c.FileName,
-			MaxSize:    c.MaxSize,
-			Compress:   c.Compress,
-			MaxBackups: c.MaxBackups,
-			MaxAge:     c.MaxAges,
+			MaxSize:    c.FileMaxSize,
+			Compress:   c.FileCompress,
+			MaxBackups: c.FileMaxBackups,
+			MaxAge:     c.FileMaxAges,
 		})
-		core := zapcore.NewCore(getEncoder(c.JsonEnable), writerSync, lvl)
+		core := zapcore.NewCore(getEncoder(c.FileJsonEnable), writerSync, lvl)
 		cores = append(cores, core)
 	}
 	multiCore := zapcore.NewTee(cores...)
-	Logger = zap.New(multiCore,
+	sugar = zap.New(multiCore,
 		zap.AddStacktrace(zapcore.ErrorLevel),
 		zap.AddCaller(),
 		zap.AddCallerSkip(1),
 	).Sugar()
-	defer Logger.Sync()
+	defer sugar.Sync()
+}
+
+func GinZap() gin.HandlerFunc {
+	return ginzap.Ginzap(sugar.Desugar(), time.RFC3339, true)
+}
+
+func GinZapWithSkipPaths() gin.HandlerFunc {
+	return ginzap.GinzapWithConfig(sugar.Desugar(),
+		&ginzap.Config{
+			TimeFormat: time.RFC3339,
+			UTC:        true,
+			SkipPaths: []string{
+				"/heartbeat",
+				"/favicon.ico",
+			},
+		},
+	)
+}
+
+func RecoverZap() gin.HandlerFunc {
+	return ginzap.RecoveryWithZap(sugar.Desugar(), true)
 }
 
 func getEncoder(JsonEnable bool) zapcore.Encoder {
@@ -113,4 +116,43 @@ func getZapLevel(level Level) zapcore.Level {
 	default:
 		return zapcore.InfoLevel
 	}
+}
+
+func DebugF(template string, args ...interface{}) {
+	sugar.Debugf(template, args...)
+}
+
+func Debug(args ...interface{}) {
+	sugar.Debug(args...)
+}
+
+func InfoF(template string, args ...interface{}) {
+	sugar.Infof(template, args...)
+}
+func Info(args ...interface{}) {
+	sugar.Info(args...)
+}
+
+func WarnF(template string, args ...interface{}) {
+	sugar.Warnf(template, args...)
+}
+
+func Warn(args ...interface{}) {
+	sugar.Warn(args...)
+}
+
+func ErrorF(template string, args ...interface{}) {
+	sugar.Errorf(template, args...)
+}
+
+func Error(args ...interface{}) {
+	sugar.Error(args...)
+}
+
+func FatalF(template string, args ...interface{}) {
+	sugar.Fatalf(template, args...)
+}
+
+func Fatal(args ...interface{}) {
+	sugar.Fatal(args...)
 }
