@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"game_slots_vsn/internal/service/models"
 	"game_slots_vsn/pkg/consts"
+	"game_slots_vsn/pkg/redis"
 )
 
 func GetGmInfo() (*models.GmInfo, error) {
 	gmInfo := &models.GmInfo{}
-	gmStr, err := rdb.Get(consts.CacheGMKey)
+	gmStr, err := redis.Rdb.Get(consts.CacheGMKey)
 	if err != nil {
 		return gmInfo, err
 	}
@@ -24,7 +25,7 @@ func UpdateGmInfo(g *models.GmInfo) error {
 	if err != nil {
 		return err
 	}
-	err = rdb.Set(consts.CacheGMKey, string(gmByte), 0)
+	err = redis.Rdb.Set(consts.CacheGMKey, string(gmByte), 0)
 	if err != nil {
 		return err
 	}

@@ -1,9 +1,11 @@
 package logger
 
 import (
-	"game_slots_vsn/pkg/setting"
+	"fmt"
+	"game_slots_vsn/pkg/consts"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -24,53 +26,80 @@ const (
 	FatalLevel Level = "fatal"
 )
 
-var (
+type Level string
+
+type setting struct {
+	ConsoleEnable bool   `yaml:"consoleEnable"`
+	ConsoleLevel  string `yaml:"consoleLevel"`
+
+	FileEnable     bool   `yaml:"fileEnable"`
+	FileName       string `yaml:"fileName"`
+	FileLevel      string `yaml:"fileLevel"`
+	FileMaxSize    int    `yaml:"maxSize"`
+	FileMaxBackups int    `yaml:"maxBackups"`
+	FileMaxAges    int    `yaml:"maxAges"`
+	FileCompress   bool   `yaml:"compress"`
+	FileJsonEnable bool   `yaml:"jsonEnable"`
+}
+
+type logger struct {
 	sugar *zap.SugaredLogger
-)
+	S     *setting
+}
 
-type (
-	Level string
-)
+var Logger = &logger{}
 
-func Setup(c *setting.LoggerSetting) {
+func SetUp() {
+	ls := &setting{}
+	err := viper.UnmarshalKey(consts.ConfigLogger, ls)
+	if err != nil {
+		panic(err)
+	}
+	Logger.setup(ls)
+}
+
+func (l *logger) setup(ls *setting) {
+	fmt.Printf("logger setting:%v\n", *ls)
 	cores := make([]zapcore.Core, 0)
-	if c.ConsoleEnable {
+	if ls.ConsoleEnable {
 		lvl := zap.NewAtomicLevel()
-		lvl.SetLevel(getZapLevel(Level(c.ConsoleLevel)))
+		lvl.SetLevel(getZapLevel(Level(ls.ConsoleLevel)))
 
 		writeSync := zapcore.Lock(os.Stdout)
-		core := zapcore.NewCore(getEncoder(c.FileJsonEnable), writeSync, lvl)
+		core := zapcore.NewCore(getEncoder(ls.FileJsonEnable), writeSync, lvl)
 		cores = append(cores, core)
 	}
 
-	if c.FileEnable {
+	if ls.FileEnable {
 		lvl := zap.NewAtomicLevel()
-		lvl.SetLevel(getZapLevel(Level(c.FileLevel)))
+		lvl.SetLevel(getZapLevel(Level(ls.FileLevel)))
 		writerSync := zapcore.AddSync(&lumberjack.Logger{
-			Filename:   c.FileName,
-			MaxSize:    c.FileMaxSize,
-			Compress:   c.FileCompress,
-			MaxBackups: c.FileMaxBackups,
-			MaxAge:     c.FileMaxAges,
+			Filename:   ls.FileName,
+			MaxSize:    ls.FileMaxSize,
+			Compress:   ls.FileCompress,
+			MaxBackups: ls.FileMaxBackups,
+			MaxAge:     ls.FileMaxAges,
 		})
-		core := zapcore.NewCore(getEncoder(c.FileJsonEnable), writerSync, lvl)
+		core := zapcore.NewCore(getEncoder(ls.FileJsonEnable), writerSync, lvl)
 		cores = append(cores, core)
 	}
 	multiCore := zapcore.NewTee(cores...)
-	sugar = zap.New(multiCore,
+	sugar := zap.New(multiCore,
 		zap.AddStacktrace(zapcore.ErrorLevel),
 		zap.AddCaller(),
 		zap.AddCallerSkip(1),
 	).Sugar()
 	defer sugar.Sync()
+	Logger.S = ls
+	Logger.sugar = sugar
 }
 
 func GinZap() gin.HandlerFunc {
-	return ginzap.Ginzap(sugar.Desugar(), time.RFC3339, true)
+	return ginzap.Ginzap(Logger.sugar.Desugar(), time.RFC3339, true)
 }
 
 func GinZapWithSkipPaths() gin.HandlerFunc {
-	return ginzap.GinzapWithConfig(sugar.Desugar(),
+	return ginzap.GinzapWithConfig(Logger.sugar.Desugar(),
 		&ginzap.Config{
 			TimeFormat: time.RFC3339,
 			UTC:        true,
@@ -83,7 +112,7 @@ func GinZapWithSkipPaths() gin.HandlerFunc {
 }
 
 func RecoverZap() gin.HandlerFunc {
-	return ginzap.RecoveryWithZap(sugar.Desugar(), true)
+	return ginzap.RecoveryWithZap(Logger.sugar.Desugar(), true)
 }
 
 func getEncoder(JsonEnable bool) zapcore.Encoder {
@@ -119,40 +148,40 @@ func getZapLevel(level Level) zapcore.Level {
 }
 
 func DebugF(template string, args ...interface{}) {
-	sugar.Debugf(template, args...)
+	Logger.sugar.Debugf(template, args...)
 }
 
 func Debug(args ...interface{}) {
-	sugar.Debug(args...)
+	Logger.sugar.Debug(args...)
 }
 
 func InfoF(template string, args ...interface{}) {
-	sugar.Infof(template, args...)
+	Logger.sugar.Infof(template, args...)
 }
 func Info(args ...interface{}) {
-	sugar.Info(args...)
+	Logger.sugar.Info(args...)
 }
 
 func WarnF(template string, args ...interface{}) {
-	sugar.Warnf(template, args...)
+	Logger.sugar.Warnf(template, args...)
 }
 
 func Warn(args ...interface{}) {
-	sugar.Warn(args...)
+	Logger.sugar.Warn(args...)
 }
 
 func ErrorF(template string, args ...interface{}) {
-	sugar.Errorf(template, args...)
+	Logger.sugar.Errorf(template, args...)
 }
 
 func Error(args ...interface{}) {
-	sugar.Error(args...)
+	Logger.sugar.Error(args...)
 }
 
 func FatalF(template string, args ...interface{}) {
-	sugar.Fatalf(template, args...)
+	Logger.sugar.Fatalf(template, args...)
 }
 
 func Fatal(args ...interface{}) {
-	sugar.Fatal(args...)
+	Logger.sugar.Fatal(args...)
 }

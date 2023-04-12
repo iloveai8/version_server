@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"game_slots_vsn/internal/service/models"
 	"game_slots_vsn/pkg/consts"
+	"game_slots_vsn/pkg/redis"
 )
 
 func GetServerInfos(platType string) map[string]*models.ServerInfo {
-	m := rdb.HGetAll(makePlatCacheKey(platType))
+	m := redis.Rdb.HGetAll(makePlatCacheKey(platType))
 	serverInfoMap := make(map[string]*models.ServerInfo, len(m))
 	for k, serverInfoStr := range m {
 		serverInfo := &models.ServerInfo{}
@@ -23,11 +24,11 @@ func AddServerInfo(platType, maxVsn string, s *models.ServerInfo) bool {
 	if err != nil {
 		return false
 	}
-	return rdb.HSet(makePlatCacheKey(platType), maxVsn, string(serverBytes))
+	return redis.Rdb.HSet(makePlatCacheKey(platType), maxVsn, string(serverBytes))
 }
 
 func GetServerInfo(platType, maxVsn string) *models.ServerInfo {
-	serverInfoStr := rdb.HGet(makePlatCacheKey(platType), maxVsn)
+	serverInfoStr := redis.Rdb.HGet(makePlatCacheKey(platType), maxVsn)
 	serverInfo := &models.ServerInfo{}
 	if serverInfoStr == "" {
 		serverInfo.SubServerInfoMap = make(map[string]*models.SubServerInfo, 1)
@@ -39,7 +40,7 @@ func GetServerInfo(platType, maxVsn string) *models.ServerInfo {
 }
 
 func DeleteServerInfo(playType, maxVsn string) bool {
-	return rdb.HDel(makePlatCacheKey(playType), maxVsn)
+	return redis.Rdb.HDel(makePlatCacheKey(playType), maxVsn)
 }
 
 func makePlatCacheKey(platType string) string {

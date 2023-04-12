@@ -1,25 +1,22 @@
-# 正式环境
-server:
+# 生产环境
+app:
   runMode: "release"
-  ip: "localhost"
+
+server:
+  ip: "127.0.0.1"
   port: 9091
 
 redis:
-  #   redis|
-  driverName: "redis"
   masterName: "redis"
   password: ""
   hosts:
     - "gs-redis.dz9dz0.ng.0001.use2.redis.amazonaws.com:6379"
   db: 0
   poolSize: 10
-  maxIdle: 10
-  maxActive: 10
-  idleTimeout: 20000
 
 log:
   fileEnable: true
-  fileName: "./logs/game-server-vsn.log"
+  fileName: "./logs/gs_vsn.log"
   fileLevel: info
 
   consoleEnable: true
@@ -30,5 +27,11 @@ log:
   maxAges: 30
   compress: true
   jsonEnable: true
+
+ggeoip:
+    name: "ggeoip.mmdb"
+    path: "./data/"
+    url: "https://geoip.ftsview.com/GeoLite2-City.mmdb"
+    duration: 168 #7 * 24 hour
 
 

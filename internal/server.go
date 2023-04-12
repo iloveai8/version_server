@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"game_slots_vsn/internal/routers"
 	"game_slots_vsn/pkg/logger"
-	"game_slots_vsn/pkg/setting"
+	"game_slots_vsn/pkg/server"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,7 +13,7 @@ import (
 
 func Run() {
 	go func() {
-		addr := fmt.Sprintf("%s:%d", setting.SrvSetting.IP, setting.SrvSetting.Port)
+		addr := fmt.Sprintf("%s:%d", server.Server.S.IP, server.Server.S.Port)
 		engine := routers.Register()
 		if err := engine.Run(addr); err != nil {
 			logger.ErrorF("Listen addr:%s err:%v\n", err)

@@ -44,9 +44,9 @@ func GetServerInfoList(c *gin.Context) {
 	gmService := &service.GMService{}
 	gmInfo, err := gmService.GetGmInfo()
 	if err != nil {
-		logger.ErrorF("get gmInfo:%v error:%v", gmInfo, err)
+		logger.ErrorF("get gmInfo:%v error:%v", *gmInfo, err)
 	}
-	logger.InfoF("get serverInfoList:%v gm:%v", subServerInfoList, gmInfo)
+	logger.InfoF("get serverInfoList:%v gm:%v", subServerInfoList, *gmInfo)
 	appG.Success(e.SUCCESS, map[string]interface{}{
 		"serverList": subServerInfoList,
 		"gm":         gmInfo,

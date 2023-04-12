@@ -1,10 +1,11 @@
 package routers
 
 import (
+	"game_slots_vsn/internal/routers/gip"
 	"game_slots_vsn/internal/routers/gm"
 	"game_slots_vsn/internal/routers/server"
+	"game_slots_vsn/pkg/app"
 	"game_slots_vsn/pkg/logger"
-	"game_slots_vsn/pkg/setting"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
@@ -16,7 +17,7 @@ type Router interface {
 }
 
 func Register() *gin.Engine {
-	gin.SetMode(setting.SrvSetting.RunMode)
+	gin.SetMode(app.RunMode())
 
 	e := gin.New()
 	_ = e.SetTrustedProxies([]string{"127.0.0.1", "localhost"})
@@ -53,6 +54,6 @@ func Register() *gin.Engine {
 	})
 	gm.Register(e)
 	server.Register(e)
-
+	gip.Register(e)
 	return e
 }

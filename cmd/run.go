@@ -5,10 +5,6 @@ package cmd
 
 import (
 	"game_slots_vsn/internal"
-	models "game_slots_vsn/internal/service/dao"
-	"game_slots_vsn/pkg/logger"
-	"game_slots_vsn/pkg/setting"
-
 	"github.com/spf13/cobra"
 )
 
@@ -23,8 +19,6 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Setup(setting.LogSetting)
-		models.Setup(setting.RisSetting)
 		internal.Run()
 	},
 }

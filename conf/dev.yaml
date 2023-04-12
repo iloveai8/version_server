@@ -1,23 +1,22 @@
 # 开发环境
+app:
+    runMode: "debug"
 
 server:
-    runMode: "debug"
     ip: "127.0.0.1"
     port: 9091
 
 redis:
+    #    masterName: "redis"
     password: ""
     hosts:
         - "10.240.10.153:6379"
     db: 15
     poolSize: 10
-    maxIdle: 10
-    maxActive: 10
-    idleTimeout: 20000
 
 log:
     fileEnable: true
-    fileName: "./logs/game-server-vsn.log"
+    fileName: "./logs/gs_vsn.log"
     fileLevel: info
 
     consoleEnable: true
@@ -28,3 +27,11 @@ log:
     maxAges: 30
     compress: true
     jsonEnable: true
+
+ggeoip:
+    name: "ggeoip.mmdb"
+    path: "./data/"
+    url: "https://geoip.ftsview.com/GeoLite2-City.mmdb"
+    duration: 1 #hour
+
+
