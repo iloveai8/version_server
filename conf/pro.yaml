@@ -10,7 +10,7 @@ redis:
   masterName: ""
   password: ""
   hosts:
-    - "gs-redis.dz9dz0.ng.0001.use2.redis.amazonaws.com:6379"
+    - "gs-redis.dz9dz0.ng.0001.use2.cache.amazonaws.com:6379"
   db: 0
   poolSize: 10
 
