@@ -7,12 +7,12 @@ server:
     port: 9091
 
 redis:
-  masterName: ""
-  password: ""
-  hosts:
-    - "gs-redis.dz9dz0.ng.0001.use2.cache.amazonaws.com:6379"
-  db: 0
-  poolSize: 5
+    masterName: ""
+    password: ""
+    hosts:
+        - "gs-redis.dz9dz0.ng.0001.use2.cache.amazonaws.com:6379"
+    db: 0
+    poolSize: 5
 
 log:
     fileEnable: true
@@ -32,8 +32,8 @@ ggeoip:
     name: "ggeoip.mmdb"
     path: "./data/"
     url: "https://geoip.ftsview.com/GeoLite2-City.mmdb"
-#    url: "https://geoip.ftsview.com/GeoLite2-Country.mmdb"
+    #    url: "https://geoip.ftsview.com/GeoLite2-Country.mmdb"
     duration: 1 #hour
-    scope : 1 #0country 1city
+    scope: 1 #0country 1city
 
 
