@@ -20,7 +20,7 @@ func Register() *gin.Engine {
 	gin.SetMode(app.RunMode())
 
 	e := gin.New()
-	_ = e.SetTrustedProxies([]string{"127.0.0.1", "localhost"})
+	//_ = e.SetTrustedProxies([]string{"127.0.0.1", "localhost", "10.113.23.183", "10.113.7.86", "10.113.10.150"})
 	//e.Use(logger.GinZap())
 	e.Use(logger.GinZapWithSkipPaths())
 	e.Use(logger.RecoverZap())
