@@ -77,7 +77,7 @@ func GetServerInfo(c *gin.Context) {
 	isGm := gmInfo.GMEnable
 	isBlock := gmInfo.Block
 	if env == "pro" {
-		logger.InfoF("c.r.r:%s  c.c:%s", c.Request.RemoteAddr, c.ClientIP())
+		logger.InfoF("X-Forwarded-For:%s  X-Real-IP:%s", c.Request.Header.Get("X-Forwarded-For"), c.Request.Header.Get("X-Real-IP"), c.ClientIP())
 		isGm = gmInfo.GMEnable && utils.MatchIp(c.ClientIP())
 	}
 
