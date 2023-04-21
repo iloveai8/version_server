@@ -1,18 +1,18 @@
-# 开发环境
+# 生产环境
 app:
     runMode: "debug"
 
 server:
-    ip: "127.0.0.1"
+    ip: ""
     port: 9091
 
 redis:
-    #    masterName: "redis"
-    password: ""
-    hosts:
-        - "10.240.10.153:6379"
-    db: 15
-    poolSize: 10
+  masterName: ""
+  password: ""
+  hosts:
+    - "gs-redis.dz9dz0.ng.0001.use2.cache.amazonaws.com:6379"
+  db: 0
+  poolSize: 5
 
 log:
     fileEnable: true
@@ -32,6 +32,8 @@ ggeoip:
     name: "ggeoip.mmdb"
     path: "./data/"
     url: "https://geoip.ftsview.com/GeoLite2-City.mmdb"
+#    url: "https://geoip.ftsview.com/GeoLite2-Country.mmdb"
     duration: 1 #hour
+    scope : 1 #0country 1city
 
 

@@ -30,7 +30,7 @@ run:clean fmt compile
 	@echo  ......run $(ENV).$(VER) finish end......
 
 # env:dev|pre|pro ver=BuildNum|TagNum
-build_stage:clean fmt compile
+build_stage:
 	@echo  ......build stage $(ENV).$(VER) image......
 	@docker rmi -f $(HarborRegistry)/$(APP):$(ENV).$(VER)
 	@docker build --rm --no-cache -t $(HarborRegistry)/$(APP):$(ENV).$(VER) -f Dockerfile .

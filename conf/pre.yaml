@@ -3,14 +3,14 @@ app:
   runMode: "release"
 
 server:
-  ip: "127.0.0.1"
+  ip: ""
   port: 9091
 
 redis:
-  masterName: "redis"
+  masterName: ""
   password: ""
   hosts:
-    - "gs-redis.dz9dz0.ng.0001.use2.redis.amazonaws.com:6379"
+    - "gs-redis.dz9dz0.ng.0001.use2.cache.amazonaws.com:6379"
   db: 0
   poolSize: 10
 
@@ -32,6 +32,8 @@ ggeoip:
     name: "ggeoip.mmdb"
     path: "./data/"
     url: "https://geoip.ftsview.com/GeoLite2-City.mmdb"
+#    url: "https://geoip.ftsview.com/GeoLite2-Country.mmdb"
     duration: 168 #hour
+    scope : 1 #0country 1city
 
 

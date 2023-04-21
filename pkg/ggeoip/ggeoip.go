@@ -10,14 +10,15 @@ import (
 )
 
 type setting struct {
-	Name     string `yaml:"name"`
-	Path     string `yaml:"path"`
-	Url      string `yaml:"url"`
-	Duration int    `yaml:"duration"`
+	Name     string           `yaml:"name"`
+	Path     string           `yaml:"path"`
+	Url      string           `yaml:"url"`
+	Duration int              `yaml:"duration"`
+	Scope    ggeoip.ScopeType `yaml:"scope"`
 }
 type gip struct {
-	S      *setting
-	ipUtil *ggeoip.GeoIpUtil
+	S   *setting
+	ctx context.Context
 }
 
 var Gip = &gip{}
@@ -33,28 +34,36 @@ func SetUp() {
 
 func (g *gip) setup(ips *setting) {
 	fmt.Printf("ggeoip setting:%v\n", *ips)
-
-	ctx := context.TODO()
-	util := ggeoip.NewGeoIpUtil(
-		ctx,
-		&ggeoip.GeoIpConfig{
-			Cxt:                ctx,
-			GeoIpURL:           ips.Url,
-			FileName:           ips.Name,
-			Path:               ips.Path,
-			UpdateIntervalHour: ips.Duration,
-			Fun:                isSuccess,
-		},
-	)
+	ctx := g.ctx
+	if ctx != nil {
+		ctx1, cancel := context.WithCancel(ctx)
+		ctx = ctx1
+		cancel()
+	} else {
+		ctx = context.TODO()
+	}
+	geoIpConfig := &ggeoip.GeoIpConfig{
+		Ctx:                ctx,
+		GeoIpURL:           ips.Url,
+		FileName:           ips.Name,
+		Path:               ips.Path,
+		UpdateIntervalHour: ips.Duration,
+		Scope:              ips.Scope,
+		Fun:                isSuccess,
+	}
+	ggeoip.LoadLocalFile(ctx, geoIpConfig, true)
 	g.S = ips
-	g.ipUtil = util
-	g.ipUtil.GeoIPInit()
+	g.ctx = ctx
 }
 
 func isSuccess(is bool) {
 	fmt.Println("update ipdb data", time.Now(), is)
 }
 
-func (g *gip) GetIP(ip string) string {
+func (g *gip) GetCountryByIP(ip string) string {
 	return ggeoip.GetCountryByIP(ip)
+}
+
+func (g *gip) GetCountryAndCityByIP(ip string) (string, map[string]string) {
+	return ggeoip.GetCountryAndCityByIP(ip)
 }

@@ -6,10 +6,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetIP(c *gin.Context) {
+func GetCountry(c *gin.Context) {
 	appG := e.Gin{C: c}
 	ipStr := c.Query("ip")
-	ipInfo := ggeoip.Gip.GetIP(ipStr)
-	appG.Success(e.SUCCESS, ipInfo)
+	country := ggeoip.Gip.GetCountryByIP(ipStr)
+	appG.Success(e.SUCCESS, map[string]interface{}{
+		"country": country,
+	})
+	return
+}
+func GetCountryAndCity(c *gin.Context) {
+	appG := e.Gin{C: c}
+	ipStr := c.Query("ip")
+	country, cities := ggeoip.Gip.GetCountryAndCityByIP(ipStr)
+	appG.Success(e.SUCCESS, map[string]interface{}{
+		"country": country,
+		"cities":  cities,
+	})
 	return
 }

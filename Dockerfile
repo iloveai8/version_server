@@ -1,19 +1,29 @@
-FROM harbor.nuclearport.com/devops/centos:7.9
-MAINTAINER Jackpotland
-WORKDIR /home/service/gsv
-COPY gsv .
-COPY conf/ conf/
-COPY static/ static/
+## 设置编译环境
+FROM harbor.nuclearport.com/golang/golang:1.19 as builder
+MAINTAINER chenhu@fotoable.com
+
+ENV GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64 \
+    GOPRIVATE=gitlab.ftsview.com \
+    GOPROXY=https://proxy.golang.org,direct
+
+WORKDIR /app
+COPY . .
+
+RUN go build -o gsv .
+
+## 设置运行环境
+FROM alpine:latest
+MAINTAINER chenhu@fotoable.com
+
+WORKDIR /service
+
+# 拷贝编译好的二进制文件
+COPY --from=builder /app/gsv .
+COPY --from=builder /app/conf/ conf/
+COPY --from=builder /app/static/ static/
+COPY --from=builder /app/data/ data/
+EXPOSE 9091
 ENTRYPOINT ./gsv run --config=./conf/${env}.yaml
-
-#docker build --rm --no-redis -t harbor.nuclearport.com/jackpotland/gsv:dev -f Dockerfile .
-#docker run --rm -p 7001:9091 -e env=dev --name gsv-dev -d harbor.nuclearport.com/jackpotland/gsv:dev
-#docker exec -it gsv-dev /bin/bash
-
-#docker build --rm --no-redis -t harbor.nuclearport.com/jackpotland/gsv:pre -f Dockerfile .
-#docker run --rm -p 7002:9091 -e env=pre  --name gsv-pre -d harbor.nuclearport.com/jackpotland/gsv:pre
-#docker exec -it gsv-pre /bin/bash
-
-#docker build --rm --no-redis -t harbor.nuclearport.com/jackpotland/gsv:pro.1.0.0 -f Dockerfile .
-#docker run --rm -p 7003:9091 -e env=pro --name gsv-pro-1.0.0 -d harbor.nuclearport.com/jackpotland/gsv:pro.1.0.0
-#docker exec -it gsv-pro-1.0.0 /bin/bash
