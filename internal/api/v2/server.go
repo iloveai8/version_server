@@ -5,6 +5,7 @@ import (
 	"game_slots_vsn/internal/service"
 	"game_slots_vsn/internal/service/models"
 	"game_slots_vsn/pkg/e"
+	"game_slots_vsn/pkg/ggeoip"
 	"game_slots_vsn/pkg/logger"
 	"game_slots_vsn/pkg/utils"
 	"github.com/gin-gonic/gin"
@@ -87,11 +88,14 @@ func GetServerInfo(c *gin.Context) {
 		Vsn:      vsn,
 		IsGm:     isGm,
 	}
+	country, cities := ggeoip.Gip.GetCountryAndCityByIP(c.ClientIP())
 	subServerList := serverService.GetServerInfo()
 	appG.Success(e.SUCCESS, map[string]interface{}{
 		"serverList": subServerList,
 		"gm":         isGm,
 		"block":      isBlock,
+		"cities":     cities,
+		"country":    country,
 	})
 	return
 }
