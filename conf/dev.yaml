@@ -1,4 +1,4 @@
-# 生产环境
+# 开发环境
 app:
     runMode: "debug"
 
@@ -10,8 +10,8 @@ redis:
     masterName: ""
     password: ""
     hosts:
-        - "gs-redis.dz9dz0.ng.0001.use2.cache.amazonaws.com:6379"
-    db: 0
+        - "10.240.10.153:6379"
+    db: 15
     poolSize: 5
 
 log:
