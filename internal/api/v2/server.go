@@ -81,7 +81,6 @@ func GetServerInfo(c *gin.Context) {
 		logger.InfoF("X-Forwarded-For:%s  X-Real-IP:%s cli:%s", c.Request.Header.Get("X-Forwarded-For"), c.Request.Header.Get("X-Real-IP"), c.ClientIP())
 		isGm = gmInfo.GMEnable && utils.MatchIp(c.ClientIP())
 	}
-
 	serverService := &service.ServerService{
 		PlatType: platType,
 		Env:      env,

@@ -17,9 +17,7 @@ type ServerService struct {
 
 func (gs *ServerService) GetServerInfo() []*models.SubServerInfo {
 	serverInfoList := make([]*models.SubServerInfo, 0)
-
 	serverInfoMap := dao.GetServerInfos(gs.PlatType)
-
 	if gs.Env == "pro" {
 		for maxVsn, serverInfo := range serverInfoMap {
 			if maxVsn == gs.Vsn {
@@ -30,7 +28,7 @@ func (gs *ServerService) GetServerInfo() []*models.SubServerInfo {
 							delete(subServerInfoMap, subVsn)
 						}
 					} else {
-						if subServerInfo.Type != consts.ServerTypePRO && subServerInfo.Type != consts.ServerTypeDefault {
+						if subServerInfo.Type < consts.ServerTypePRO {
 							delete(subServerInfoMap, subVsn)
 						}
 					}
@@ -51,12 +49,13 @@ func (gs *ServerService) GetServerInfo() []*models.SubServerInfo {
 				}
 			}
 		}
-	} else {
+		//内网测试
+	} else if gs.Env == "dev" {
 		for maxVsn, serverInfo := range serverInfoMap {
 			if maxVsn == gs.Vsn {
 				subServerInfoMap := serverInfo.SubServerInfoMap
 				for subVsn, subServerInfo := range subServerInfoMap {
-					if subServerInfo.Type != consts.ServerTypePRO && subServerInfo.Type != consts.ServerTypeDefault {
+					if subServerInfo.Type < consts.ServerTypePRO {
 						delete(subServerInfoMap, subVsn)
 					}
 				}
