@@ -52,6 +52,21 @@ func (gs *ServerService) GetServerInfo() []*models.SubServerInfo {
 			}
 		}
 	} else {
+		for maxVsn, serverInfo := range serverInfoMap {
+			if maxVsn == gs.Vsn {
+				subServerInfoMap := serverInfo.SubServerInfoMap
+				for subVsn, subServerInfo := range subServerInfoMap {
+					if subServerInfo.Type != consts.ServerTypePRO && subServerInfo.Type != consts.ServerTypeDefault {
+						delete(subServerInfoMap, subVsn)
+					}
+				}
+				if len(subServerInfoMap) > 0 {
+					maxSubServer := getMaxSubServerInfo(subServerInfoMap)
+					maxSubServer.Vsn = joinVsn(maxVsn, maxSubServer.Vsn)
+					serverInfoList = append(serverInfoList, maxSubServer)
+				}
+			}
+		}
 		innerServerMap := dao.GetServerInfos("inner")
 		for _, server := range innerServerMap {
 			subVsnMap := server.SubServerInfoMap
