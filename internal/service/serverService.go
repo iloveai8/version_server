@@ -19,28 +19,39 @@ func (gs *ServerService) GetServerInfo() []*models.SubServerInfo {
 	serverInfoList := make([]*models.SubServerInfo, 0)
 
 	serverInfoMap := dao.GetServerInfos(gs.PlatType)
-	for maxVsn, serverInfo := range serverInfoMap {
-		if maxVsn == gs.Vsn {
-			subServerInfoMap := serverInfo.SubServerInfoMap
-			for subVsn, subServerInfo := range subServerInfoMap {
-				if gs.IsGm {
-					if subServerInfo.Type < consts.ServerTypePRE {
-						delete(subServerInfoMap, subVsn)
-					}
-				} else {
-					if subServerInfo.Type != consts.ServerTypePRO && subServerInfo.Type != consts.ServerTypeDefault {
-						delete(subServerInfoMap, subVsn)
+
+	if gs.Env == "pro" {
+		for maxVsn, serverInfo := range serverInfoMap {
+			if maxVsn == gs.Vsn {
+				subServerInfoMap := serverInfo.SubServerInfoMap
+				for subVsn, subServerInfo := range subServerInfoMap {
+					if gs.IsGm {
+						if subServerInfo.Type < consts.ServerTypePRE {
+							delete(subServerInfoMap, subVsn)
+						}
+					} else {
+						if subServerInfo.Type != consts.ServerTypePRO && subServerInfo.Type != consts.ServerTypeDefault {
+							delete(subServerInfoMap, subVsn)
+						}
 					}
 				}
-			}
-			if len(subServerInfoMap) > 0 {
-				maxSubServer := getMaxSubServerInfo(subServerInfoMap)
-				maxSubServer.Vsn = joinVsn(maxVsn, maxSubServer.Vsn)
-				serverInfoList = append(serverInfoList, maxSubServer)
+				if len(subServerInfoMap) > 0 {
+					maxSubServer := getMaxSubServerInfo(subServerInfoMap)
+					maxSubServer.Vsn = joinVsn(maxVsn, maxSubServer.Vsn)
+					serverInfoList = append(serverInfoList, maxSubServer)
+				}
 			}
 		}
-	}
-	if gs.IsGm {
+		if gs.IsGm {
+			innerServerMap := dao.GetServerInfos("inner")
+			for _, server := range innerServerMap {
+				subVsnMap := server.SubServerInfoMap
+				for _, subServer := range subVsnMap {
+					serverInfoList = append(serverInfoList, subServer)
+				}
+			}
+		}
+	} else {
 		innerServerMap := dao.GetServerInfos("inner")
 		for _, server := range innerServerMap {
 			subVsnMap := server.SubServerInfoMap
