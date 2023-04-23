@@ -32,6 +32,9 @@ func Register() *gin.Engine {
 	e.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", gin.H{"env": os.Getenv("env"), "ver": os.Getenv("ver")})
 	})
+	e.GET("/:env", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{"env": os.Getenv("env"), "ver": os.Getenv("ver")})
+	})
 	e.GET("/akamai", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "akamai.html", gin.H{})
 	})
