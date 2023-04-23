@@ -30,10 +30,10 @@ func Register() *gin.Engine {
 	})
 	e.LoadHTMLGlob("static/*")
 	e.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{"env": os.Getenv("env"), "ver": os.Getenv("ver")})
+		c.HTML(http.StatusOK, "index.html", gin.H{"env": os.Getenv("env"), "ver": os.Getenv("ver"), "ip": c.ClientIP()})
 	})
 	e.GET("/:env", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{"env": os.Getenv("env"), "ver": os.Getenv("ver")})
+		c.HTML(http.StatusOK, "index.html", gin.H{"env": os.Getenv("env"), "ver": os.Getenv("ver"), "ip": c.ClientIP()})
 	})
 	e.GET("/akamai", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "akamai.html", gin.H{})
