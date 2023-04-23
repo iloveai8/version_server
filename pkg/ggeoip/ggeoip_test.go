@@ -24,7 +24,6 @@ func TestGetIpData(t *testing.T) {
 	fmt.Println(ggeoip.GetCountryAndCityByIP("1.202.246.19"))
 	cancel()
 	time.Sleep(time.Second * 10)
-
 }
 
 func TestLoadLocalFile(t *testing.T) {

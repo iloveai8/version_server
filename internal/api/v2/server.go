@@ -88,13 +88,12 @@ func GetServerInfo(c *gin.Context) {
 		Vsn:      vsn,
 		IsGm:     isGm,
 	}
-	country, cities := ggeoip.Gip.GetCountryAndCityByIP(c.ClientIP())
+	country := ggeoip.Gip.GetCountryByIP(c.ClientIP())
 	subServerList := serverService.GetServerInfo()
 	appG.Success(e.SUCCESS, map[string]interface{}{
 		"serverList": subServerList,
 		"gm":         isGm,
 		"block":      isBlock,
-		"cities":     cities,
 		"country":    country,
 	})
 	return
