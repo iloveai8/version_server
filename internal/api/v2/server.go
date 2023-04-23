@@ -95,6 +95,7 @@ func GetServerInfo(c *gin.Context) {
 		"gm":         isGm,
 		"block":      isBlock,
 		"country":    country,
+		"ip":         c.ClientIP(),
 	})
 	return
 }
