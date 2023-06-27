@@ -52,7 +52,7 @@ deploy_stage:
 		&& kustomize edit set image $(HarborRegistry)/$(APP):$(ENV).$(VER) \
 		&& cd - \
 		&& kustomize build $(DeployPath)/overlays/$(ENV) | kubectl --kubeconfig $(config) apply -f - \
-		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
+#		&& kubectl --kubeconfig $(config) apply -f $(DeployPath)/ingress.yaml \
 
 	@echo ......deploy stage $(ENV).$(VER) finish end......
 #
