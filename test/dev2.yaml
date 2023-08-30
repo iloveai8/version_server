@@ -1,6 +1,6 @@
-# 生产环境
+# 开发环境
 app:
-    runMode: "release"
+    runMode: "debug"
 
 server:
     ip: ""
@@ -10,7 +10,6 @@ redis:
     masterName: ""
     password: ""
     hosts:
-        #        - "gs-redis.dz9dz0.ng.0001.use2.cache.amazonaws.com:6379"
         - "gs-redis-cluster-0001-001.dz9dz0.0001.use2.cache.amazonaws.com:6379"
         - "gs-redis-cluster-0002-001.dz9dz0.0001.use2.cache.amazonaws.com:6379"
         - "gs-redis-cluster-0003-001.dz9dz0.0001.use2.cache.amazonaws.com:6379"
@@ -18,7 +17,7 @@ redis:
         - "gs-redis-cluster-0005-001.dz9dz0.0001.use2.cache.amazonaws.com:6379"
         - "gs-redis-cluster-0006-001.dz9dz0.0001.use2.cache.amazonaws.com:6379"
     db: 0
-    poolSize: 10
+    poolSize: 5
 
 log:
     fileEnable: true
@@ -26,7 +25,7 @@ log:
     fileLevel: info
 
     consoleEnable: true
-    consoleLevel: info
+    consoleLevel: debug
 
     maxSize: 20
     maxBackups: 10
@@ -39,7 +38,7 @@ ggeoip:
     path: "./data/"
 #    url: "https://geoip.ftsview.com/GeoLite2-City.mmdb"
     url: "https://geoip.ftsview.com/GeoLite2-Country.mmdb"
-    duration: 168 #hour
+    duration: 1 #hour
     scope: 0 #0country 1city
 
 
