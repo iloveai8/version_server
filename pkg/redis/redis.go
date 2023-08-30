@@ -19,13 +19,13 @@ type setting struct {
 	PoolSize   int      `yaml:"poolSize"`
 }
 
-type rdb struct {
+type RedDB struct {
 	ctx    context.Context
 	client redis.UniversalClient
 	S      *setting
 }
 
-var Rdb = &rdb{}
+var Rdb = &RedDB{}
 
 func SetUp() {
 	rs := &setting{}
@@ -36,16 +36,25 @@ func SetUp() {
 	Rdb.setup(rs)
 }
 
-func (rdb *rdb) setup(rs *setting) {
-	fmt.Printf("redis setting:%v\n", *rs)
+func (rdb *RedDB) NewRDB() {
+	rs := &setting{}
+	err := viper.UnmarshalKey(consts.ConfigRedis, rs)
+	if err != nil {
+		panic(err)
+	}
+	rdb.setup(rs)
+}
+
+func (rdb *RedDB) setup(s *setting) {
+	fmt.Printf("redis setting:%v\n", *s)
 	ctx := context.Background()
 	client := redis.NewUniversalClient(
 		&redis.UniversalOptions{
-			MasterName:   rs.MasterName,
-			Password:     rs.Password,
-			DB:           rs.DB,
-			Addrs:        rs.Hosts,
-			PoolSize:     rs.PoolSize,
+			MasterName:   s.MasterName,
+			Password:     s.Password,
+			DB:           s.DB,
+			Addrs:        s.Hosts,
+			PoolSize:     s.PoolSize,
 			DialTimeout:  5 * time.Second,
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 5 * time.Second,
@@ -59,12 +68,12 @@ func (rdb *rdb) setup(rs *setting) {
 	if err != nil {
 		panic(err)
 	}
-	rdb.S = rs
+	rdb.S = s
 	rdb.ctx = ctx
 	rdb.client = client
 }
 
-func (rdb *rdb) HGet(key, field string) string {
+func (rdb *RedDB) HGet(key, field string) string {
 	value, err := rdb.client.HGet(rdb.ctx, key, field).Result()
 	if err != nil {
 		return ""
@@ -72,14 +81,14 @@ func (rdb *rdb) HGet(key, field string) string {
 	return value
 }
 
-func (rdb *rdb) HSet(key, field, value string) bool {
+func (rdb *RedDB) HSet(key, field, value string) bool {
 	if _, err := rdb.client.HSet(rdb.ctx, key, field, value).Result(); err != nil {
 		return false
 	}
 	return true
 }
 
-func (rdb *rdb) HMGet(key string, fields ...string) []interface{} {
+func (rdb *RedDB) HMGet(key string, fields ...string) []interface{} {
 	value, err := rdb.client.HMGet(rdb.ctx, key, fields...).Result()
 	if err != nil {
 		return nil
@@ -87,7 +96,7 @@ func (rdb *rdb) HMGet(key string, fields ...string) []interface{} {
 	return value
 }
 
-func (rdb *rdb) HMSet(key string, data map[string]interface{}) bool {
+func (rdb *RedDB) HMSet(key string, data map[string]interface{}) bool {
 	_, err := rdb.client.HMSet(rdb.ctx, key, data).Result()
 	if err != nil {
 		return false
@@ -95,7 +104,7 @@ func (rdb *rdb) HMSet(key string, data map[string]interface{}) bool {
 	return true
 }
 
-func (rdb *rdb) HDel(key string, fields ...string) bool {
+func (rdb *RedDB) HDel(key string, fields ...string) bool {
 	_, err := rdb.client.HDel(rdb.ctx, key, fields...).Result()
 	if err != nil {
 		return false
@@ -103,7 +112,7 @@ func (rdb *rdb) HDel(key string, fields ...string) bool {
 	return true
 }
 
-func (rdb *rdb) HGetAll(key string) map[string]string {
+func (rdb *RedDB) HGetAll(key string) map[string]string {
 	value, err := rdb.client.HGetAll(rdb.ctx, key).Result()
 	if err != nil {
 		return nil
@@ -111,7 +120,7 @@ func (rdb *rdb) HGetAll(key string) map[string]string {
 	return value
 }
 
-func (rdb *rdb) HIncrBy(key, field string, incr int64) int64 {
+func (rdb *RedDB) HIncrBy(key, field string, incr int64) int64 {
 	value, err := rdb.client.HIncrBy(rdb.ctx, key, field, incr).Result()
 	if err != nil {
 		return 0
@@ -119,28 +128,28 @@ func (rdb *rdb) HIncrBy(key, field string, incr int64) int64 {
 	return value
 }
 
-func (rdb *rdb) SAdd(key string, values []string) bool {
+func (rdb *RedDB) SAdd(key string, values []string) bool {
 	if _, err := rdb.client.SAdd(rdb.ctx, key, values).Result(); err != nil {
 		return false
 	}
 	return true
 }
 
-func (rdb *rdb) SRem(key string, values []string) bool {
+func (rdb *RedDB) SRem(key string, values []string) bool {
 	if _, err := rdb.client.SRem(rdb.ctx, key, values).Result(); err != nil {
 		return false
 	}
 	return true
 }
 
-func (rdb *rdb) SIsMember(key string, value string) bool {
+func (rdb *RedDB) SIsMember(key string, value string) bool {
 	if _, err := rdb.client.SIsMember(rdb.ctx, key, value).Result(); err != nil {
 		return false
 	}
 	return true
 }
 
-func (rdb *rdb) SCard(key string) (count int64, isSuccess bool) {
+func (rdb *RedDB) SCard(key string) (count int64, isSuccess bool) {
 	var err error
 	if count, err = rdb.client.SCard(rdb.ctx, key).Result(); err != nil {
 		return 0, false
@@ -148,28 +157,28 @@ func (rdb *rdb) SCard(key string) (count int64, isSuccess bool) {
 	return count, true
 }
 
-func (rdb *rdb) SMembers(key string) []string {
+func (rdb *RedDB) SMembers(key string) []string {
 	if values, err := rdb.client.SMembers(rdb.ctx, key).Result(); err == nil {
 		return values
 	}
 	return nil
 }
 
-func (rdb *rdb) Del(key ...string) bool {
+func (rdb *RedDB) Del(key ...string) bool {
 	if _, err := rdb.client.Del(rdb.ctx, key...).Result(); err != nil {
 		return false
 	}
 	return true
 }
 
-func (rdb *rdb) IncrVersion(key string) (version int64, err error) {
+func (rdb *RedDB) IncrVersion(key string) (version int64, err error) {
 	if version, err = rdb.client.Incr(rdb.ctx, key).Result(); err != nil {
 		return
 	}
 	return
 }
 
-func (rdb *rdb) GetIncrVersion(key string) (version int64, err error) {
+func (rdb *RedDB) GetIncrVersion(key string) (version int64, err error) {
 	var versionStr string
 	if versionStr, err = rdb.client.Get(rdb.ctx, key).Result(); err != nil && !errors.Is(err, redis.Nil) {
 		return
@@ -181,21 +190,21 @@ func (rdb *rdb) GetIncrVersion(key string) (version int64, err error) {
 	return
 }
 
-func (rdb *rdb) Get(key string) (value string, err error) {
+func (rdb *RedDB) Get(key string) (value string, err error) {
 	if value, err = rdb.client.Get(rdb.ctx, key).Result(); err != nil && !errors.Is(err, redis.Nil) {
 		return
 	}
 	return
 }
 
-func (rdb *rdb) Set(key, value string, expire time.Duration) error {
+func (rdb *RedDB) Set(key, value string, expire time.Duration) error {
 	if _, err := rdb.client.Set(rdb.ctx, key, value, expire).Result(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (rdb *rdb) GetSet(key string) (values []string) {
+func (rdb *RedDB) GetSet(key string) (values []string) {
 	var index uint64
 	var tempValues []string
 	var err error
@@ -212,7 +221,7 @@ func (rdb *rdb) GetSet(key string) (values []string) {
 	return
 }
 
-func (rdb *rdb) Subscribe(key string, fun func(message string)) {
+func (rdb *RedDB) Subscribe(key string, fun func(message string)) {
 	subscribe := rdb.client.(*redis.Client).Subscribe(rdb.ctx, key)
 	for {
 		msg := <-subscribe.Channel()
@@ -220,14 +229,14 @@ func (rdb *rdb) Subscribe(key string, fun func(message string)) {
 	}
 }
 
-func (rdb *rdb) Publish(key, msg string) bool {
+func (rdb *RedDB) Publish(key, msg string) bool {
 	if _, err := rdb.client.Publish(rdb.ctx, key, msg).Result(); err != nil {
 		return false
 	}
 	return true
 }
 
-func (rdb *rdb) RPop(key string) (value string, isSuccess bool) {
+func (rdb *RedDB) RPop(key string) (value string, isSuccess bool) {
 	var err error
 	if value, err = rdb.client.RPop(rdb.ctx, key).Result(); err != nil {
 		return value, false
@@ -235,7 +244,7 @@ func (rdb *rdb) RPop(key string) (value string, isSuccess bool) {
 	return value, true
 }
 
-func (rdb *rdb) LPush(key string, values []interface{}) (count int64, isSuccess bool) {
+func (rdb *RedDB) LPush(key string, values []interface{}) (count int64, isSuccess bool) {
 	var err error
 	if count, err = rdb.client.LPush(rdb.ctx, key, values...).Result(); err != nil {
 		return count, false
@@ -243,7 +252,7 @@ func (rdb *rdb) LPush(key string, values []interface{}) (count int64, isSuccess 
 	return count, true
 }
 
-func (rdb *rdb) SetNX(key string, value interface{}, expiration time.Duration) (isSuccess bool) {
+func (rdb *RedDB) SetNX(key string, value interface{}, expiration time.Duration) (isSuccess bool) {
 	_, err := rdb.client.SetNX(rdb.ctx, key, value, expiration).Result()
 	if err != nil {
 		return
@@ -251,7 +260,7 @@ func (rdb *rdb) SetNX(key string, value interface{}, expiration time.Duration) (
 	return
 }
 
-func (rdb *rdb) Expire(key string, expiration time.Duration) (isSuccess bool) {
+func (rdb *RedDB) Expire(key string, expiration time.Duration) (isSuccess bool) {
 	_, err := rdb.client.Expire(rdb.ctx, key, expiration).Result()
 	if err != nil {
 		return
@@ -259,14 +268,14 @@ func (rdb *rdb) Expire(key string, expiration time.Duration) (isSuccess bool) {
 	return
 }
 
-func (rdb *rdb) Exists(key string) bool {
+func (rdb *RedDB) Exists(key string) bool {
 	return rdb.client.Exists(rdb.ctx, key).Val() > 0
 }
 
-func (rdb *rdb) Pipeline() redis.Pipeliner {
+func (rdb *RedDB) Pipeline() redis.Pipeliner {
 	return rdb.client.Pipeline()
 }
 
-func (rdb *rdb) GetCtx() context.Context {
+func (rdb *RedDB) GetCtx() context.Context {
 	return rdb.ctx
 }
