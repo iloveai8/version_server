@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetGmIPList(c *gin.Context) {
+func List(c *gin.Context) {
 	appG := e.Gin{C: c}
 	ipService := &service.GmIPService{}
 	ipList := ipService.GetGmIPList()
@@ -16,17 +16,17 @@ func GetGmIPList(c *gin.Context) {
 	return
 }
 
-func AddGmIP(c *gin.Context) {
+func Add(c *gin.Context) {
 	appG := e.Gin{C: c}
-	ip := c.Query("gmIP")
+	ip := c.Query("ip")
 	ipService := &service.GmIPService{}
 	add := ipService.AddGmIP(ip)
 	appG.Success(e.SUCCESS, add)
 	return
 }
-func RemGmIP(c *gin.Context) {
+func Rem(c *gin.Context) {
 	appG := e.Gin{C: c}
-	ip := c.Query("gmIP")
+	ip := c.Query("ip")
 	ipService := &service.GmIPService{}
 	rem := ipService.RemGmIP(ip)
 	appG.Success(e.SUCCESS, rem)
