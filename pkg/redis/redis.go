@@ -143,10 +143,15 @@ func (rdb *RedDB) SRem(key string, values []string) bool {
 }
 
 func (rdb *RedDB) SIsMember(key string, value string) bool {
-	if _, err := rdb.client.SIsMember(rdb.ctx, key, value).Result(); err != nil {
+	//if _, err := rdb.client.SIsMember(rdb.ctx, key, value).Result(); err != nil {
+	//	return false
+	//}
+	//return true
+	b, err := rdb.client.SIsMember(rdb.ctx, key, value).Result()
+	if err != nil {
 		return false
 	}
-	return true
+	return b
 }
 
 func (rdb *RedDB) SCard(key string) (count int64, isSuccess bool) {

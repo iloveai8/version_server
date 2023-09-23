@@ -3,6 +3,7 @@ package consts
 const (
 	CacheServerKey string = "v2.server."
 	CacheGMKey     string = "v2.gm."
+	CacheGMIPKey   string = "v2.gmip."
 
 	ServerTypeDefault int = 0
 	ServerTypeDEV     int = 1
@@ -20,7 +21,7 @@ const (
 	ConfigGgeoip = "ggeoip"
 )
 
-var IPList = [...]string{
+var IPList = []string{
 	"1.202.246.19",
 	"40.83.97.197",
 	"47.75.45.195",

@@ -88,7 +88,7 @@ func TestGip_GetCountryByIP(t *testing.T) {
 			cnCounter++
 
 			ips[ip]++
-			if utils.MatchIp(ip) {
+			if utils.IsGmIP(ip) {
 				ipIDList[ip] = append(ipIDList[ip], archiveID)
 			} else {
 				otherIDList = append(otherIDList, archiveID)
