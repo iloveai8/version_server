@@ -16,6 +16,7 @@ const (
 	ConfigLogger = "log"
 	ConfigServer = "server"
 	ConfigRedis  = "redis"
+	ConfigMongo  = "mongo"
 	ConfigGgeoip = "ggeoip"
 )
 
