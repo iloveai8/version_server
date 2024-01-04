@@ -31,7 +31,8 @@ func SetUp() {
 	rs := &setting{}
 	err := viper.UnmarshalKey(consts.ConfigRedis, rs)
 	if err != nil {
-		panic(err)
+		_ = fmt.Errorf("error redis: %v", err)
+		return
 	}
 	Rdb.setup(rs)
 }

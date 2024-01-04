@@ -15,7 +15,16 @@ redis:
     poolSize: 5
 
 mongo:
-    url: "mongodb://10.240.10.154:27017/?retryReads=false"
+    username: ""
+    password: ""
+    url: "mongodb://10.240.10.154:27017"
+    database: "game_slots"
+    minPoolSize: 10
+    maxPoolSize: 20
+    maxIdleTimeMS: 100
+    socketTimeoutMS: 100
+    connectTimeoutMS: 100
+
 
 log:
     fileEnable: true

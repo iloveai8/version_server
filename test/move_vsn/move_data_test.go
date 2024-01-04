@@ -15,13 +15,13 @@ var tRdb = &redis.RedDB{}
 
 func init() {
 	init1()
-	init2()
+	//init2()
 }
 
 func init1() {
 	viper.AddConfigPath(".")
 	viper.SetConfigType("yaml")
-	viper.SetConfigName("devMaster")
+	viper.SetConfigName("devCluster")
 	viper.AutomaticEnv() // read in environment variables that match
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
@@ -40,6 +40,15 @@ func init2() {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 	tRdb.NewRDB()
+}
+
+func TestRemoveVsn(t *testing.T) {
+	platType := "inner"
+	delServerInfo(fRdb, platType, "ios244.X")
+	m := getServerInfos(fRdb, platType)
+	for maxVsn, v := range m {
+		fmt.Println("cluster ====================>platType:", platType, " maxVsn:", maxVsn, " v:", v)
+	}
 }
 
 func TestMoveTOCluster(t *testing.T) {
@@ -127,6 +136,10 @@ func addServerInfo(rdb *redis.RedDB, platType, maxVsn string, s *models.ServerIn
 		return false
 	}
 	return rdb.HSet(makePlatCacheKey(platType), maxVsn, string(serverBytes))
+}
+
+func delServerInfo(rdb *redis.RedDB, platType, maxVsn string) bool {
+	return rdb.HDel(makePlatCacheKey(platType), maxVsn)
 }
 
 func makePlatCacheKey(platType string) string {
