@@ -44,10 +44,13 @@ func init2() {
 
 func TestRemoveVsn(t *testing.T) {
 	platType := "inner"
-	delServerInfo(fRdb, platType, "ios244.X")
+	delServerInfo(fRdb, platType, "2.5.2.2.2")
 	m := getServerInfos(fRdb, platType)
 	for maxVsn, v := range m {
-		fmt.Println("cluster ====================>platType:", platType, " maxVsn:", maxVsn, " v:", v)
+		for kk, vv := range v.SubServerInfoMap {
+			fmt.Println("cluster ====================>platType:", platType, " maxVsn:", maxVsn, " kk:", kk, " vv:", vv)
+
+		}
 	}
 }
 
@@ -136,6 +139,13 @@ func addServerInfo(rdb *redis.RedDB, platType, maxVsn string, s *models.ServerIn
 		return false
 	}
 	return rdb.HSet(makePlatCacheKey(platType), maxVsn, string(serverBytes))
+}
+
+func getServerInfo(rdb *redis.RedDB, platType, maxVsn string) *models.ServerInfo {
+	m := rdb.HGet(makePlatCacheKey(platType), maxVsn)
+	serverInfo := &models.ServerInfo{}
+	_ = json.Unmarshal([]byte(m), serverInfo)
+	return serverInfo
 }
 
 func delServerInfo(rdb *redis.RedDB, platType, maxVsn string) bool {
