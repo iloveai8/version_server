@@ -10,7 +10,7 @@ redis:
     masterName: ""
     password: ""
     hosts:
-        - "10.240.10.153:6379"
+        - "10.240.10.153:6389"
     db: 15
     poolSize: 5
 
