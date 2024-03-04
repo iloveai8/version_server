@@ -3,12 +3,9 @@ redis:
     masterName: ""
     password: ""
     hosts:
-        - "gs-redis-cluster-0001-001.dz9dz0.0001.use2.cache.amazonaws.com:6379"
-        - "gs-redis-cluster-0002-001.dz9dz0.0001.use2.cache.amazonaws.com:6379"
-        - "gs-redis-cluster-0003-001.dz9dz0.0001.use2.cache.amazonaws.com:6379"
-        - "gs-redis-cluster-0004-001.dz9dz0.0002.use2.cache.amazonaws.com:6379"
-        - "gs-redis-cluster-0005-001.dz9dz0.0001.use2.cache.amazonaws.com:6379"
-        - "gs-redis-cluster-0006-001.dz9dz0.0001.use2.cache.amazonaws.com:6379"
+        - "10.240.10.154:8001"
+        - "10.240.10.154:8002"
+        - "10.240.10.154:8003"
     db: 0
     poolSize: 1
 

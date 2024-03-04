@@ -15,13 +15,13 @@ var tRdb = &redis.RedDB{}
 
 func init() {
 	init1()
-	//init2()
+	init2()
 }
 
 func init1() {
 	viper.AddConfigPath(".")
 	viper.SetConfigType("yaml")
-	viper.SetConfigName("devCluster")
+	viper.SetConfigName("devDev")
 	viper.AutomaticEnv() // read in environment variables that match
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
