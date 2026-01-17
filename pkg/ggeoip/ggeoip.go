@@ -3,7 +3,7 @@ package ggeoip
 import (
 	"context"
 	"fmt"
-	"game_slots_vsn/pkg/consts"
+	"game_slots_vsn/pkg/constants"
 	"github.com/spf13/viper"
 	"gitlab.ftsview.com/fotoable-go/ggeoip"
 	"time"
@@ -25,7 +25,7 @@ var Gip = &gip{}
 
 func SetUp() {
 	ipSetting := &setting{}
-	err := viper.UnmarshalKey(consts.ConfigGgeoip, ipSetting)
+	err := viper.UnmarshalKey(constants.ConfigGgeoip, ipSetting)
 	if err != nil {
 		panic(err)
 	}

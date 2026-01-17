@@ -1,0 +1,1183 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>domain: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">game_slots_vsn/internal/domain/error.go (100.0%)</option>
+				
+				<option value="file1">game_slots_vsn/internal/domain/gm_config.go (100.0%)</option>
+				
+				<option value="file2">game_slots_vsn/internal/domain/ip_whitelist.go (99.0%)</option>
+				
+				<option value="file3">game_slots_vsn/internal/domain/version.go (96.1%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package domain
+
+import (
+        "fmt"
+
+        "game_slots_vsn/pkg/errcode"
+)
+
+// DomainError 领域错误类型
+//
+// 包装了AppError，提供更具体的领域错误信息
+// 该类型实现了error接口
+type DomainError struct {
+        Err     *errcode.AppError // 底层错误
+        Context string            // 错误上下文（如操作类型、资源名称等）
+}
+
+// Error 实现error接口
+//
+// 返回格式化的错误消息，包含上下文信息
+//
+// 返回:
+//   string: 错误消息
+func (e *DomainError) Error() string <span class="cov8" title="1">{
+        if e.Context != "" </span><span class="cov8" title="1">{
+                return fmt.Sprintf("%s: %s", e.Context, e.Err.Message)
+        }</span>
+        <span class="cov8" title="1">return e.Err.Message</span>
+}
+
+// Unwrap 返回底层错误
+//
+// 支持errors.As和errors.Is
+//
+// 返回:
+//   error: 底层的AppError
+func (e *DomainError) Unwrap() error <span class="cov8" title="1">{
+        return e.Err
+}</span>
+
+// NewDomainError 创建领域错误
+//
+// 参数:
+//   appErr: 底层AppError
+//   context: 错误上下文（可选）
+//
+// 返回:
+//   *DomainError: 领域错误实例
+func NewDomainError(appErr *errcode.AppError, context string) *DomainError <span class="cov8" title="1">{
+        return &amp;DomainError{
+                Err:     appErr,
+                Context: context,
+        }
+}</span>
+
+// WrapError 包装错误为领域错误
+//
+// 如果已经是AppError则直接包装，否则创建内部错误
+//
+// 参数:
+//   err: 待包装的错误
+//   context: 错误上下文
+//
+// 返回:
+//   error: 领域错误
+func WrapError(err error, context string) error <span class="cov8" title="1">{
+        if err == nil </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+
+        // 如果是AppError，直接包装
+        <span class="cov8" title="1">if appErr, ok := err.(*errcode.AppError); ok </span><span class="cov8" title="1">{
+                return NewDomainError(appErr, context)
+        }</span>
+
+        // 如果是DomainError，添加上下文
+        <span class="cov8" title="1">if domainErr, ok := err.(*DomainError); ok </span><span class="cov8" title="1">{
+                return &amp;DomainError{
+                        Err:     domainErr.Err,
+                        Context: context + ": " + domainErr.Context,
+                }
+        }</span>
+
+        // 其他错误，转换为内部错误
+        <span class="cov8" title="1">return NewDomainError(errcode.ErrInternalError.WithMessage(err.Error()), context)</span>
+}
+
+// ==================== 领域特定错误便捷函数 ====================
+//
+// 以下函数提供了创建常见领域错误的便捷方法
+
+// ErrInvalidVersion 创建无效版本号错误
+//
+// 参数:
+//   version: 无效的版本号
+//   reason: 无效原因
+//
+// 返回:
+//   *DomainError: 领域错误
+func ErrInvalidVersion(version, reason string) *DomainError <span class="cov8" title="1">{
+        return NewDomainError(
+                errcode.ErrInvalidParams.WithDetails(map[string]interface{}{
+                        "field":  "vsn",
+                        "reason": reason,
+                        "value":  version,
+                }),
+                "version validation",
+        )
+}</span>
+
+// ErrInvalidSubServer 创建无效子服务器错误
+//
+// 参数:
+//   key: 子服务器键
+//   reason: 无效原因
+//
+// 返回:
+//   *DomainError: 领域错误
+func ErrInvalidSubServer(key, reason string) *DomainError <span class="cov8" title="1">{
+        details := map[string]interface{}{
+                "field":  "subServer",
+                "key":    key,
+                "reason": reason,
+        }
+        return NewDomainError(
+                errcode.ErrInvalidParams.WithDetails(details),
+                "subServer validation",
+        )
+}</span>
+
+// ErrSubServerNotFound 创建子服务器不存在错误
+//
+// 参数:
+//   key: 子服务器键
+//   available: 可用的子服务器键列表
+//
+// 返回:
+//   *DomainError: 领域错误
+func ErrSubServerNotFound(key string, available []string) *DomainError <span class="cov8" title="1">{
+        details := map[string]interface{}{
+                "key":       key,
+                "reason":    "子服务器不存在",
+                "available": available,
+        }
+        return NewDomainError(
+                errcode.ErrInvalidParams.WithDetails(details),
+                "subServer lookup",
+        )
+}</span>
+
+// ErrInvalidIPAddress 创建无效IP地址错误
+//
+// 参数:
+//   ip: 无效的IP地址
+//
+// 返回:
+//   *DomainError: 领域错误
+func ErrInvalidIPAddress(ip string) *DomainError <span class="cov8" title="1">{
+        return NewDomainError(
+                errcode.ErrInvalidIPFormat.WithDetails(map[string]interface{}{
+                        "ip":     ip,
+                        "reason": "IP地址格式无效",
+                }),
+                "IP validation",
+        )
+}</span>
+
+// ErrIPAlreadyExists 创建IP已存在错误
+//
+// 参数:
+//   ip: 已存在的IP地址
+//
+// 返回:
+//   *DomainError: 领域错误
+func ErrIPAlreadyExists(ip string) *DomainError <span class="cov8" title="1">{
+        return NewDomainError(
+                errcode.ErrDuplicateIP.WithDetails(map[string]interface{}{
+                        "ip":     ip,
+                        "reason": "IP已存在于白名单中",
+                }),
+                "IP whitelist add",
+        )
+}</span>
+
+// ErrIPNotInWhitelist 创建IP不在白名单错误
+//
+// 参数:
+//   ip: 不在白名单中的IP地址
+//
+// 返回:
+//   *DomainError: 领域错误
+func ErrIPNotInWhitelist(ip string) *DomainError <span class="cov8" title="1">{
+        return NewDomainError(
+                errcode.ErrIPNotFound.WithDetails(map[string]interface{}{
+                        "ip":     ip,
+                        "reason": "IP不在白名单中",
+                }),
+                "IP whitelist check",
+        )
+}</span>
+
+// ErrGMConfigNotFound 创建GM配置不存在错误
+//
+// 返回:
+//   *DomainError: 领域错误
+func ErrGMConfigNotFound() *DomainError <span class="cov8" title="1">{
+        return NewDomainError(
+                errcode.ErrGMConfigNotFound,
+                "GM config lookup",
+        )
+}</span>
+
+// ErrVersionNotFound 创建版本不存在错误
+//
+// 参数:
+//   version: 不存在的版本号
+//
+// 返回:
+//   *DomainError: 领域错误
+func ErrVersionNotFound(version string) *DomainError <span class="cov8" title="1">{
+        return NewDomainError(
+                errcode.NewVersionNotFoundError(version),
+                "version lookup",
+        )
+}</span>
+
+// AsDomainError 转换为DomainError
+//
+// 尝试将error转换为DomainError类型
+//
+// 参数:
+//   err: 待转换的错误
+//
+// 返回:
+//   *DomainError: DomainError实例（如果不是DomainError则返回nil）
+//   bool: 是否转换成功
+//
+// 示例:
+//   if domainErr, ok := AsDomainError(err); ok {
+//       log.Printf("Domain error context: %s", domainErr.Context)
+//   }
+func AsDomainError(err error) (*DomainError, bool) <span class="cov8" title="1">{
+        if err == nil </span><span class="cov8" title="1">{
+                return nil, false
+        }</span>
+        <span class="cov8" title="1">if domainErr, ok := err.(*DomainError); ok </span><span class="cov8" title="1">{
+                return domainErr, true
+        }</span>
+        <span class="cov8" title="1">return nil, false</span>
+}
+
+// IsDomainError 判断是否为DomainError
+//
+// 参数:
+//   err: 待判断的错误
+//
+// 返回:
+//   bool: 如果是DomainError返回true，否则返回false
+func IsDomainError(err error) bool <span class="cov8" title="1">{
+        _, ok := AsDomainError(err)
+        return ok
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package domain
+
+import (
+        "fmt"
+
+        "game_slots_vsn/pkg/errcode"
+)
+
+// GMConfig GM配置领域模型
+//
+// 表示GM（Game Master）后台的开关配置，包括GM功能开关和封锁状态
+//
+// 使用示例：
+//   config := &amp;domain.GMConfig{
+//       GMEnable: true,
+//       Block:    false,
+//   }
+//   if err := config.Validate(); err != nil {
+//       return err
+//   }
+type GMConfig struct {
+        GMEnable bool `json:"gmEnable"` // GM功能开关
+        Block    bool `json:"block"`    // 封锁状态
+}
+
+// NewGMConfig 创建新的GM配置
+//
+// 参数:
+//   gmEnable: GM功能是否启用
+//   block: 是否封锁
+//
+// 返回:
+//   *GMConfig: GM配置对象
+func NewGMConfig(gmEnable, block bool) *GMConfig <span class="cov8" title="1">{
+        return &amp;GMConfig{
+                GMEnable: gmEnable,
+                Block:    block,
+        }
+}</span>
+
+// Validate 验证GM配置
+//
+// GM配置总是有效的，因为所有字段都是布尔类型且有默认值
+// 此方法为了保持与其他领域模型的一致性而提供
+//
+// 返回:
+//   error: 总是返回nil
+func (g *GMConfig) Validate() error <span class="cov8" title="1">{
+        // GM配置没有需要验证的字段，所有字段都是布尔类型
+        return nil
+}</span>
+
+// IsValid 快速检查GM配置是否有效
+//
+// 返回:
+//   bool: 总是返回true
+func (g *GMConfig) IsValid() bool <span class="cov8" title="1">{
+        return true
+}</span>
+
+// ToggleGM 切换GM功能开关
+//
+// 返回:
+//   bool: 切换后的GM功能状态
+func (g *GMConfig) ToggleGM() bool <span class="cov8" title="1">{
+        g.GMEnable = !g.GMEnable
+        return g.GMEnable
+}</span>
+
+// ToggleBlock 切换封锁状态
+//
+// 返回:
+//   bool: 切换后的封锁状态
+func (g *GMConfig) ToggleBlock() bool <span class="cov8" title="1">{
+        g.Block = !g.Block
+        return g.Block
+}</span>
+
+// SetGMEnable 设置GM功能开关
+//
+// 参数:
+//   enable: GM功能状态
+func (g *GMConfig) SetGMEnable(enable bool) <span class="cov8" title="1">{
+        g.GMEnable = enable
+}</span>
+
+// SetBlock 设置封锁状态
+//
+// 参数:
+//   block: 封锁状态
+func (g *GMConfig) SetBlock(block bool) <span class="cov8" title="1">{
+        g.Block = block
+}</span>
+
+// IsGMEnabled 检查GM功能是否启用
+//
+// 返回:
+//   bool: GM功能启用返回true，否则返回false
+func (g *GMConfig) IsGMEnabled() bool <span class="cov8" title="1">{
+        return g.GMEnable
+}</span>
+
+// IsBlocked 检查是否处于封锁状态
+//
+// 返回:
+//   bool: 封锁状态返回true，否则返回false
+func (g *GMConfig) IsBlocked() bool <span class="cov8" title="1">{
+        return g.Block
+}</span>
+
+// GetStatus 获取GM配置状态摘要
+//
+// 返回:
+//   map[string]interface{}: 包含GM功能状态和封锁状态
+func (g *GMConfig) GetStatus() map[string]interface{} <span class="cov8" title="1">{
+        return map[string]interface{}{
+                "gmEnable": g.GMEnable,
+                "block":    g.Block,
+        }
+}</span>
+
+// String 返回GM配置的字符串表示
+//
+// 返回:
+//   string: GM配置的描述
+func (g *GMConfig) String() string <span class="cov8" title="1">{
+        return fmt.Sprintf("GMConfig{GMEnable: %v, Block: %v}", g.GMEnable, g.Block)
+}</span>
+
+// Clone 克隆GM配置
+//
+// 创建当前GM配置的深拷贝
+//
+// 返回:
+//   *GMConfig: GM配置的副本
+func (g *GMConfig) Clone() *GMConfig <span class="cov8" title="1">{
+        return &amp;GMConfig{
+                GMEnable: g.GMEnable,
+                Block:    g.Block,
+        }
+}</span>
+
+// Merge 合并另一个GM配置
+//
+// 当另一个配置不为nil时，使用其值覆盖当前配置
+//
+// 参数:
+//   other: 要合并的GM配置
+//
+// 返回:
+//   error: other为nil时返回错误
+func (g *GMConfig) Merge(other *GMConfig) error <span class="cov8" title="1">{
+        if other == nil </span><span class="cov8" title="1">{
+                return errcode.ErrInvalidParams.WithDetails(map[string]interface{}{
+                        "reason": "不能合并nil配置",
+                })
+        }</span>
+
+        <span class="cov8" title="1">g.GMEnable = other.GMEnable
+        g.Block = other.Block
+
+        return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package domain
+
+import (
+        "fmt"
+        "net"
+        "strings"
+        "sync"
+
+        "game_slots_vsn/pkg/errcode"
+        "game_slots_vsn/pkg/validator"
+)
+
+// IPWhitelist IP白名单领域模型
+//
+// 表示允许访问的IP地址列表，用于GM后台等需要IP限制的场景
+//
+// 使用示例：
+//   whitelist := domain.NewIPWhitelist()
+//   if err := whitelist.AddIP("192.168.1.1"); err != nil {
+//       return err
+//   }
+//   if whitelist.Contains("192.168.1.1") {
+//       // 允许访问
+//   }
+type IPWhitelist struct {
+        mu  sync.RWMutex
+        IPs map[string]bool `json:"ips"` // IP地址集合（使用map保证唯一性）
+}
+
+// NewIPWhitelist 创建新的IP白名单
+//
+// 返回:
+//   *IPWhitelist: IP白名单对象
+func NewIPWhitelist() *IPWhitelist <span class="cov8" title="1">{
+        return &amp;IPWhitelist{
+                IPs: make(map[string]bool),
+        }
+}</span>
+
+// NewIPWhitelistFromSlice 从IP列表创建IP白名单
+//
+// 支持单个IP地址和CIDR网段格式
+//
+// 参数:
+//   ips: IP地址或CIDR列表
+//
+// 返回:
+//   *IPWhitelist: IP白名单对象
+//   error: 如果有IP格式无效，返回错误
+func NewIPWhitelistFromSlice(ips []string) (*IPWhitelist, error) <span class="cov8" title="1">{
+        w := &amp;IPWhitelist{
+                IPs: make(map[string]bool),
+        }
+
+        if err := w.AddIPs(ips); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return w, nil</span>
+}
+
+// Validate 验证IP白名单配置
+//
+// 验证所有IP地址的格式
+//
+// 返回:
+//   error: 如果有IP格式无效，返回错误
+func (i *IPWhitelist) Validate() error <span class="cov8" title="1">{
+        i.mu.RLock()
+        defer i.mu.RUnlock()
+
+        // IP白名单总是有效的，即使是空的
+        return nil
+}</span>
+
+// IsValid 快速检查IP白名单是否有效
+//
+// 返回:
+//   bool: 总是返回true
+func (i *IPWhitelist) IsValid() bool <span class="cov8" title="1">{
+        return true
+}</span>
+
+// AddIP 添加IP到白名单
+//
+// 支持单个IP地址和CIDR网段格式
+//
+// 参数:
+//   ip: IP地址或CIDR字符串
+//
+// 返回:
+//   error: IP格式无效或已存在时返回错误
+func (i *IPWhitelist) AddIP(ip string) error <span class="cov8" title="1">{
+        // 标准化IP地址
+        normalizedIP := strings.TrimSpace(ip)
+
+        // 验证IP或CIDR格式
+        if err := validator.ValidateIPOrCIDR(normalizedIP); err != nil </span><span class="cov8" title="1">{
+                return errcode.ErrInvalidIPFormat.WithDetails(map[string]interface{}{
+                        "ip":     normalizedIP,
+                        "reason": "IP地址或CIDR格式无效",
+                })
+        }</span>
+
+        <span class="cov8" title="1">i.mu.Lock()
+        defer i.mu.Unlock()
+
+        // 检查是否已存在
+        if _, exists := i.IPs[normalizedIP]; exists </span><span class="cov8" title="1">{
+                return errcode.ErrDuplicateIP.WithDetails(map[string]interface{}{
+                        "ip":     normalizedIP,
+                        "reason": "IP已存在于白名单中",
+                })
+        }</span>
+
+        // 添加IP
+        <span class="cov8" title="1">i.IPs[normalizedIP] = true
+        return nil</span>
+}
+
+// RemoveIP 从白名单移除IP
+//
+// 参数:
+//   ip: IP地址
+//
+// 返回:
+//   error: IP不存在时返回错误
+func (i *IPWhitelist) RemoveIP(ip string) error <span class="cov8" title="1">{
+        normalizedIP := strings.TrimSpace(ip)
+
+        i.mu.Lock()
+        defer i.mu.Unlock()
+
+        if _, exists := i.IPs[normalizedIP]; !exists </span><span class="cov8" title="1">{
+                return errcode.ErrIPNotFound.WithDetails(map[string]interface{}{
+                        "ip":     normalizedIP,
+                        "reason": "IP不在白名单中",
+                })
+        }</span>
+
+        <span class="cov8" title="1">delete(i.IPs, normalizedIP)
+        return nil</span>
+}
+
+// Contains 检查IP是否在白名单中
+//
+// 参数:
+//   ip: IP地址
+//
+// 返回:
+//   bool: IP在白名单中返回true，否则返回false
+func (i *IPWhitelist) Contains(ip string) bool <span class="cov8" title="1">{
+        normalizedIP := strings.TrimSpace(ip)
+
+        i.mu.RLock()
+        defer i.mu.RUnlock()
+
+        return i.IPs[normalizedIP]
+}</span>
+
+// ContainsIPNet 检查IP是否在白名单的IP网络范围内
+//
+// 支持CIDR格式的IP网段匹配
+//
+// 参数:
+//   ip: IP地址
+//
+// 返回:
+//   bool: IP在白名单或某个IP网段范围内返回true
+func (i *IPWhitelist) ContainsIPNet(ip string) bool <span class="cov8" title="1">{
+        normalizedIP := strings.TrimSpace(ip)
+        checkIP := net.ParseIP(normalizedIP)
+        if checkIP == nil </span><span class="cov8" title="1">{
+                return false
+        }</span>
+
+        <span class="cov8" title="1">i.mu.RLock()
+        defer i.mu.RUnlock()
+
+        // 检查精确匹配
+        if i.IPs[normalizedIP] </span><span class="cov8" title="1">{
+                return true
+        }</span>
+
+        // 检查CIDR网段匹配
+        <span class="cov8" title="1">for whitelistIP := range i.IPs </span><span class="cov8" title="1">{
+                if strings.Contains(whitelistIP, "/") </span><span class="cov8" title="1">{
+                        _, ipNet, err := net.ParseCIDR(whitelistIP)
+                        if err != nil </span><span class="cov0" title="0">{
+                                continue</span>
+                        }
+                        <span class="cov8" title="1">if ipNet.Contains(checkIP) </span><span class="cov8" title="1">{
+                                return true
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">return false</span>
+}
+
+// AddIPs 批量添加IP到白名单
+//
+// 参数:
+//   ips: IP地址列表
+//
+// 返回:
+//   error: 如果有任何IP格式无效，返回错误（已添加的IP不会回滚）
+func (i *IPWhitelist) AddIPs(ips []string) error <span class="cov8" title="1">{
+        var lastErr error
+        successCount := 0
+
+        for _, ip := range ips </span><span class="cov8" title="1">{
+                if err := i.AddIP(ip); err != nil </span><span class="cov8" title="1">{
+                        lastErr = err
+                }</span> else<span class="cov8" title="1"> {
+                        successCount++
+                }</span>
+        }
+
+        // 如果有错误，返回最后一个错误
+        <span class="cov8" title="1">if lastErr != nil &amp;&amp; successCount == 0 </span><span class="cov8" title="1">{
+                return lastErr
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// RemoveIPs 批量从白名单移除IP
+//
+// 参数:
+//   ips: IP地址列表
+//
+// 返回:
+//   error: 如果有任何IP不存在，返回错误（已移除的IP不会回滚）
+func (i *IPWhitelist) RemoveIPs(ips []string) error <span class="cov8" title="1">{
+        var lastErr error
+        successCount := 0
+
+        for _, ip := range ips </span><span class="cov8" title="1">{
+                if err := i.RemoveIP(ip); err != nil </span><span class="cov8" title="1">{
+                        lastErr = err
+                }</span> else<span class="cov8" title="1"> {
+                        successCount++
+                }</span>
+        }
+
+        // 如果有错误且没有成功移除任何IP，返回最后一个错误
+        <span class="cov8" title="1">if lastErr != nil &amp;&amp; successCount == 0 </span><span class="cov8" title="1">{
+                return lastErr
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetIPs 获取所有IP地址列表
+//
+// 返回:
+//   []string: IP地址列表
+func (i *IPWhitelist) GetIPs() []string <span class="cov8" title="1">{
+        i.mu.RLock()
+        defer i.mu.RUnlock()
+
+        ips := make([]string, 0, len(i.IPs))
+        for ip := range i.IPs </span><span class="cov8" title="1">{
+                ips = append(ips, ip)
+        }</span>
+        <span class="cov8" title="1">return ips</span>
+}
+
+// Count 获取白名单中IP数量
+//
+// 返回:
+//   int: IP数量
+func (i *IPWhitelist) Count() int <span class="cov8" title="1">{
+        i.mu.RLock()
+        defer i.mu.RUnlock()
+
+        return len(i.IPs)
+}</span>
+
+// IsEmpty 检查白名单是否为空
+//
+// 返回:
+//   bool: 白名单为空返回true，否则返回false
+func (i *IPWhitelist) IsEmpty() bool <span class="cov8" title="1">{
+        return i.Count() == 0
+}</span>
+
+// Clear 清空白名单
+func (i *IPWhitelist) Clear() <span class="cov8" title="1">{
+        i.mu.Lock()
+        defer i.mu.Unlock()
+
+        i.IPs = make(map[string]bool)
+}</span>
+
+// Clone 克隆IP白名单
+//
+// 创建当前IP白名单的深拷贝
+//
+// 返回:
+//   *IPWhitelist: IP白名单的副本
+func (i *IPWhitelist) Clone() *IPWhitelist <span class="cov8" title="1">{
+        i.mu.RLock()
+        defer i.mu.RUnlock()
+
+        newWhitelist := NewIPWhitelist()
+        for ip := range i.IPs </span><span class="cov8" title="1">{
+                newWhitelist.IPs[ip] = true
+        }</span>
+
+        <span class="cov8" title="1">return newWhitelist</span>
+}
+
+// ToSlice 转换为IP地址切片
+//
+// 返回:
+//   []string: IP地址列表
+func (i *IPWhitelist) ToSlice() []string <span class="cov8" title="1">{
+        return i.GetIPs()
+}</span>
+
+// String 返回IP白名单的字符串表示
+//
+// 返回:
+//   string: IP白名单的描述
+func (i *IPWhitelist) String() string <span class="cov8" title="1">{
+        ips := i.GetIPs()
+        return fmt.Sprintf("IPWhitelist{Count: %d, IPs: [%s]}", len(ips), strings.Join(ips, ", "))
+}</span>
+
+// Merge 合并另一个IP白名单
+//
+// 将另一个白名单的所有IP添加到当前白名单
+//
+// 参数:
+//   other: 要合并的IP白名单
+//
+// 返回:
+//   error: other为nil时返回错误
+func (i *IPWhitelist) Merge(other *IPWhitelist) error <span class="cov8" title="1">{
+        if other == nil </span><span class="cov8" title="1">{
+                return errcode.ErrInvalidParams.WithDetails(map[string]interface{}{
+                        "reason": "不能合并nil白名单",
+                })
+        }</span>
+
+        <span class="cov8" title="1">other.mu.RLock()
+        ips := make([]string, 0, len(other.IPs))
+        for ip := range other.IPs </span><span class="cov8" title="1">{
+                ips = append(ips, ip)
+        }</span>
+        <span class="cov8" title="1">other.mu.RUnlock()
+
+        return i.AddIPs(ips)</span>
+}
+
+// ValidateIPs 验证IP地址列表的格式
+//
+// 支持单个IP地址和CIDR网段格式
+//
+// 参数:
+//   ips: IP地址或CIDR列表
+//
+// 返回:
+//   error: 如果有IP格式无效，返回包含所有错误信息的错误
+func (i *IPWhitelist) ValidateIPs(ips []string) error <span class="cov8" title="1">{
+        errors := make([]string, 0)
+
+        for _, ip := range ips </span><span class="cov8" title="1">{
+                normalizedIP := strings.TrimSpace(ip)
+                if err := validator.ValidateIPOrCIDR(normalizedIP); err != nil </span><span class="cov8" title="1">{
+                        errors = append(errors, fmt.Sprintf("IP '%s': %v", normalizedIP, err))
+                }</span>
+        }
+
+        <span class="cov8" title="1">if len(errors) &gt; 0 </span><span class="cov8" title="1">{
+                return errcode.ErrInvalidIPFormat.WithDetails(map[string]interface{}{
+                        "reason": "部分IP格式无效",
+                        "errors": errors,
+                })
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">// Package domain 提供业务领域模型的定义
+//
+// 该包实现了所有核心业务实体：
+// - Version: 版本配置领域模型
+// - GMConfig: GM配置领域模型
+// - IPWhitelist: IP白名单领域模型
+//
+// 领域模型特点：
+// - 纯净性：不依赖任何外部包（除基础设施包）
+// - 自验证：每个领域对象都有Validate()方法
+// - 业务逻辑封装：业务规则在领域模型内部实现
+package domain
+
+import (
+        "fmt"
+        "strings"
+
+        "game_slots_vsn/pkg/errcode"
+        "game_slots_vsn/pkg/validator"
+)
+
+// Version 版本配置领域模型
+//
+// 表示一个游戏版本的完整配置，包含版本号和所有子服务器信息
+//
+// 使用示例：
+//   v := &amp;domain.Version{
+//       Vsn: "1.2.3",
+//       SubServers: make(map[string]*domain.SubServer),
+//   }
+//   if err := v.Validate(); err != nil {
+//       return err
+//   }
+type Version struct {
+        Vsn        string                 `json:"vsn"`        // 版本号 X.Y.Z或X.Y.Z.N
+        SubServers map[string]*SubServer  `json:"subServers"` // 子服务器信息映射
+}
+
+// SubServer 子服务器配置
+//
+// 表示一个子服务器的配置信息
+type SubServer struct {
+        Vsn    string `json:"vsn"`    // 版本号
+        SrvUrl string `json:"srvUrl"` // 服务器URL
+        ResUrl string `json:"resUrl"` // 资源URL
+        Type   int    `json:"type"`   // 服务器类型
+}
+
+// NewVersion 创建新的版本配置
+//
+// 参数:
+//   vsn: 版本号字符串
+//
+// 返回:
+//   *Version: 版本配置对象
+func NewVersion(vsn string) *Version <span class="cov8" title="1">{
+        return &amp;Version{
+                Vsn:        vsn,
+                SubServers: make(map[string]*SubServer),
+        }
+}</span>
+
+// NewSubServer 创建新的子服务器配置
+//
+// 参数:
+//   vsn: 版本号
+//   srvUrl: 服务器URL
+//   resUrl: 资源URL
+//   type: 服务器类型
+//
+// 返回:
+//   *SubServer: 子服务器配置对象
+func NewSubServer(vsn, srvUrl, resUrl string, serverType int) *SubServer <span class="cov8" title="1">{
+        return &amp;SubServer{
+                Vsn:    vsn,
+                SrvUrl: srvUrl,
+                ResUrl: resUrl,
+                Type:   serverType,
+        }
+}</span>
+
+// Validate 验证版本配置
+//
+// 验证版本号格式和所有子服务器配置的有效性
+//
+// 返回:
+//   error: 配置无效时返回错误，格式正确返回nil
+func (v *Version) Validate() error <span class="cov8" title="1">{
+        // 验证版本号非空
+        if strings.TrimSpace(v.Vsn) == "" </span><span class="cov8" title="1">{
+                return errcode.ErrInvalidParams.WithDetails(map[string]interface{}{
+                        "field":     "vsn",
+                        "reason":    "版本号不能为空",
+                        "vsn":       v.Vsn,
+                        "rule":      "X.Y.Z 或 X.Y.Z.N",
+                        "examples":  []string{"1.0.0", "1.2.3.4"},
+                })
+        }</span>
+
+        // 验证版本号格式
+        <span class="cov8" title="1">if err := validator.ValidateVersion(v.Vsn); err != nil </span><span class="cov8" title="1">{
+                return errcode.ErrInvalidParams.WithDetails(map[string]interface{}{
+                        "field":     "vsn",
+                        "reason":    "版本号格式无效",
+                        "vsn":       v.Vsn,
+                        "rule":      "X.Y.Z 或 X.Y.Z.N",
+                        "examples":  []string{"1.0.0", "1.2.3.4"},
+                })
+        }</span>
+
+        // 验证子服务器配置
+        <span class="cov8" title="1">for key, sub := range v.SubServers </span><span class="cov8" title="1">{
+                if err := sub.Validate(); err != nil </span><span class="cov8" title="1">{
+                        // 如果是AppError，添加子服务器信息到详情
+                        if appErr, ok := errcode.AsAppError(err); ok </span><span class="cov8" title="1">{
+                                details := make(map[string]interface{})
+                                if appErr.Details != nil </span><span class="cov8" title="1">{
+                                        for k, v := range appErr.Details </span><span class="cov8" title="1">{
+                                                details[k] = v
+                                        }</span>
+                                }
+                                <span class="cov8" title="1">details["subServerKey"] = key
+                                return appErr.WithDetails(details)</span>
+                        }
+                        // 如果不是AppError，包装为AppError
+                        <span class="cov0" title="0">return errcode.ErrInvalidParams.WithDetails(map[string]interface{}{
+                                "subServerKey": key,
+                                "reason":       err.Error(),
+                        })</span>
+                }
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// IsValid 快速检查版本配置是否有效
+//
+// 返回:
+//   bool: 配置有效返回true，否则返回false
+func (v *Version) IsValid() bool <span class="cov8" title="1">{
+        return v.Validate() == nil
+}</span>
+
+// AddSubServer 添加子服务器
+//
+// 参数:
+//   key: 子服务器键
+//   sub: 子服务器配置
+//
+// 返回:
+//   error: 子服务器配置无效时返回错误
+func (v *Version) AddSubServer(key string, sub *SubServer) error <span class="cov8" title="1">{
+        if err := sub.Validate(); err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("invalid subServer: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">v.SubServers[key] = sub
+        return nil</span>
+}
+
+// GetSubServer 获取子服务器
+//
+// 参数:
+//   key: 子服务器键
+//
+// 返回:
+//   *SubServer: 子服务器配置
+//   error: 子服务器不存在时返回错误
+func (v *Version) GetSubServer(key string) (*SubServer, error) <span class="cov8" title="1">{
+        sub, ok := v.SubServers[key]
+        if !ok </span><span class="cov8" title="1">{
+                return nil, errcode.ErrInvalidParams.WithDetails(map[string]interface{}{
+                        "field":     "subServer",
+                        "key":       key,
+                        "reason":    "子服务器不存在",
+                        "available": v.GetSubServerKeys(),
+                })
+        }</span>
+
+        <span class="cov8" title="1">return sub, nil</span>
+}
+
+// RemoveSubServer 移除子服务器
+//
+// 参数:
+//   key: 子服务器键
+func (v *Version) RemoveSubServer(key string) <span class="cov8" title="1">{
+        delete(v.SubServers, key)
+}</span>
+
+// GetSubServerKeys 获取所有子服务器键
+//
+// 返回:
+//   []string: 子服务器键列表
+func (v *Version) GetSubServerKeys() []string <span class="cov8" title="1">{
+        keys := make([]string, 0, len(v.SubServers))
+        for key := range v.SubServers </span><span class="cov8" title="1">{
+                keys = append(keys, key)
+        }</span>
+        <span class="cov8" title="1">return keys</span>
+}
+
+// HasSubServer 检查是否存在指定子服务器
+//
+// 参数:
+//   key: 子服务器键
+//
+// 返回:
+//   bool: 存在返回true，否则返回false
+func (v *Version) HasSubServer(key string) bool <span class="cov8" title="1">{
+        _, ok := v.SubServers[key]
+        return ok
+}</span>
+
+// Validate 验证子服务器配置
+//
+// 验证子服务器的所有必需字段
+//
+// 返回:
+//   error: 配置无效时返回错误，格式正确返回nil
+func (s *SubServer) Validate() error <span class="cov8" title="1">{
+        errors := make(map[string]string)
+
+        // 验证版本号
+        if strings.TrimSpace(s.Vsn) == "" </span><span class="cov8" title="1">{
+                errors["vsn"] = "版本号不能为空"
+        }</span> else<span class="cov8" title="1"> if err := validator.ValidateVersion(s.Vsn); err != nil </span><span class="cov8" title="1">{
+                errors["vsn"] = "版本号格式无效"
+        }</span>
+
+        // 验证服务器URL
+        <span class="cov8" title="1">if strings.TrimSpace(s.SrvUrl) == "" </span><span class="cov8" title="1">{
+                errors["srvUrl"] = "服务器URL不能为空"
+        }</span> else<span class="cov8" title="1"> if err := validator.ValidateURL(s.SrvUrl); err != nil </span><span class="cov8" title="1">{
+                errors["srvUrl"] = "服务器URL格式无效"
+        }</span>
+
+        // 验证资源URL
+        <span class="cov8" title="1">if strings.TrimSpace(s.ResUrl) == "" </span><span class="cov8" title="1">{
+                errors["resUrl"] = "资源URL不能为空"
+        }</span> else<span class="cov8" title="1"> if err := validator.ValidateURL(s.ResUrl); err != nil </span><span class="cov0" title="0">{
+                errors["resUrl"] = "资源URL格式无效"
+        }</span>
+
+        // 验证服务器类型
+        <span class="cov8" title="1">if s.Type &lt; 0 </span><span class="cov8" title="1">{
+                errors["type"] = "服务器类型不能为负数"
+        }</span>
+
+        <span class="cov8" title="1">if len(errors) &gt; 0 </span><span class="cov8" title="1">{
+                return errcode.ErrInvalidParams.WithDetails(map[string]interface{}{
+                        "field":  "subServer",
+                        "errors": errors,
+                })
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

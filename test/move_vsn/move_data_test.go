@@ -1,161 +1,214 @@
+// Package move_vsn 版本数据迁移测试
+//
+// 该测试包验证版本配置在Redis集群环境下的数据迁移功能
 package move_vsn
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"game_slots_vsn/internal/service/models"
-	"game_slots_vsn/pkg/consts"
-	"game_slots_vsn/pkg/redis"
-	"github.com/spf13/viper"
+	"os"
 	"testing"
+
+	"github.com/alicebob/miniredis/v2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"game_slots_vsn/internal/domain"
+	"game_slots_vsn/internal/repository"
+	redispkg "game_slots_vsn/internal/repository/redis"
+	"game_slots_vsn/internal/service"
+	"game_slots_vsn/pkg/constants"
 )
 
-var fRdb = &redis.RedDB{}
-var tRdb = &redis.RedDB{}
+// setupTestRedis 创建测试用的Redis环境
+//
+// 使用miniredis模拟Redis，避免依赖真实Redis服务
+//
+// 返回:
+//   *miniredis.Miniredis: miniredis实例
+//   redispkg.Client: Redis客户端
+func setupTestRedis(t *testing.T) (*miniredis.Miniredis, redispkg.Client) {
+	// 创建miniredis
+	mr := miniredis.RunT(t)
 
-func init() {
-	init1()
-	init2()
+	// 创建Redis客户端
+	redisClient := redispkg.NewRedisClientFromURL(mr.Addr())
+
+	return mr, redisClient
 }
 
-func init1() {
-	viper.AddConfigPath(".")
-	viper.SetConfigType("yaml")
-	viper.SetConfigName("devDev")
-	viper.AutomaticEnv() // read in environment variables that match
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
-	fRdb.NewRDB()
-}
-
-func init2() {
-	viper.AddConfigPath(".")
-	viper.SetConfigType("yaml")
-	viper.SetConfigName("devCluster")
-	viper.AutomaticEnv() // read in environment variables that match
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
-	tRdb.NewRDB()
-}
-
+// TestRemoveVsn 测试版本删除功能
+//
+// 验证可以正确删除指定环境的版本配置
 func TestRemoveVsn(t *testing.T) {
-	platType := "inner"
-	delServerInfo(fRdb, platType, "2.5.2.2.2")
-	m := getServerInfos(fRdb, platType)
-	for maxVsn, v := range m {
-		for kk, vv := range v.SubServerInfoMap {
-			fmt.Println("cluster ====================>platType:", platType, " maxVsn:", maxVsn, " kk:", kk, " vv:", vv)
+	mr, redisClient := setupTestRedis(t)
+	defer mr.Close()
 
+	// 创建Repository和Service
+	versionRepo := repository.NewVersionRepository(redisClient)
+	versionSvc := service.NewVersionService(versionRepo)
+
+	ctx := context.Background()
+
+	// 创建测试版本
+	testVersions := []string{"1.0.0", "1.1.0", "1.2.0"}
+	for _, vsn := range testVersions {
+		version := domain.NewVersion(vsn)
+		version.SubServers = map[string]*domain.SubServer{
+			"server1": {
+				Vsn:    vsn,
+				SrvUrl: "http://server1.example.com",
+				ResUrl: "http://server1.example.com/res",
+				Type:   1,
+			},
 		}
+		err := versionSvc.CreateVersion(ctx, version, "dev")
+		require.NoError(t, err, "创建版本失败: %s", vsn)
 	}
+
+	// 验证版本已创建
+	for _, vsn := range testVersions {
+		_, err := versionSvc.GetVersion(ctx, vsn, "dev")
+		assert.NoError(t, err, "版本应该存在: %s", vsn)
+	}
+
+	// 删除版本
+	err := versionSvc.DeleteVersion(ctx, "1.0.0", "dev")
+	assert.NoError(t, err, "删除版本失败")
+
+	// 验证版本已删除
+	_, err = versionSvc.GetVersion(ctx, "1.0.0", "dev")
+	assert.Error(t, err, "版本应该已被删除")
 }
 
+// TestMoveTOCluster 测试数据迁移到集群
+//
+// 验证版本配置可以正确迁移到Redis集群环境
 func TestMoveTOCluster(t *testing.T) {
-	doMoveGM(fRdb, tRdb)
-	array := [3]string{"ios", "android", "inner"}
-	for _, platType := range array {
-		doMoveServers(fRdb, tRdb, platType)
+	mr, redisClient := setupTestRedis(t)
+	defer mr.Close()
+
+	// 创建Repository
+	versionRepo := repository.NewVersionRepository(redisClient)
+	versionSvc := service.NewVersionService(versionRepo)
+
+	ctx := context.Background()
+
+	// 测试数据：模拟不同平台的版本配置
+	testCases := []struct {
+		platform string
+		maxVsn    string
+		env       string
+	}{
+		{"android", "100.2.17", "dev"},
+		{"android", "100.2.18", "pre"},
+		{"android", "100.2.7", "pro"},
+		{"ios", "200.4.16", "dev"},
+		{"ios", "200.4.17", "pre"},
+		{"ios", "100.2.16", "pro"},
+		{"windows", "100.1.21", "dev"},
+		{"windows", "100.2.8", "pre"},
+		{"windows", "100.1.22", "pro"},
+	}
+
+	// 创建测试版本
+	for _, tc := range testCases {
+		t.Run(tc.platform+"_"+tc.env, func(t *testing.T) {
+			vsn := tc.maxVsn
+			version := domain.NewVersion(vsn)
+			version.SubServers = map[string]*domain.SubServer{
+				tc.platform: {
+					Vsn:    vsn,
+					SrvUrl: fmt.Sprintf("http://%s.example.com", tc.platform),
+					ResUrl: fmt.Sprintf("http://%s.example.com/res", tc.platform),
+					Type:   getServerType(tc.env),
+				},
+			}
+
+			err := versionSvc.CreateVersion(ctx, version, tc.env)
+			require.NoError(t, err, "创建版本失败: platform=%s, env=%s", tc.platform, tc.env)
+
+			// 验证版本已创建
+			created, err := versionSvc.GetVersion(ctx, vsn, tc.env)
+			require.NoError(t, err, "获取版本失败")
+			assert.Equal(t, vsn, created.Vsn, "版本号应该匹配")
+		})
+	}
+
+	// 列出所有版本验证
+	for _, env := range []string{"dev", "pre", "pro"} {
+		versions, err := versionSvc.ListVersions(ctx, env)
+		assert.NoError(t, err, "列出版本失败: env=%s", env)
+		t.Logf("环境 %s 共有 %d 个版本", env, len(versions))
 	}
 }
 
+// TestClusterData 测试集群数据一致性
+//
+// 验证Redis集群环境下的数据读写一致性
 func TestClusterData(t *testing.T) {
-	gmInfo, err := getGmInfo(tRdb)
-	if err != nil {
-		return
+	mr, redisClient := setupTestRedis(t)
+	defer mr.Close()
+
+	versionRepo := repository.NewVersionRepository(redisClient)
+	versionSvc := service.NewVersionService(versionRepo)
+
+	ctx := context.Background()
+
+	// 创建版本
+	vsn := "1.0.0"
+	version := domain.NewVersion(vsn)
+	version.SubServers = map[string]*domain.SubServer{
+		"server1": {
+			Vsn:    vsn,
+			SrvUrl: "http://server1.example.com",
+			ResUrl: "http://server1.example.com/res",
+			Type:   1,
+		},
 	}
-	fmt.Println("cluster ====================>gmInfo:", gmInfo)
-	array := [3]string{"ios", "android", "inner"}
-	for _, platType := range array {
-		m := getServerInfos(tRdb, platType)
-		for maxVsn, v := range m {
-			fmt.Println("cluster ====================>platType:", platType, " maxVsn:", maxVsn, " v:", v)
-		}
+
+	err := versionSvc.CreateVersion(ctx, version, "dev")
+	require.NoError(t, err)
+
+	// 多次读取验证一致性
+	for i := 0; i < 5; i++ {
+		retrieved, err := versionSvc.GetVersion(ctx, vsn, "dev")
+		require.NoError(t, err)
+		assert.Equal(t, vsn, retrieved.Vsn, "第%d次读取: 版本号应该匹配", i+1)
+		assert.Len(t, retrieved.SubServers, 1, "子服务器数量应该一致")
 	}
 }
 
-func doMoveGM(fRdb, tRdb *redis.RedDB) {
-	gmInfo, err := getGmInfo(fRdb)
-	if err != nil {
-		return
+// getServerType 根据环境获取服务器类型
+//
+// 参数:
+//   env: 环境标识
+//
+// 返回:
+//   int: 服务器类型
+func getServerType(env string) int {
+	switch env {
+	case "dev":
+		return constants.ServerTypeDEV
+	case "pre":
+		return constants.ServerTypePRE
+	case "pro":
+		return constants.ServerTypePRO
+	default:
+		return constants.ServerTypeDefault
 	}
-	err = updateGmInfo(tRdb, gmInfo)
-	if err != nil {
-		return
-	}
-	return
 }
 
-func doMoveServers(fRdb, tRdb *redis.RedDB, platType string) {
-	m := getServerInfos(fRdb, platType)
-	for maxVsn, v := range m {
-		fmt.Println("platType:", platType, " maxVsn:", maxVsn, " v:", v)
-		addServerInfo(tRdb, platType, maxVsn, v)
+// TestMain 测试入口
+//
+// 设置测试环境并运行所有测试
+func TestMain(m *testing.M) {
+	// 设置环境变量（如果需要）
+	if os.Getenv("REDIS_ADDR") == "" {
+		os.Setenv("REDIS_ADDR", "localhost:6379")
 	}
-}
 
-func getGmInfo(rdb *redis.RedDB) (*models.GmInfo, error) {
-	gmInfo := &models.GmInfo{}
-	gmStr, err := rdb.Get(consts.CacheGMKey)
-	if err != nil {
-		return gmInfo, err
-	}
-	err = json.Unmarshal([]byte(gmStr), gmInfo)
-	if err != nil {
-		return gmInfo, err
-	}
-	return gmInfo, nil
-}
-
-func updateGmInfo(rdb *redis.RedDB, g *models.GmInfo) error {
-	gmByte, err := json.Marshal(g)
-	if err != nil {
-		return err
-	}
-	err = rdb.Set(consts.CacheGMKey, string(gmByte), 0)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func getServerInfos(rdb *redis.RedDB, platType string) map[string]*models.ServerInfo {
-	m := rdb.HGetAll(makePlatCacheKey(platType))
-	serverInfoMap := make(map[string]*models.ServerInfo, len(m))
-	for k, serverInfoStr := range m {
-		serverInfo := &models.ServerInfo{}
-		_ = json.Unmarshal([]byte(serverInfoStr), serverInfo)
-		serverInfoMap[k] = serverInfo
-	}
-	return serverInfoMap
-}
-
-func addServerInfo(rdb *redis.RedDB, platType, maxVsn string, s *models.ServerInfo) bool {
-	serverBytes, err := json.Marshal(s)
-	if err != nil {
-		return false
-	}
-	return rdb.HSet(makePlatCacheKey(platType), maxVsn, string(serverBytes))
-}
-
-func getServerInfo(rdb *redis.RedDB, platType, maxVsn string) *models.ServerInfo {
-	m := rdb.HGet(makePlatCacheKey(platType), maxVsn)
-	serverInfo := &models.ServerInfo{}
-	_ = json.Unmarshal([]byte(m), serverInfo)
-	return serverInfo
-}
-
-func delServerInfo(rdb *redis.RedDB, platType, maxVsn string) bool {
-	return rdb.HDel(makePlatCacheKey(platType), maxVsn)
-}
-
-func makePlatCacheKey(platType string) string {
-	key := consts.CacheServerKey
-	if len(platType) > 0 {
-		key = fmt.Sprintf("%s%s.", key, platType)
-	}
-	return key
+	// 运行测试
+	code := m.Run()
+	os.Exit(code)
 }

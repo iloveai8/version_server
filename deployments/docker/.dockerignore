@@ -1,0 +1,65 @@
+# Docker 构建忽略文件
+#
+# 减小 Docker 构建上下文大小，加快构建速度
+
+# Git
+.git
+.gitignore
+
+# 文档
+*.md
+LICENSE
+docs/
+
+# 测试
+*_test.go
+test/
+.coverage
+coverage.out
+coverage.html
+
+# 依赖
+vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 构建产物
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+
+# 归档
+_archive/
+
+# Docker
+Dockerfile
+.dockerignore
+deployments/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# 其他
+.env
+.env.local

@@ -1,0 +1,26 @@
+# Kubernetes ConfigMap 配置
+#
+# Game Slots Version Server 配置
+#
+# 使用方法：
+#   kubectl apply -f configmap.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: game-slots-vsn-config
+  namespace: default
+data:
+  # Redis 配置
+  REDIS_ADDR: "redis:6379"
+  REDIS_DB: "0"
+  REDIS_POOL_SIZE: "10"
+
+  # GeoIP 配置
+  GEOIP_DB_PATH: "/app/data/geoip.mmdb"
+
+  # 环境配置
+  ENVIRONMENT: "production"
+
+  # 监控配置
+  METRICS_ENABLED: "true"

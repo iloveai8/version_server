@@ -1,0 +1,644 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>config: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">game_slots_vsn/pkg/config/config.go (86.1%)</option>
+				
+				<option value="file1">game_slots_vsn/pkg/config/loader.go (91.3%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">// Package config 提供配置管理功能
+//
+// 该包实现了：
+// - 配置文件加载（YAML格式）
+// - 多环境配置支持（dev/pre/pro）
+// - 全局配置管理
+// - 配置验证
+// - 日志路径处理
+// - GeoIP配置
+//
+// 使用示例：
+//   cfg, err := config.LoadByEnv("dev")
+//   if err != nil {
+//       log.Fatal(err)
+//   }
+//   addr := cfg.Server.GetAddr()
+package config
+
+import (
+        "fmt"
+        "os"
+        "path/filepath"
+        "strings"
+)
+
+// Config 总配置结构
+//
+// 包含应用、服务器、Redis、日志和GeoIP的所有配置项
+type Config struct {
+        App     AppConfig      `yaml:"app" validate:"required"`
+        Server  ServerConfig   `yaml:"server" validate:"required"`
+        Redis   RedisConfig    `yaml:"redis" validate:"required"`
+        Log     LogConfig      `yaml:"log" validate:"required"`
+        GeoIP   GeoIPConfig    `yaml:"ggeoip" validate:"required"`
+}
+
+// AppConfig 应用配置
+//
+// 定义应用程序运行模式和基本配置
+type AppConfig struct {
+        RunMode string `yaml:"runMode" validate:"required,oneof=debug release test"` // 运行模式：debug/release/test
+}
+
+// ServerConfig 服务器配置
+//
+// 定义HTTP服务器监听地址和端口
+type ServerConfig struct {
+        IP   string `yaml:"ip"`                                                          // 监听IP地址（空表示监听所有网卡）
+        Port int    `yaml:"port" validate:"required,min=1,max=65535"`                   // 监听端口
+}
+
+// RedisConfig Redis配置
+//
+// 定义Redis连接参数和连接池设置
+type RedisConfig struct {
+        MasterName string   `yaml:"masterName"`  // Redis Sentinel主节点名称（可选）
+        Password   string   `yaml:"password"`    // Redis密码
+        Hosts      []string `yaml:"hosts" validate:"required,min=1"`                   // Redis主机列表（集群模式）
+        DB         int      `yaml:"db" validate:"min=0,max=15"`                         // 数据库编号（0-15）
+        PoolSize   int      `yaml:"poolSize" validate:"min=1"`                          // 连接池大小
+}
+
+// LogConfig 日志配置
+//
+// 定义日志输出方式、日志级别和文件轮转策略
+type LogConfig struct {
+        FileEnable    bool   `yaml:"fileEnable"`                                          // 是否启用文件日志
+        FileName      string `yaml:"fileName"`                                            // 日志文件路径
+        FileLevel     string `yaml:"fileLevel" validate:"oneof=debug info warn error"`   // 文件日志级别
+        ConsoleEnable bool   `yaml:"consoleEnable"`                                       // 是否启用控制台日志
+        ConsoleLevel  string `yaml:"consoleLevel" validate:"oneof=debug info warn error"` // 控制台日志级别
+        MaxSize       int    `yaml:"maxSize" validate:"min=1"`                            // 单个日志文件最大大小（MB）
+        MaxBackups    int    `yaml:"maxBackups" validate:"min=1"`                         // 保留的旧日志文件最大数量
+        MaxAges       int    `yaml:"maxAges" validate:"min=1"`                            // 保留旧日志文件的最大天数
+        Compress      bool   `yaml:"compress"`                                            // 是否压缩旧日志文件
+        JSONEnable    bool   `yaml:"jsonEnable"`                                          // 是否使用JSON格式日志
+}
+
+// GeoIPConfig GeoIP配置
+//
+// 定义GeoIP数据库的下载和配置
+type GeoIPConfig struct {
+        Name     string `yaml:"name" validate:"required"`             // GeoIP数据库文件名
+        Path     string `yaml:"path" validate:"required"`             // GeoIP数据库存储路径
+        URL      string `yaml:"url" validate:"required,url"`          // GeoIP数据库下载地址
+        Duration int    `yaml:"duration" validate:"min=1"`             // GeoIP数据库更新间隔（小时）
+        Scope    int    `yaml:"scope" validate:"oneof=0 1"`            // GeoIP查询范围：0=国家，1=城市
+}
+
+// GetAddr 获取服务器地址
+//
+// 返回格式化的服务器监听地址（host:port）
+//
+// 返回:
+//   string: 如果IP为空则返回":port"，否则返回"ip:port"
+//
+// 示例:
+//   addr := cfg.Server.GetAddr()  // ":9091" 或 "0.0.0.0:9091"
+func (s *ServerConfig) GetAddr() string <span class="cov8" title="1">{
+        if s.IP == "" </span><span class="cov8" title="1">{
+                return fmt.Sprintf(":%d", s.Port)
+        }</span>
+        <span class="cov8" title="1">return fmt.Sprintf("%s:%d", s.IP, s.Port)</span>
+}
+
+// IsDebug 是否为调试模式
+//
+// 判断当前运行模式是否为调试模式
+//
+// 返回:
+//   bool: debug或test模式返回true，release模式返回false
+//
+// 示例:
+//   if cfg.App.IsDebug() {
+//       log.Println("Debug mode enabled")
+//   }
+func (a *AppConfig) IsDebug() bool <span class="cov8" title="1">{
+        return a.RunMode == "debug" || a.RunMode == "test"
+}</span>
+
+// GetRunMode 获取运行模式（标准化）
+//
+// 将运行模式标准化为debug或release
+//
+// 返回:
+//   string: "debug" 或 "release"
+//
+// 示例:
+//   mode := cfg.App.GetRunMode()  // "debug" 或 "release"
+func (a *AppConfig) GetRunMode() string <span class="cov8" title="1">{
+        switch strings.ToLower(a.RunMode) </span>{
+        case "debug", "test":<span class="cov8" title="1">
+                return "debug"</span>
+        default:<span class="cov8" title="1">
+                return "release"</span>
+        }
+}
+
+// GetLogFilePath 获取日志文件完整路径
+//
+// 获取日志文件的绝对路径
+//
+// 返回:
+//   string: 日志文件的绝对路径
+//   error: 如果文件名为空或获取绝对路径失败则返回错误
+//
+// 示例:
+//   path, err := cfg.Log.GetLogFilePath()
+//   if err != nil {
+//       log.Fatal(err)
+//   }
+func (l *LogConfig) GetLogFilePath() (string, error) <span class="cov8" title="1">{
+        if !l.FileEnable </span><span class="cov8" title="1">{
+                return "", nil
+        }</span>
+
+        <span class="cov8" title="1">if l.FileName == "" </span><span class="cov8" title="1">{
+                return "", fmt.Errorf("log file name is empty")
+        }</span>
+
+        // 如果是相对路径，转换为绝对路径
+        <span class="cov8" title="1">if !filepath.IsAbs(l.FileName) </span><span class="cov8" title="1">{
+                abs, err := filepath.Abs(l.FileName)
+                if err != nil </span><span class="cov0" title="0">{
+                        return "", fmt.Errorf("failed to get absolute path: %w", err)
+                }</span>
+                <span class="cov8" title="1">return abs, nil</span>
+        }
+
+        <span class="cov8" title="1">return l.FileName, nil</span>
+}
+
+// EnsureLogDir 确保日志目录存在
+//
+// 如果日志文件目录不存在则创建目录
+//
+// 返回:
+//   error: 目录创建失败则返回错误
+//
+// 示例:
+//   if err := cfg.Log.EnsureLogDir(); err != nil {
+//       log.Fatal(err)
+//   }
+func (l *LogConfig) EnsureLogDir() error <span class="cov8" title="1">{
+        if !l.FileEnable </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">filePath, err := l.GetLogFilePath()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if filePath == "" </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">logDir := filepath.Dir(filePath)
+        if err := os.MkdirAll(logDir, 0755); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create log directory: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetGeoDBFilePath 获取GeoIP数据库文件完整路径
+//
+// 拼接GeoIP数据库目录和文件名
+//
+// 返回:
+//   string: GeoIP数据库文件的完整路径
+//
+// 示例:
+//   path := cfg.GeoIP.GetGeoDBFilePath()  // "./data/geoip.mmdb"
+func (g *GeoIPConfig) GetGeoDBFilePath() string <span class="cov8" title="1">{
+        path := g.Path
+
+        // 如果路径为空，直接返回文件名
+        if path == "" </span><span class="cov8" title="1">{
+                return g.Name
+        }</span>
+
+        // 确保路径以 / 结尾
+        <span class="cov8" title="1">if !strings.HasSuffix(path, "/") </span><span class="cov8" title="1">{
+                path += "/"
+        }</span>
+
+        <span class="cov8" title="1">return path + g.Name</span>
+}
+
+// IsCountryMode 是否为国家模式
+//
+// 判断GeoIP查询模式是否为国家级别
+//
+// 返回:
+//   bool: Scope=0时返回true
+//
+// 示例:
+//   if cfg.GeoIP.IsCountryMode() {
+//       // 只查询国家信息
+//   }
+func (g *GeoIPConfig) IsCountryMode() bool <span class="cov8" title="1">{
+        return g.Scope == 0
+}</span>
+
+// IsCityMode 是否为城市模式
+//
+// 判断GeoIP查询模式是否为城市级别
+//
+// 返回:
+//   bool: Scope=1时返回true
+//
+// 示例:
+//   if cfg.GeoIP.IsCityMode() {
+//       // 查询城市详细信息
+//   }
+func (g *GeoIPConfig) IsCityMode() bool <span class="cov8" title="1">{
+        return g.Scope == 1
+}</span>
+
+// GlobalConfig 全局配置实例（单例）
+//
+// 该变量保存应用程序的全局配置，在配置加载后初始化
+var GlobalConfig *Config
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package config
+
+import (
+        "fmt"
+        "os"
+        "strings"
+
+        "github.com/spf13/viper"
+)
+
+// Load 从指定路径加载配置文件
+//
+// 从指定路径加载YAML配置文件并解析为Config结构
+//
+// 参数:
+//   configPath: 配置文件路径
+//
+// 返回:
+//   *Config: 配置对象
+//   error: 文件读取失败或解析失败时返回错误
+//
+// 示例:
+//   cfg, err := config.Load("./conf/dev.yaml")
+//   if err != nil {
+//       log.Fatal(err)
+//   }
+func Load(configPath string) (*Config, error) <span class="cov8" title="1">{
+        // 设置配置文件
+        v := viper.New()
+
+        // 设置配置文件路径
+        v.SetConfigFile(configPath)
+
+        // 读取配置文件
+        if err := v.ReadInConfig(); err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("failed to read config file: %w", err)
+        }</span>
+
+        // 解析配置
+        <span class="cov8" title="1">var cfg Config
+        if err := v.Unmarshal(&amp;cfg); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+        }</span>
+
+        // 设置全局配置
+        <span class="cov8" title="1">GlobalConfig = &amp;cfg
+
+        return &amp;cfg, nil</span>
+}
+
+// LoadFromEnv 从环境变量加载配置路径
+//
+// 从CONFIG_PATH环境变量读取配置文件路径并加载配置
+// 如果环境变量未设置，则使用默认路径./conf/dev.yaml
+//
+// 返回:
+//   *Config: 配置对象
+//   error: 加载失败时返回错误
+//
+// 示例:
+//   os.Setenv("CONFIG_PATH", "./conf/pro.yaml")
+//   cfg, err := config.LoadFromEnv()
+func LoadFromEnv() (*Config, error) <span class="cov8" title="1">{
+        // 从环境变量获取配置文件路径
+        configPath := os.Getenv("CONFIG_PATH")
+        if configPath == "" </span><span class="cov8" title="1">{
+                // 默认配置文件路径
+                configPath = "./conf/dev.yaml"
+        }</span>
+
+        <span class="cov8" title="1">return Load(configPath)</span>
+}
+
+// LoadByEnv 根据环境加载配置
+//
+// 根据环境名称加载对应的配置文件（dev/pre/pro）
+// 如果env为空，则从APP_ENV环境变量读取，默认为"dev"
+//
+// 参数:
+//   env: 环境名称（dev/pre/pro），为空则使用环境变量APP_ENV
+//
+// 返回:
+//   *Config: 配置对象
+//   error: 加载失败时返回错误
+//
+// 示例:
+//   cfg, err := config.LoadByEnv("dev")
+func LoadByEnv(env string) (*Config, error) <span class="cov8" title="1">{
+        if env == "" </span><span class="cov8" title="1">{
+                env = os.Getenv("APP_ENV")
+                if env == "" </span><span class="cov8" title="1">{
+                        env = "dev"
+                }</span>
+        }
+
+        // 标准化环境名称
+        <span class="cov8" title="1">env = strings.ToLower(env)
+
+        configPath := fmt.Sprintf("./conf/%s.yaml", env)
+        return Load(configPath)</span>
+}
+
+// LoadOrDefault 加载配置，如果失败则返回默认配置
+//
+// 尝试从指定路径加载配置，如果失败则返回默认配置
+//
+// 参数:
+//   configPath: 配置文件路径
+//
+// 返回:
+//   *Config: 配置对象（加载成功或默认配置）
+//   error: 总是返回nil
+//
+// 示例:
+//   cfg, err := config.LoadOrDefault("./conf/dev.yaml")
+//   // 不会返回错误，至少返回默认配置
+func LoadOrDefault(configPath string) (*Config, error) <span class="cov8" title="1">{
+        cfg, err := Load(configPath)
+        if err != nil </span><span class="cov8" title="1">{
+                // 返回默认配置
+                cfg = DefaultConfig()
+                GlobalConfig = cfg
+                return cfg, nil
+        }</span>
+        <span class="cov0" title="0">return cfg, nil</span>
+}
+
+// DefaultConfig 返回默认配置
+//
+// 返回一个预配置的默认配置对象，适用于开发和测试
+//
+// 返回:
+//   *Config: 默认配置对象
+//
+// 默认配置:
+// - RunMode: debug
+// - Port: 9091
+// - Redis: localhost:6379, DB=0
+// - 日志: 文件和控制台都启用
+//
+// 示例:
+//   cfg := config.DefaultConfig()
+func DefaultConfig() *Config <span class="cov8" title="1">{
+        return &amp;Config{
+                App: AppConfig{
+                        RunMode: "debug",
+                },
+                Server: ServerConfig{
+                        IP:   "",
+                        Port: 9091,
+                },
+                Redis: RedisConfig{
+                        MasterName: "",
+                        Password:   "",
+                        Hosts:      []string{"localhost:6379"},
+                        DB:         0,
+                        PoolSize:   5,
+                },
+                Log: LogConfig{
+                        FileEnable:    true,
+                        FileName:      "./logs/app.log",
+                        FileLevel:     "info",
+                        ConsoleEnable: true,
+                        ConsoleLevel:  "debug",
+                        MaxSize:       20,
+                        MaxBackups:    10,
+                        MaxAges:       30,
+                        Compress:      true,
+                        JSONEnable:    true,
+                },
+                GeoIP: GeoIPConfig{
+                        Name:     "geoip.mmdb",
+                        Path:     "./data/",
+                        URL:      "https://geoip.ftsview.com/GeoLite2-Country.mmdb",
+                        Duration: 1,
+                        Scope:    0,
+                },
+        }
+}</span>
+
+// Get 获取全局配置
+//
+// 获取全局配置实例，如果未初始化则自动加载dev环境配置
+// 如果加载失败则返回默认配置
+//
+// 返回:
+//   *Config: 全局配置对象
+//
+// 示例:
+//   cfg := config.Get()
+//   addr := cfg.Server.GetAddr()
+func Get() *Config <span class="cov8" title="1">{
+        if GlobalConfig == nil </span><span class="cov8" title="1">{
+                // 如果全局配置未初始化，尝试从默认路径加载
+                cfg, err := LoadByEnv("dev")
+                if err != nil </span><span class="cov8" title="1">{
+                        return DefaultConfig()
+                }</span>
+                <span class="cov0" title="0">return cfg</span>
+        }
+        <span class="cov0" title="0">return GlobalConfig</span>
+}
+
+// Reload 重新加载配置
+//
+// 从指定路径重新加载配置并更新全局配置实例
+//
+// 参数:
+//   configPath: 配置文件路径
+//
+// 返回:
+//   error: 加载失败时返回错误
+//
+// 示例:
+//   if err := config.Reload("./conf/pro.yaml"); err != nil {
+//       log.Printf("Reload failed: %v", err)
+//   }
+func Reload(configPath string) error <span class="cov8" title="1">{
+        cfg, err := Load(configPath)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">GlobalConfig = cfg
+        return nil</span>
+}
+
+// MustLoad 加载配置，失败则panic
+//
+// 从指定路径加载配置，如果失败则panic
+// 适用于main函数中初始化配置的场景
+//
+// 参数:
+//   configPath: 配置文件路径
+//
+// 返回:
+//   *Config: 配置对象
+//
+// Panic:
+// 当配置加载失败时panic
+//
+// 示例:
+//   cfg := config.MustLoad("./conf/dev.yaml")
+func MustLoad(configPath string) *Config <span class="cov8" title="1">{
+        cfg, err := Load(configPath)
+        if err != nil </span><span class="cov8" title="1">{
+                panic(fmt.Sprintf("failed to load config: %v", err))</span>
+        }
+        <span class="cov8" title="1">return cfg</span>
+}
+
+// MustLoadByEnv 根据环境加载配置，失败则panic
+//
+// 根据环境名称加载配置，如果失败则panic
+// 适用于main函数中初始化配置的场景
+//
+// 参数:
+//   env: 环境名称（dev/pre/pro）
+//
+// 返回:
+//   *Config: 配置对象
+//
+// Panic:
+// 当配置加载失败时panic
+//
+// 示例:
+//   cfg := config.MustLoadByEnv("dev")
+func MustLoadByEnv(env string) *Config <span class="cov8" title="1">{
+        cfg, err := LoadByEnv(env)
+        if err != nil </span><span class="cov8" title="1">{
+                panic(fmt.Sprintf("failed to load config for env %s: %v", env, err))</span>
+        }
+        <span class="cov8" title="1">return cfg</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

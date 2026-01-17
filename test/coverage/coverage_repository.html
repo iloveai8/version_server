@@ -1,0 +1,957 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>repository: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">game_slots_vsn/internal/repository/gm_repository.go (77.3%)</option>
+				
+				<option value="file1">game_slots_vsn/internal/repository/interfaces.go (100.0%)</option>
+				
+				<option value="file2">game_slots_vsn/internal/repository/ip_whitelist_repository.go (76.9%)</option>
+				
+				<option value="file3">game_slots_vsn/internal/repository/redis/client.go (28.6%)</option>
+				
+				<option value="file4">game_slots_vsn/internal/repository/version_repository.go (79.1%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package repository
+
+import (
+        "context"
+        "encoding/json"
+        "fmt"
+
+        "game_slots_vsn/internal/domain"
+        redispkg "game_slots_vsn/internal/repository/redis"
+        "game_slots_vsn/pkg/errcode"
+)
+
+// gmRepository GM配置仓储实现
+//
+// 使用Redis存储GM配置数据
+type gmRepository struct {
+        client redispkg.Client
+}
+
+// NewGMRepository 创建GM配置仓储
+//
+// 参数:
+//   client: Redis客户端
+//
+// 返回:
+//   GMRepository: GM配置仓储接口
+func NewGMRepository(client redispkg.Client) GMRepository <span class="cov8" title="1">{
+        return &amp;gmRepository{
+                client: client,
+        }
+}</span>
+
+// Get 获取GM配置
+func (r *gmRepository) Get(ctx context.Context) (*domain.GMConfig, error) <span class="cov8" title="1">{
+        key := KeyGMConfig
+
+        // 从Redis获取JSON数据
+        data, err := r.client.JSONGet(ctx, key)
+        if err != nil </span><span class="cov8" title="1">{
+                // 检查是否是"不存在"错误
+                if appErr, ok := errcode.AsAppError(err); ok &amp;&amp; appErr.Code == errcode.ErrCodeVersionNotFound </span><span class="cov8" title="1">{
+                        return nil, errcode.ErrGMConfigNotFound
+                }</span>
+                <span class="cov0" title="0">return nil, err</span>
+        }
+
+        // 反序列化JSON
+        <span class="cov8" title="1">var config domain.GMConfig
+        if err := json.Unmarshal([]byte(data), &amp;config); err != nil </span><span class="cov0" title="0">{
+                return nil, errcode.ErrJSONError.WithMessage(fmt.Sprintf("反序列化GM配置失败: %v", err))
+        }</span>
+
+        <span class="cov8" title="1">return &amp;config, nil</span>
+}
+
+// Save 保存GM配置
+func (r *gmRepository) Save(ctx context.Context, config *domain.GMConfig) error <span class="cov8" title="1">{
+        // 验证GM配置
+        if err := config.Validate(); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">key := KeyGMConfig
+
+        // 序列化为JSON
+        data, err := json.Marshal(config)
+        if err != nil </span><span class="cov0" title="0">{
+                return errcode.ErrJSONError.WithMessage(fmt.Sprintf("序列化GM配置失败: %v", err))
+        }</span>
+
+        // 保存到Redis
+        <span class="cov8" title="1">if err := r.client.Set(ctx, key, data, 0); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Exists 检查GM配置是否存在
+func (r *gmRepository) Exists(ctx context.Context) (bool, error) <span class="cov8" title="1">{
+        key := KeyGMConfig
+        return r.client.Exists(ctx, key)
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">// Package repository 提供数据访问层的抽象和实现
+//
+// 该包实现了：
+// - Repository接口定义
+// - Redis客户端封装
+// - VersionRepository: 版本配置数据访问
+// - GMRepository: GM配置数据访问
+// - IPWhitelistRepository: IP白名单数据访问
+//
+// 设计原则：
+// - 接口隔离：定义清晰的Repository接口
+// - 依赖倒置：高层模块依赖抽象接口而非具体实现
+// - 可测试性：使用miniredis进行集成测试
+package repository
+
+import (
+        "context"
+
+        "game_slots_vsn/internal/domain"
+)
+
+// ==================== Repository接口定义 ====================
+
+// VersionRepository 版本配置仓储接口
+//
+// 定义版本配置的持久化操作
+type VersionRepository interface {
+        // GetByVersionAndEnv 根据版本号和环境获取版本配置
+        //
+        // 参数:
+        //   ctx: 上下文
+        //   vsn: 版本号
+        //   env: 环境（dev或pro）
+        //
+        // 返回:
+        //   *domain.Version: 版本配置对象
+        //   error: 版本不存在或发生错误时返回错误
+        GetByVersionAndEnv(ctx context.Context, vsn, env string) (*domain.Version, error)
+
+        // Save 保存版本配置
+        //
+        // 参数:
+        //   ctx: 上下文
+        //   version: 版本配置对象
+        //   env: 环境（dev或pro）
+        //
+        // 返回:
+        //   error: 保存失败时返回错误
+        Save(ctx context.Context, version *domain.Version, env string) error
+
+        // Delete 删除版本配置
+        //
+        // 参数:
+        //   ctx: 上下文
+        //   vsn: 版本号
+        //   env: 环境（dev或pro）
+        //
+        // 返回:
+        //   error: 删除失败时返回错误
+        Delete(ctx context.Context, vsn, env string) error
+
+        // Exists 检查版本是否存在
+        //
+        // 参数:
+        //   ctx: 上下文
+        //   vsn: 版本号
+        //   env: 环境（dev或pro）
+        //
+        // 返回:
+        //   bool: 存在返回true，否则返回false
+        //   error: 发生错误时返回错误
+        Exists(ctx context.Context, vsn, env string) (bool, error)
+
+        // List 获取所有版本列表
+        //
+        // 参数:
+        //   ctx: 上下文
+        //   env: 环境（dev或pro）
+        //
+        // 返回:
+        //   []*domain.Version: 版本配置列表
+        //   error: 查询失败时返回错误
+        List(ctx context.Context, env string) ([]*domain.Version, error)
+}
+
+// GMRepository GM配置仓储接口
+//
+// 定义GM配置的持久化操作
+type GMRepository interface {
+        // Get 获取GM配置
+        //
+        // 参数:
+        //   ctx: 上下文
+        //
+        // 返回:
+        //   *domain.GMConfig: GM配置对象
+        //   error: 配置不存在或发生错误时返回错误
+        Get(ctx context.Context) (*domain.GMConfig, error)
+
+        // Save 保存GM配置
+        //
+        // 参数:
+        //   ctx: 上下文
+        //   config: GM配置对象
+        //
+        // 返回:
+        //   error: 保存失败时返回错误
+        Save(ctx context.Context, config *domain.GMConfig) error
+
+        // Exists 检查GM配置是否存在
+        //
+        // 参数:
+        //   ctx: 上下文
+        //
+        // 返回:
+        //   bool: 存在返回true，否则返回false
+        //   error: 发生错误时返回错误
+        Exists(ctx context.Context) (bool, error)
+}
+
+// IPWhitelistRepository IP白名单仓储接口
+//
+// 定义IP白名单的持久化操作
+type IPWhitelistRepository interface {
+        // Get 获取IP白名单
+        //
+        // 参数:
+        //   ctx: 上下文
+        //
+        // 返回:
+        //   *domain.IPWhitelist: IP白名单对象
+        //   error: 查询失败时返回错误
+        Get(ctx context.Context) (*domain.IPWhitelist, error)
+
+        // Save 保存IP白名单
+        //
+        // 参数:
+        //   ctx: 上下文
+        //   whitelist: IP白名单对象
+        //
+        // 返回:
+        //   error: 保存失败时返回错误
+        Save(ctx context.Context, whitelist *domain.IPWhitelist) error
+
+        // Exists 检查IP白名单是否存在
+        //
+        // 参数:
+        //   ctx: 上下文
+        //
+        // 返回:
+        //   bool: 存在返回true，否则返回false
+        //   error: 发生错误时返回错误
+        Exists(ctx context.Context) (bool, error)
+
+        // Contains 检查IP是否在白名单中
+        //
+        // 参数:
+        //   ctx: 上下文
+        //   ip: IP地址
+        //
+        // 返回:
+        //   bool: 在白名单中返回true，否则返回false
+        //   error: 查询失败时返回错误
+        Contains(ctx context.Context, ip string) (bool, error)
+}
+
+// ==================== Redis键定义 ====================
+
+const (
+        // Redis键前缀
+        KeyPrefixVersion      = "version:"      // 版本配置键前缀
+        KeyPrefixGMConfig     = "gm:"           // GM配置键前缀
+        KeyPrefixIPWhitelist  = "ip_whitelist:" // IP白名单键前缀
+
+        // 特殊键
+        KeyGMConfig     = "gm:config"     // GM配置键
+        KeyIPWhitelist  = "ip:whitelist"  // IP白名单键
+)
+
+// BuildVersionKey 构建版本配置的Redis键
+//
+// 参数:
+//   vsn: 版本号
+//   env: 环境（dev或pro）
+//
+// 返回:
+//   string: Redis键，格式为 "version:{env}:{vsn}"
+func BuildVersionKey(vsn, env string) string <span class="cov8" title="1">{
+        return KeyPrefixVersion + env + ":" + vsn
+}</span>
+
+// BuildVersionListKey 构建版本列表的Redis键
+//
+// 参数:
+//   env: 环境（dev或pro）
+//
+// 返回:
+//   string: 版本列表键，格式为 "version:{env}:list"
+func BuildVersionListKey(env string) string <span class="cov8" title="1">{
+        return KeyPrefixVersion + env + ":list"
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package repository
+
+import (
+        "context"
+        "encoding/json"
+        "fmt"
+
+        "game_slots_vsn/internal/domain"
+        redispkg "game_slots_vsn/internal/repository/redis"
+        "game_slots_vsn/pkg/errcode"
+)
+
+// ipWhitelistRepository IP白名单仓储实现
+//
+// 使用Redis存储IP白名单数据
+type ipWhitelistRepository struct {
+        client redispkg.Client
+}
+
+// NewIPWhitelistRepository 创建IP白名单仓储
+//
+// 参数:
+//   client: Redis客户端
+//
+// 返回:
+//   IPWhitelistRepository: IP白名单仓储接口
+func NewIPWhitelistRepository(client redispkg.Client) IPWhitelistRepository <span class="cov8" title="1">{
+        return &amp;ipWhitelistRepository{
+                client: client,
+        }
+}</span>
+
+// Get 获取IP白名单
+func (r *ipWhitelistRepository) Get(ctx context.Context) (*domain.IPWhitelist, error) <span class="cov8" title="1">{
+        key := KeyIPWhitelist
+
+        // 从Redis获取JSON数据
+        data, err := r.client.JSONGet(ctx, key)
+        if err != nil </span><span class="cov8" title="1">{
+                // 检查是否是"不存在"错误
+                if appErr, ok := errcode.AsAppError(err); ok &amp;&amp; appErr.Code == errcode.ErrCodeVersionNotFound </span><span class="cov8" title="1">{
+                        // 返回空的白名单
+                        return domain.NewIPWhitelist(), nil
+                }</span>
+                <span class="cov0" title="0">return nil, err</span>
+        }
+
+        // 反序列化JSON
+        <span class="cov8" title="1">var whitelist domain.IPWhitelist
+        if err := json.Unmarshal([]byte(data), &amp;whitelist); err != nil </span><span class="cov0" title="0">{
+                return nil, errcode.ErrJSONError.WithMessage(fmt.Sprintf("反序列化IP白名单失败: %v", err))
+        }</span>
+
+        <span class="cov8" title="1">return &amp;whitelist, nil</span>
+}
+
+// Save 保存IP白名单
+func (r *ipWhitelistRepository) Save(ctx context.Context, whitelist *domain.IPWhitelist) error <span class="cov8" title="1">{
+        // 验证IP白名单
+        if err := whitelist.Validate(); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">key := KeyIPWhitelist
+
+        // 序列化为JSON
+        data, err := json.Marshal(whitelist)
+        if err != nil </span><span class="cov0" title="0">{
+                return errcode.ErrJSONError.WithMessage(fmt.Sprintf("序列化IP白名单失败: %v", err))
+        }</span>
+
+        // 保存到Redis
+        <span class="cov8" title="1">if err := r.client.Set(ctx, key, data, 0); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Exists 检查IP白名单是否存在
+func (r *ipWhitelistRepository) Exists(ctx context.Context) (bool, error) <span class="cov8" title="1">{
+        key := KeyIPWhitelist
+        return r.client.Exists(ctx, key)
+}</span>
+
+// Contains 检查IP是否在白名单中
+func (r *ipWhitelistRepository) Contains(ctx context.Context, ip string) (bool, error) <span class="cov8" title="1">{
+        // 获取白名单
+        whitelist, err := r.Get(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return false, err
+        }</span>
+
+        // 检查IP是否在白名单中
+        <span class="cov8" title="1">return whitelist.ContainsIPNet(ip), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">// Package redis 提供Redis客户端的封装
+//
+// 该包实现了：
+// - Redis客户端接口定义
+// - Redis命令的封装
+// - 错误处理和重试逻辑
+//
+// 设计原则：
+// - 接口抽象：定义清晰的Client接口
+// - 可测试性：支持使用miniredis进行测试
+// - 错误处理：将Redis错误转换为应用错误
+package redis
+
+import (
+        "context"
+        "encoding/json"
+        "fmt"
+        "time"
+
+        "github.com/redis/go-redis/v9"
+
+        "game_slots_vsn/pkg/errcode"
+)
+
+// Client Redis客户端接口
+//
+// 定义了Redis操作的核心方法，支持依赖注入和测试
+type Client interface {
+        // ==================== 连接操作 ====================
+
+        // Ping 检查Redis连接
+        //
+        // 参数:
+        //   ctx: 上下文
+        //
+        // 返回:
+        //   error: 连接失败时返回错误
+        Ping(ctx context.Context) error
+
+        // ==================== String操作 ====================
+
+        // Get 获取字符串值
+        Get(ctx context.Context, key string) (string, error)
+
+        // Set 设置字符串值
+        Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error
+
+        // Del 删除键
+        Del(ctx context.Context, keys ...string) error
+
+        // Exists 检查键是否存在
+        Exists(ctx context.Context, key string) (bool, error)
+
+        // ==================== Hash操作 ====================
+
+        // HGet 获取哈希字段值
+        HGet(ctx context.Context, key, field string) (string, error)
+
+        // HSet 设置哈希字段值
+        HSet(ctx context.Context, key, field string, value interface{}) error
+
+        // HMGet 批量获取哈希字段值
+        HMGet(ctx context.Context, key string, fields ...string) ([]interface{}, error)
+
+        // HMSet 批量设置哈希字段值
+        HMSet(ctx context.Context, key string, values map[string]interface{}) error
+
+        // HGetAll 获取哈希所有字段值
+        HGetAll(ctx context.Context, key string) (map[string]string, error)
+
+        // HDel 删除哈希字段
+        HDel(ctx context.Context, key string, fields ...string) error
+
+        // ==================== Set操作 ====================
+
+        // SAdd 向集合添加成员
+        SAdd(ctx context.Context, key string, members ...interface{}) error
+
+        // SRem 从集合移除成员
+        SRem(ctx context.Context, key string, members ...interface{}) error
+
+        // SIsMember 检查成员是否在集合中
+        SIsMember(ctx context.Context, key string, member interface{}) (bool, error)
+
+        // SMembers 获取集合所有成员
+        SMembers(ctx context.Context, key string) ([]string, error)
+
+        // SCard 获取集合成员数量
+        SCard(ctx context.Context, key string) (int64, error)
+
+        // ==================== JSON操作 ====================
+
+        // JSONSet 设置JSON值
+        JSONSet(ctx context.Context, key string, value interface{}) error
+
+        // JSONGet 获取JSON值
+        JSONGet(ctx context.Context, key string) (string, error)
+}
+
+// RedisClient Redis客户端实现
+//
+// 封装了go-redis/v9的客户端
+type RedisClient struct {
+        client *redis.Client
+}
+
+// NewRedisClient 创建Redis客户端
+//
+// 参数:
+//   client: go-redis客户端实例
+//
+// 返回:
+//   Client: Redis客户端接口
+func NewRedisClient(client *redis.Client) Client <span class="cov8" title="1">{
+        return &amp;RedisClient{client: client}
+}</span>
+
+// Ping 检查Redis连接
+//
+// 参数:
+//   ctx: 上下文
+//
+// 返回:
+//   error: 连接失败时返回错误
+func (r *RedisClient) Ping(ctx context.Context) error <span class="cov0" title="0">{
+        _, err := r.client.Ping(ctx).Result()
+        if err != nil </span><span class="cov0" title="0">{
+                return errcode.ErrRedisConnError.WithMessage("Redis连接失败")
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// NewRedisClientFromURL 从URL创建Redis客户端
+//
+// 参数:
+//   url: Redis连接URL
+//
+// 返回:
+//   Client: Redis客户端接口
+func NewRedisClientFromURL(url string) Client <span class="cov0" title="0">{
+        client := redis.NewClient(&amp;redis.Options{
+                Addr: url,
+        })
+        return &amp;RedisClient{client: client}
+}</span>
+
+// ==================== String操作实现 ====================
+
+// Get 获取字符串值
+func (r *RedisClient) Get(ctx context.Context, key string) (string, error) <span class="cov0" title="0">{
+        val, err := r.client.Get(ctx, key).Result()
+        if err != nil </span><span class="cov0" title="0">{
+                if err == redis.Nil </span><span class="cov0" title="0">{
+                        return "", errcode.ErrVersionNotFound.WithDetails(map[string]interface{}{
+                                "key": key,
+                        })
+                }</span>
+                <span class="cov0" title="0">return "", errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis GET失败: %v", err))</span>
+        }
+        <span class="cov0" title="0">return val, nil</span>
+}
+
+// Set 设置字符串值
+func (r *RedisClient) Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error <span class="cov8" title="1">{
+        err := r.client.Set(ctx, key, value, expiration).Err()
+        if err != nil </span><span class="cov0" title="0">{
+                return errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis SET失败: %v", err))
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Del 删除键
+func (r *RedisClient) Del(ctx context.Context, keys ...string) error <span class="cov8" title="1">{
+        _, err := r.client.Del(ctx, keys...).Result()
+        if err != nil </span><span class="cov0" title="0">{
+                return errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis DEL失败: %v", err))
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Exists 检查键是否存在
+func (r *RedisClient) Exists(ctx context.Context, key string) (bool, error) <span class="cov8" title="1">{
+        count, err := r.client.Exists(ctx, key).Result()
+        if err != nil </span><span class="cov0" title="0">{
+                return false, errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis EXISTS失败: %v", err))
+        }</span>
+        <span class="cov8" title="1">return count &gt; 0, nil</span>
+}
+
+// ==================== Hash操作实现 ====================
+
+// HGet 获取哈希字段值
+func (r *RedisClient) HGet(ctx context.Context, key, field string) (string, error) <span class="cov0" title="0">{
+        val, err := r.client.HGet(ctx, key, field).Result()
+        if err != nil </span><span class="cov0" title="0">{
+                if err == redis.Nil </span><span class="cov0" title="0">{
+                        return "", errcode.ErrVersionNotFound.WithDetails(map[string]interface{}{
+                                "key":   key,
+                                "field": field,
+                        })
+                }</span>
+                <span class="cov0" title="0">return "", errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis HGET失败: %v", err))</span>
+        }
+        <span class="cov0" title="0">return val, nil</span>
+}
+
+// HSet 设置哈希字段值
+func (r *RedisClient) HSet(ctx context.Context, key, field string, value interface{}) error <span class="cov0" title="0">{
+        err := r.client.HSet(ctx, key, field, value).Err()
+        if err != nil </span><span class="cov0" title="0">{
+                return errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis HSET失败: %v", err))
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// HMGet 批量获取哈希字段值
+func (r *RedisClient) HMGet(ctx context.Context, key string, fields ...string) ([]interface{}, error) <span class="cov0" title="0">{
+        vals, err := r.client.HMGet(ctx, key, fields...).Result()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis HMGET失败: %v", err))
+        }</span>
+        <span class="cov0" title="0">return vals, nil</span>
+}
+
+// HMSet 批量设置哈希字段值
+func (r *RedisClient) HMSet(ctx context.Context, key string, values map[string]interface{}) error <span class="cov0" title="0">{
+        err := r.client.HMSet(ctx, key, values).Err()
+        if err != nil </span><span class="cov0" title="0">{
+                return errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis HMSET失败: %v", err))
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// HGetAll 获取哈希所有字段值
+func (r *RedisClient) HGetAll(ctx context.Context, key string) (map[string]string, error) <span class="cov0" title="0">{
+        vals, err := r.client.HGetAll(ctx, key).Result()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis HGETALL失败: %v", err))
+        }</span>
+        <span class="cov0" title="0">return vals, nil</span>
+}
+
+// HDel 删除哈希字段
+func (r *RedisClient) HDel(ctx context.Context, key string, fields ...string) error <span class="cov0" title="0">{
+        _, err := r.client.HDel(ctx, key, fields...).Result()
+        if err != nil </span><span class="cov0" title="0">{
+                return errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis HDEL失败: %v", err))
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// ==================== Set操作实现 ====================
+
+// SAdd 向集合添加成员
+func (r *RedisClient) SAdd(ctx context.Context, key string, members ...interface{}) error <span class="cov8" title="1">{
+        err := r.client.SAdd(ctx, key, members...).Err()
+        if err != nil </span><span class="cov0" title="0">{
+                return errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis SADD失败: %v", err))
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// SRem 从集合移除成员
+func (r *RedisClient) SRem(ctx context.Context, key string, members ...interface{}) error <span class="cov8" title="1">{
+        err := r.client.SRem(ctx, key, members...).Err()
+        if err != nil </span><span class="cov0" title="0">{
+                return errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis SREM失败: %v", err))
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// SIsMember 检查成员是否在集合中
+func (r *RedisClient) SIsMember(ctx context.Context, key string, member interface{}) (bool, error) <span class="cov0" title="0">{
+        exists, err := r.client.SIsMember(ctx, key, member).Result()
+        if err != nil </span><span class="cov0" title="0">{
+                return false, errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis SISMEMBER失败: %v", err))
+        }</span>
+        <span class="cov0" title="0">return exists, nil</span>
+}
+
+// SMembers 获取集合所有成员
+func (r *RedisClient) SMembers(ctx context.Context, key string) ([]string, error) <span class="cov8" title="1">{
+        members, err := r.client.SMembers(ctx, key).Result()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis SMEMBERS失败: %v", err))
+        }</span>
+        <span class="cov8" title="1">return members, nil</span>
+}
+
+// SCard 获取集合成员数量
+func (r *RedisClient) SCard(ctx context.Context, key string) (int64, error) <span class="cov0" title="0">{
+        count, err := r.client.SCard(ctx, key).Result()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis SCARD失败: %v", err))
+        }</span>
+        <span class="cov0" title="0">return count, nil</span>
+}
+
+// ==================== JSON操作实现 ====================
+
+// JSONSet 设置JSON值
+func (r *RedisClient) JSONSet(ctx context.Context, key string, value interface{}) error <span class="cov0" title="0">{
+        data, err := json.Marshal(value)
+        if err != nil </span><span class="cov0" title="0">{
+                return errcode.ErrJSONError.WithMessage(fmt.Sprintf("JSON序列化失败: %v", err))
+        }</span>
+
+        <span class="cov0" title="0">err = r.client.Set(ctx, key, data, 0).Err()
+        if err != nil </span><span class="cov0" title="0">{
+                return errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis JSON SET失败: %v", err))
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// JSONGet 获取JSON值
+func (r *RedisClient) JSONGet(ctx context.Context, key string) (string, error) <span class="cov8" title="1">{
+        data, err := r.client.Get(ctx, key).Result()
+        if err != nil </span><span class="cov8" title="1">{
+                if err == redis.Nil </span><span class="cov8" title="1">{
+                        return "", errcode.ErrVersionNotFound.WithDetails(map[string]interface{}{
+                                "key": key,
+                        })
+                }</span>
+                <span class="cov0" title="0">return "", errcode.ErrRedisError.WithMessage(fmt.Sprintf("Redis JSON GET失败: %v", err))</span>
+        }
+        <span class="cov8" title="1">return data, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package repository
+
+import (
+        "context"
+        "encoding/json"
+        "fmt"
+
+        "game_slots_vsn/internal/domain"
+        redispkg "game_slots_vsn/internal/repository/redis"
+        "game_slots_vsn/pkg/errcode"
+)
+
+// versionRepository 版本配置仓储实现
+//
+// 使用Redis存储版本配置数据
+type versionRepository struct {
+        client redispkg.Client
+}
+
+// NewVersionRepository 创建版本配置仓储
+//
+// 参数:
+//   client: Redis客户端
+//
+// 返回:
+//   VersionRepository: 版本配置仓储接口
+func NewVersionRepository(client redispkg.Client) VersionRepository <span class="cov8" title="1">{
+        return &amp;versionRepository{
+                client: client,
+        }
+}</span>
+
+// GetByVersionAndEnv 根据版本号和环境获取版本配置
+func (r *versionRepository) GetByVersionAndEnv(ctx context.Context, vsn, env string) (*domain.Version, error) <span class="cov8" title="1">{
+        key := BuildVersionKey(vsn, env)
+
+        // 从Redis获取JSON数据
+        data, err := r.client.JSONGet(ctx, key)
+        if err != nil </span><span class="cov8" title="1">{
+                // 检查是否是"不存在"错误
+                if appErr, ok := errcode.AsAppError(err); ok &amp;&amp; appErr.Code == errcode.ErrCodeVersionNotFound </span><span class="cov8" title="1">{
+                        return nil, errcode.NewVersionNotFoundError(vsn)
+                }</span>
+                <span class="cov0" title="0">return nil, err</span>
+        }
+
+        // 反序列化JSON
+        <span class="cov8" title="1">var version domain.Version
+        if err := json.Unmarshal([]byte(data), &amp;version); err != nil </span><span class="cov0" title="0">{
+                return nil, errcode.ErrJSONError.WithMessage(fmt.Sprintf("反序列化版本配置失败: %v", err))
+        }</span>
+
+        <span class="cov8" title="1">return &amp;version, nil</span>
+}
+
+// Save 保存版本配置
+func (r *versionRepository) Save(ctx context.Context, version *domain.Version, env string) error <span class="cov8" title="1">{
+        // 验证版本配置
+        if err := version.Validate(); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">key := BuildVersionKey(version.Vsn, env)
+
+        // 序列化为JSON
+        data, err := json.Marshal(version)
+        if err != nil </span><span class="cov0" title="0">{
+                return errcode.ErrJSONError.WithMessage(fmt.Sprintf("序列化版本配置失败: %v", err))
+        }</span>
+
+        // 保存到Redis
+        <span class="cov8" title="1">if err := r.client.Set(ctx, key, data, 0); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // 添加到版本列表
+        <span class="cov8" title="1">listKey := BuildVersionListKey(env)
+        if err := r.client.SAdd(ctx, listKey, version.Vsn); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Delete 删除版本配置
+func (r *versionRepository) Delete(ctx context.Context, vsn, env string) error <span class="cov8" title="1">{
+        key := BuildVersionKey(vsn, env)
+
+        // 从Redis删除
+        if err := r.client.Del(ctx, key); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // 从版本列表移除
+        <span class="cov8" title="1">listKey := BuildVersionListKey(env)
+        if err := r.client.SRem(ctx, listKey, vsn); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Exists 检查版本是否存在
+func (r *versionRepository) Exists(ctx context.Context, vsn, env string) (bool, error) <span class="cov8" title="1">{
+        key := BuildVersionKey(vsn, env)
+        return r.client.Exists(ctx, key)
+}</span>
+
+// List 获取所有版本列表
+func (r *versionRepository) List(ctx context.Context, env string) ([]*domain.Version, error) <span class="cov8" title="1">{
+        listKey := BuildVersionListKey(env)
+
+        // 获取所有版本号
+        vsns, err := r.client.SMembers(ctx, listKey)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // 获取每个版本的详细信息
+        <span class="cov8" title="1">versions := make([]*domain.Version, 0, len(vsns))
+        for _, vsn := range vsns </span><span class="cov8" title="1">{
+                version, err := r.GetByVersionAndEnv(ctx, vsn, env)
+                if err != nil </span><span class="cov0" title="0">{
+                        // 跳过获取失败的版本
+                        continue</span>
+                }
+                <span class="cov8" title="1">versions = append(versions, version)</span>
+        }
+
+        <span class="cov8" title="1">return versions, nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
